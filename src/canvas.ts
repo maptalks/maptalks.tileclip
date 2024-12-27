@@ -1,4 +1,4 @@
-let globalCanvas;
+let globalCanvas: OffscreenCanvas;
 
 export function getCanvas(tileSize = 256) {
     if (!globalCanvas && OffscreenCanvas) {
@@ -10,17 +10,17 @@ export function getCanvas(tileSize = 256) {
     return globalCanvas;
 }
 
-function clearCanvas(ctx) {
+function clearCanvas(ctx: OffscreenCanvasRenderingContext2D) {
     const canvas = ctx.canvas;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
-export function getCanvasContext(canvas) {
+export function getCanvasContext(canvas: OffscreenCanvas) {
     const ctx = canvas.getContext('2d');
     return ctx;
 }
 
-export function getBlankTile(tileSize) {
+export function getBlankTile(tileSize?: number) {
     const canvas = getCanvas(tileSize);
     const ctx = getCanvasContext(canvas);
     clearCanvas(ctx);
@@ -30,7 +30,7 @@ export function getBlankTile(tileSize) {
     return canvas.transferToImageBitmap();
 }
 
-export function imageClip(canvas, polygons, image) {
+export function imageClip(canvas: OffscreenCanvas, polygons, image) {
     const ctx = getCanvasContext(canvas);
     clearCanvas(ctx);
     ctx.save();
@@ -65,7 +65,7 @@ export function imageClip(canvas, polygons, image) {
     return bitImage;
 }
 
-export function toBlobURL(imagebitmap) {
+export function toBlobURL(imagebitmap: ImageBitmap) {
     const canvas = getCanvas();
     canvas.width = imagebitmap.width;
     canvas.height = imagebitmap.height;
@@ -75,7 +75,7 @@ export function toBlobURL(imagebitmap) {
     return canvas.convertToBlob();
 }
 
-export function imageFilter(canvas, imagebitmap, filter) {
+export function imageFilter(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, filter: string) {
     if (!filter) {
         return imagebitmap;
     }

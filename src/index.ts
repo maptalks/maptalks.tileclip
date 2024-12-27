@@ -1,19 +1,67 @@
 import { registerWorkerAdapter, worker } from 'maptalks';
-import WORKERCODE from './dist/worker';
-import { isPolygon } from './src/tileclip';
+//@ts-ignore
+import WORKERCODE from '../dist/worker.bundle.js';
+import { isPolygon } from './tileclip';
+import { BBOXtype } from './bbox';
 
 const WORKERNAME = '__maptalks.tileclip';
 
-registerWorkerAdapter(WORKERNAME, WORKERCODE);
+registerWorkerAdapter(WORKERNAME, WORKERCODE as unknown as string);
 
 const maskMap = {};
 
+export type getTileOptions = {
+    url: string;
+    referrer?: string;
+    filter?: string;
+    headers?: Record<string, string>;
+    fetchOptions?: Record<string, any>;
+}
+
+export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {
+    urlTemplate: string;
+    maxAvailableZoom: number;
+    x: number;
+    y: number;
+    z: number;
+}
+
+export type clipTileOptions = {
+    tile: ImageBitmap;
+    tileBBOX: BBOXtype;
+    projection: string;
+    tileSize: number;
+    maskId: string;
+    returnBlobURL?: boolean;
+}
+
+export type GeoJSONPolygon = {
+    type: 'Feature',
+    geometry: {
+        type: 'Polygon',
+        coordinates: number[][][]
+    },
+    properties?: Record<string, any>;
+    bbox?: BBOXtype
+}
+
+export type GeoJSONMultiPolygon = {
+    type: 'Feature',
+    geometry: {
+        type: 'MultiPolygon',
+        coordinates: number[][][][]
+    },
+    properties?: Record<string, any>;
+    bbox?: BBOXtype
+}
+
 class TileActor extends worker.Actor {
 
-    getTile(options = {}) {
-        return new Promise((resolve, reject) => {
+    getTile(options: getTileOptions) {
+        options = Object.assign({}, options);
+        return new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             options.referrer = options.referrer || document.location.href;
-            this.send(Object.assign({}, { _type: 'getTile' }, options), null, (error, image) => {
+            this.send(Object.assign({}, { _type: 'getTile' }, options), [], (error, image) => {
                 if (error) {
                     reject(error);
                 } else {
@@ -23,10 +71,11 @@ class TileActor extends worker.Actor {
         });
     }
 
-    getTileWithMaxZoom(options = {}) {
-        return new Promise((resolve, reject) => {
+    getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
+        options = Object.assign({}, options);
+        return new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             options.referrer = options.referrer || document.location.href;
-            this.send(Object.assign({}, { _type: 'getTileWithMaxZoom' }, options), null, (error, image) => {
+            this.send(Object.assign({}, { _type: 'getTileWithMaxZoom' }, options), [], (error, image) => {
                 if (error) {
                     reject(error);
                 } else {
@@ -36,11 +85,12 @@ class TileActor extends worker.Actor {
         });
     }
 
-    clipTile(options = {}) {
-        return new Promise((resolve, reject) => {
-            const buffers = [];
+    clipTile(options: clipTileOptions) {
+        options = Object.assign({}, options);
+        return new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
+            const buffers: ArrayBuffer[] = [];
             if (options.tile && options.tile instanceof ImageBitmap) {
-                buffers.push(options.tile);
+                buffers.push(options.tile as unknown as ArrayBuffer);
             }
             this.send(Object.assign({}, { _type: 'clipTile' }, options), buffers, (error, image) => {
                 if (error) {
@@ -52,7 +102,7 @@ class TileActor extends worker.Actor {
         });
     }
 
-    injectMask(maskId, geojsonFeature) {
+    injectMask(maskId: string, geojsonFeature: GeoJSONPolygon | GeoJSONMultiPolygon) {
         return new Promise((resolve, reject) => {
             if (!maskId) {
                 reject(new Error('maskId is null'));
@@ -75,13 +125,13 @@ class TileActor extends worker.Actor {
                     reject(error);
                     return;
                 }
-                resolve();
+                resolve(null);
                 maskMap[maskId] = true;
             });
         });
     }
 
-    removeMask(maskId) {
+    removeMask(maskId: string) {
         return new Promise((resolve, reject) => {
             if (!maskId) {
                 reject(new Error('maskId is null'));
@@ -95,13 +145,13 @@ class TileActor extends worker.Actor {
                     reject(error);
                     return;
                 }
-                resolve();
+                resolve(null);
                 delete maskMap[maskId];
             });
         });
     }
 
-    maskHasInjected(maskId) {
+    maskHasInjected(maskId: string) {
         if (!maskId) {
             console.error('maskId is null');
             return false;
@@ -110,7 +160,7 @@ class TileActor extends worker.Actor {
     }
 }
 
-let actor;
+let actor: TileActor;
 
 export function getTileActor() {
     if (!actor) {

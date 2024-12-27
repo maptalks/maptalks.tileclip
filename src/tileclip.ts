@@ -1,24 +1,25 @@
 import geojsonbbox from '@maptalks/geojson-bbox';
 import lineclip from 'lineclip';
 import { getBlankTile, getCanvas, imageClip, toBlobURL } from './canvas';
-import { bboxInBBOX, bboxIntersect } from './bbox';
+import { bboxInBBOX, bboxIntersect, BBOXtype } from './bbox';
+import { clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon } from './index';
 
 const GeoJSONCache = {};
 
-export function isPolygon(feature) {
+export function isPolygon(feature: GeoJSONPolygon | GeoJSONMultiPolygon) {
     if (!feature) {
         return false;
     }
-    const geometry = feature.geometry || {};
+    const geometry = feature.geometry || { type: null };
     const type = geometry.type;
     return type === 'Polygon' || type === 'MultiPolygon';
 }
 
-export function isEPSG3857(projection) {
+export function isEPSG3857(projection: string) {
     return projection === 'EPSG:3857';
 }
 
-export function injectMask(maskId, geojson) {
+export function injectMask(maskId: string, geojson: GeoJSONPolygon | GeoJSONMultiPolygon) {
     if (!isPolygon(geojson)) {
         return new Error('geojson.feature is not Polygon');
     }
@@ -30,15 +31,15 @@ export function injectMask(maskId, geojson) {
     return geojson;
 }
 
-export function removeMask(maskId) {
+export function removeMask(maskId: string) {
     delete GeoJSONCache[maskId];
 }
 
-function checkGeoJSONFeatureBBOX(feature) {
+function checkGeoJSONFeatureBBOX(feature: GeoJSONPolygon | GeoJSONMultiPolygon) {
     feature.bbox = feature.bbox || geojsonbbox(feature);
 }
 
-function lnglat2Mercator(coordinates) {
+function lnglat2Mercator(coordinates: [number, number]) {
     const [lng, lat] = coordinates;
     const earthRad = 6378137.0;
     const x = lng * Math.PI / 180 * earthRad;
@@ -47,7 +48,7 @@ function lnglat2Mercator(coordinates) {
     return [x, y];
 }
 
-function transformCoordinates(projection, coordinates) {
+function transformCoordinates(projection: string, coordinates) {
     if (!isEPSG3857(projection)) {
         return coordinates;
     } else {
@@ -67,7 +68,7 @@ function transformCoordinates(projection, coordinates) {
     }
 }
 
-function coordinate2Pixel(tileBBOX, tileSize, coordinate) {
+function coordinate2Pixel(tileBBOX: BBOXtype, tileSize: number, coordinate) {
     const [minx, miny, maxx, maxy] = tileBBOX;
     const dx = (maxx - minx), dy = (maxy - miny);
     const ax = dx / tileSize, ay = dy / tileSize;
@@ -77,7 +78,7 @@ function coordinate2Pixel(tileBBOX, tileSize, coordinate) {
     return [px, py];
 }
 
-function transformPixels(projection, tileBBOX, tileSize, coordinates) {
+function transformPixels(projection: string, tileBBOX: BBOXtype, tileSize: number, coordinates) {
     const [minx, miny, maxx, maxy] = tileBBOX;
     const transformRing = (coord, bbox) => {
         const result = [];
@@ -101,7 +102,7 @@ function transformPixels(projection, tileBBOX, tileSize, coordinates) {
     }
 }
 
-export function clip(options = {}) {
+export function clip(options: clipTileOptions) {
     return new Promise((resolve, reject) => {
         const { tile, tileBBOX, projection, tileSize, maskId, returnBlobURL } = options;
         if (!tile) {

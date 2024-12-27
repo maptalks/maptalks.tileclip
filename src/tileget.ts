@@ -1,3 +1,4 @@
+import { getTileOptions, getTileWithMaxZoomOptions } from './index';
 import { getCanvas, imageFilter, imageTileScale } from './canvas';
 import LRUCache from './LRUCache';
 
@@ -18,9 +19,9 @@ const tileCache = new LRUCache(200, (image) => {
     }
 });
 
-function fetchTile(url, headers = {}, options) {
-    return new Promise((resolve, reject) => {
-        const copyImageBitMap = (image) => {
+function fetchTile(url: string, headers = {}, options) {
+    return new Promise((resolve: (image: ImageBitmap) => void, reject) => {
+        const copyImageBitMap = (image: ImageBitmap) => {
             createImageBitmap(image).then(imagebit => {
                 resolve(imagebit);
             }).catch(error => {
@@ -45,7 +46,7 @@ function fetchTile(url, headers = {}, options) {
     });
 }
 
-export function getTile(url, options = {}) {
+export function getTile(url, options: getTileOptions) {
     return new Promise((resolve, reject) => {
         if (!url) {
             reject(new Error('url is null'));
@@ -70,7 +71,7 @@ export function getTile(url, options = {}) {
     });
 }
 
-export function getTileWithMaxZoom(options = {}) {
+export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
     const { urlTemplate, x, y, z, maxAvailableZoom } = options;
     const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
     return new Promise((resolve, reject) => {
@@ -122,7 +123,7 @@ export function getTileWithMaxZoom(options = {}) {
             tileY = py;
             tileZ = maxAvailableZoom;
         }
-        const url = urlTemplate.replace('{x}', tileX).replace('{y}', tileY).replace('{z}', tileZ);
+        const url = urlTemplate.replace('{x}', tileX as unknown as string).replace('{y}', tileY as unknown as string).replace('{z}', tileZ as unknown as string);
         const headers = Object.assign({}, HEADERS, options.headers || {});
 
         fetchTile(url, headers, options).then(imagebit => {
