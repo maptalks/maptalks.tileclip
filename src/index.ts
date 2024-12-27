@@ -1,6 +1,6 @@
 import { registerWorkerAdapter, worker } from 'maptalks';
 //@ts-ignore
-import WORKERCODE from '../dist/worker.bundle.js';
+import WORKERCODE from './worker.bundle.js';
 import { isPolygon } from './tileclip';
 import { BBOXtype } from './bbox';
 

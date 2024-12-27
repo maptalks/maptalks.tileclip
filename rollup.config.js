@@ -45,7 +45,7 @@ const bundles = [
             name: 'maptalks',
             globals,
             extend: true,
-            file: 'dist/worker.bundle.js'
+            file: 'src/worker.bundle.js'
         }
     },
     {
