@@ -19,6 +19,7 @@
 * [EPSG:4326](https://maptalks.github.io/maptalks.tileclip/demo/4326.html)
 * [custom SpatialReference](https://maptalks.github.io/maptalks.tileclip/demo/custom-sp.html)
 * [update mask](https://maptalks.github.io/maptalks.tileclip/demo/update-mask.html)
+* [mask remove or add](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-remve.html)
 * [identify projection](https://maptalks.github.io/maptalks.tileclip/demo/identify.html)
 * [water mark](https://maptalks.github.io/maptalks.tileclip/demo/watermark.html)
 * [maxAvailableZoom](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom.html)
