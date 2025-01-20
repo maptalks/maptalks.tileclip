@@ -11,6 +11,7 @@
 ## Examples
 
 * [simple get tile](https://maptalks.github.io/maptalks.tileclip/demo/tile.html)
+* [simple get tiles](https://maptalks.github.io/maptalks.tileclip/demo/tile-array.html)
 * [get tile with filter](https://maptalks.github.io/maptalks.tileclip/demo/polygon-hole-clip-filter.html)
 * [clip by polygon](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip.html)
 * [clip by polygon with holes](https://maptalks.github.io/maptalks.tileclip/demo/polygon-hole-clip.html)
@@ -23,7 +24,9 @@
 * [identify projection](https://maptalks.github.io/maptalks.tileclip/demo/identify.html)
 * [water mark](https://maptalks.github.io/maptalks.tileclip/demo/watermark.html)
 * [maxAvailableZoom](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom.html)
+* [maxAvailableZoom tiles](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-array.html)
 * [maxAvailableZoom polygon clip](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-polygon-clip.html)
+* [maxAvailableZoom tiles polygon clip](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-polygon-clip-array.html)
 * [underground by clip tile](https://maptalks.github.io/maptalks.tileclip/demo/underground.html)
 * [leaflet demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet.html)
 
@@ -74,7 +77,7 @@ const tileActor = getTileActor();
 #### methods
 
 * `getTile(options)` get tile [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap) by fetch in worker, return `Promise`
-  + `options.url`:tile url
+  + `options.url`:tile url orl tiles urls
   + `options.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
   + `options.headers`:fetch headers params. if need
   + `options.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
@@ -101,7 +104,7 @@ tileActor.getTile({
   + `options.y`:tile row
   + `options.z`:tile zoom
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
-  + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}
+  + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
   + `options.headers`:fetch headers params. if need
   + `options.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
