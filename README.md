@@ -85,6 +85,7 @@ const tileActor = getTileActor();
 ```js
 tileActor.getTile({
     url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/12/1663/3425',
+    //or url:[ur1,ur2],
     fetchOptions: {
         referrer: document.location.href,
         headers: {
@@ -123,6 +124,7 @@ tileActor.getTileWithMaxZoom({
     y,
     z,
     urlTemplate,
+    //or urlTemplate:[urlTemplate1,urlTemplate2],
     maxAvailableZoom,
     fetchOptions: {
         referrer: document.location.href,
