@@ -1,5 +1,5 @@
 import { getTileOptions, getTileWithMaxZoomOptions } from './index';
-import { getCanvas, imageFilter, imageTileScale } from './canvas';
+import { getCanvas, imageFilter, imageTileScale, mergeTiles } from './canvas';
 import LRUCache from './LRUCache';
 
 const CANVAS_ERROR_MESSAGE = new Error('not find canvas.The current environment does not support OffscreenCanvas');
@@ -11,6 +11,13 @@ const HEADERS = {
 
 function isNumber(value) {
     return typeof value === 'number';
+}
+
+function checkTileUrl(url: string | Array<string>): Array<string> {
+    if (Array.isArray(url)) {
+        return url;
+    }
+    return [url];
 }
 
 const tileCache = new LRUCache(200, (image) => {
@@ -52,22 +59,31 @@ export function getTile(url, options: getTileOptions) {
             reject(new Error('url is null'));
             return;
         }
+        const urls = checkTileUrl(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
-        fetchTile(url, headers, options).then(imagebit => {
+        const fetchTiles = urls.map(tileUrl => {
+            return fetchTile(tileUrl, headers, options)
+        });
+        Promise.all(fetchTiles).then(imagebits => {
+            const canvas = getCanvas();
+            if (!canvas) {
+                reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
+            const image = mergeTiles(imagebits);
+            if (image instanceof Error) {
+                reject(image);
+                return;
+            }
             const filter = options.filter;
             if (filter) {
-                const canvas = getCanvas();
-                if (!canvas) {
-                    reject(CANVAS_ERROR_MESSAGE);
-                } else {
-                    resolve(imageFilter(canvas, imagebit, filter));
-                }
+                resolve(imageFilter(canvas, image, filter));
             } else {
-                resolve(imagebit);
+                resolve(image);
             }
         }).catch(error => {
             reject(error);
-        });
+        })
     });
 }
 
@@ -87,6 +103,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
             reject(new Error('x/y/z is error'));
             return;
         }
+        const urlTemplates = checkTileUrl(urlTemplate);
         let dxScale, dyScale, wScale, hScale;
         let tileX = x, tileY = y, tileZ = z;
         const zoomOffset = z - maxAvailableZoom;
@@ -123,30 +140,48 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
             tileY = py;
             tileZ = maxAvailableZoom;
         }
-        const url = urlTemplate.replace('{x}', tileX as unknown as string).replace('{y}', tileY as unknown as string).replace('{z}', tileZ as unknown as string);
+        const urls = urlTemplates.map(urlTemplate => {
+            let key = '{x}';
+            while (urlTemplate.indexOf(key) > -1) {
+                urlTemplate = urlTemplate.replace(key, tileX as unknown as string);
+            }
+            key = '{y}';
+            while (urlTemplate.indexOf(key) > -1) {
+                urlTemplate = urlTemplate.replace(key, tileY as unknown as string);
+            }
+            key = '{z}';
+            while (urlTemplate.indexOf(key) > -1) {
+                urlTemplate = urlTemplate.replace(key, tileZ as unknown as string);
+            }
+            return urlTemplate;
+        });
         const headers = Object.assign({}, HEADERS, options.headers || {});
 
-        fetchTile(url, headers, options).then(imagebit => {
-            let image;
-            const filter = options.filter;
-            if (filter) {
-                const canvas = getCanvas();
-                if (!canvas) {
-                    reject(CANVAS_ERROR_MESSAGE);
-                    return;
-                } else {
-                    image = (imageFilter(canvas, imagebit, filter));
-                }
-            } else {
-                image = imagebit;
-            }
-            if (zoomOffset <= 0) {
-                resolve(image);
-                return;
-            }
+        const fetchTiles = urls.map(url => {
+            return fetchTile(url, headers, options);
+        })
+
+        Promise.all(fetchTiles).then(imagebits => {
             const canvas = getCanvas();
             if (!canvas) {
                 reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
+
+            const mergeImage = mergeTiles(imagebits);
+            if (mergeImage instanceof Error) {
+                reject(mergeImage);
+                return;
+            }
+            let image;
+            const filter = options.filter;
+            if (filter) {
+                image = (imageFilter(canvas, mergeImage, filter));
+            } else {
+                image = mergeImage;
+            }
+            if (zoomOffset <= 0) {
+                resolve(image);
                 return;
             }
             const { width, height } = image;
@@ -155,7 +190,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
             resolve(imageBitMap);
         }).catch(error => {
             reject(error);
-        });
+        })
     });
 
 }

@@ -11,7 +11,7 @@ registerWorkerAdapter(WORKERNAME, WORKERCODE as unknown as string);
 const maskMap = {};
 
 export type getTileOptions = {
-    url: string;
+    url: string | Array<string>;
     referrer?: string;
     filter?: string;
     headers?: Record<string, string>;
@@ -19,7 +19,7 @@ export type getTileOptions = {
 }
 
 export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {
-    urlTemplate: string;
+    urlTemplate: string | Array<string>;
     maxAvailableZoom: number;
     x: number;
     y: number;

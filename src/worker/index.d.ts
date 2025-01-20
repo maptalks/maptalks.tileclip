@@ -1,14 +1,14 @@
 import { worker } from 'maptalks';
 import { BBOXtype } from './bbox';
 export type getTileOptions = {
-    url: string;
+    url: string | Array<string>;
     referrer?: string;
     filter?: string;
     headers?: Record<string, string>;
     fetchOptions?: Record<string, any>;
 };
 export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {
-    urlTemplate: string;
+    urlTemplate: string | Array<string>;
     maxAvailableZoom: number;
     x: number;
     y: number;

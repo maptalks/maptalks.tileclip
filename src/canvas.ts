@@ -30,6 +30,29 @@ export function getBlankTile(tileSize?: number) {
     return canvas.transferToImageBitmap();
 }
 
+export function mergeTiles(images: Array<ImageBitmap>) {
+    if (images.length === 1) {
+        return images[0];
+    }
+    if (images.length === 0) {
+        return new Error('merge tiles error,not find imagebitmaps');
+    }
+    for (let i = 0, len = images.length; i < len; i++) {
+        const image = images[i];
+        if (!(image instanceof ImageBitmap)) {
+            return new Error('merge tiles error,images not imagebitmap');
+        }
+    }
+    const tileSize = images[0].width;
+    const canvas = getCanvas(tileSize);
+    const ctx = getCanvasContext(canvas);
+    clearCanvas(ctx);
+    images.forEach(image => {
+        ctx.drawImage(image, 0, 0, tileSize, tileSize);
+    });
+    return canvas.transferToImageBitmap();
+}
+
 export function imageClip(canvas: OffscreenCanvas, polygons, image) {
     const ctx = getCanvasContext(canvas);
     clearCanvas(ctx);
