@@ -1,6 +1,6 @@
 # maptalks.tileclip
 
-[maptalks](https://github.com/maptalks/maptalks.js) TileLayer clip tool
+[maptalks](https://github.com/maptalks/maptalks.js) TileLayer tiles merge and clip tool
 
 * This plugin requires the runtime environment to support [OffscreenCanvas](https://developer.mozilla.org/zh-CN/docs/Web/API/OffscreenCanvas). Pay attention to relevant compatibility
 
