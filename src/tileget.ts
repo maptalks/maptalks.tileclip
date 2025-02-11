@@ -1,6 +1,7 @@
 import { getTileOptions, getTileWithMaxZoomOptions } from './index';
-import { getCanvas, imageFilter, imageTileScale, mergeTiles } from './canvas';
+import { getCanvas, imageFilter, imageOpacity, imageTileScale, mergeTiles } from './canvas';
 import LRUCache from './LRUCache';
+import { isNumber, checkTileUrl } from './util';
 
 const CANVAS_ERROR_MESSAGE = new Error('not find canvas.The current environment does not support OffscreenCanvas');
 
@@ -8,17 +9,6 @@ const HEADERS = {
     'accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.26'
 };
-
-function isNumber(value) {
-    return typeof value === 'number';
-}
-
-function checkTileUrl(url: string | Array<string>): Array<string> {
-    if (Array.isArray(url)) {
-        return url;
-    }
-    return [url];
-}
 
 const tileCache = new LRUCache(200, (image) => {
     if (image && image.close) {
@@ -76,11 +66,13 @@ export function getTile(url, options: getTileOptions) {
                 return;
             }
             const filter = options.filter;
+            let tileImage;
             if (filter) {
-                resolve(imageFilter(canvas, image, filter));
+                tileImage = imageFilter(canvas, image, filter);
             } else {
-                resolve(image);
+                tileImage = image;
             }
+            resolve(imageOpacity(tileImage, options.opacity));
         }).catch(error => {
             reject(error);
         })
@@ -181,13 +173,13 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
                 image = mergeImage;
             }
             if (zoomOffset <= 0) {
-                resolve(image);
+                resolve(imageOpacity(image, options.opacity));
                 return;
             }
             const { width, height } = image;
             const dx = width * dxScale, dy = height * dyScale, w = width * wScale, h = height * hScale;
             const imageBitMap = imageTileScale(canvas, image, dx, dy, w, h);
-            resolve(imageBitMap);
+            resolve(imageOpacity(imageBitMap, options.opacity));
         }).catch(error => {
             reject(error);
         })

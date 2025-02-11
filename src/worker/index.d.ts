@@ -6,6 +6,7 @@ export type getTileOptions = {
     filter?: string;
     headers?: Record<string, string>;
     fetchOptions?: Record<string, any>;
+    opacity?: number;
 };
 export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {
     urlTemplate: string | Array<string>;

@@ -1,3 +1,5 @@
+import { isNumber } from "./util";
+
 let globalCanvas: OffscreenCanvas;
 
 export function getCanvas(tileSize = 256) {
@@ -53,7 +55,7 @@ export function mergeTiles(images: Array<ImageBitmap>) {
     return canvas.transferToImageBitmap();
 }
 
-export function imageClip(canvas: OffscreenCanvas, polygons, image) {
+export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap) {
     const ctx = getCanvasContext(canvas);
     clearCanvas(ctx);
     ctx.save();
@@ -114,7 +116,7 @@ export function imageFilter(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, f
     return bitImage;
 }
 
-export function imageTileScale(canvas, imagebitmap, dx, dy, w, h) {
+export function imageTileScale(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, dx: number, dy: number, w: number, h: number) {
     canvas.width = imagebitmap.width;
     canvas.height = imagebitmap.height;
     const ctx = getCanvasContext(canvas);
@@ -125,5 +127,21 @@ export function imageTileScale(canvas, imagebitmap, dx, dy, w, h) {
     ctx.drawImage(imagebitmap, dx, dy, w, h, 0, 0, canvas.width, canvas.height);
     ctx.restore();
     const bitImage = canvas.transferToImageBitmap();
+    return bitImage;
+}
+
+export function imageOpacity(image: ImageBitmap, opacity = 1) {
+    if (!isNumber(opacity) || opacity === 1 || opacity < 0 || opacity > 1) {
+        return image;
+    }
+    const canvas = getCanvas();
+    canvas.width = image.width;
+    canvas.height = image.height;
+    const ctx = getCanvasContext(canvas);
+    clearCanvas(ctx);
+    ctx.globalAlpha = opacity;
+    ctx.drawImage(image, 0, 0);
+    const bitImage = canvas.transferToImageBitmap();
+    ctx.globalAlpha = 1;
     return bitImage;
 }

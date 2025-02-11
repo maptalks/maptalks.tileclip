@@ -1,1 +1,929 @@
-export default `(function(t){"use strict";function e(t,e){n(t.geometry,e)}function n(t,e){if(t)switch(t.type){case"Point":r(t.coordinates,e);break;case"MultiPoint":case"LineString":o(t.coordinates,e);break;case"MultiLineString":!function(t,e){for(let n=0,r=t.length;n<r;n++)o(t[n],e)}(t.coordinates,e);break;case"Polygon":i(t.coordinates,e);break;case"MultiPolygon":!function(t,e){for(let n=0,r=t.length;n<r;n++)i(t[n],e)}(t.coordinates,e);break;case"GeometryCollection":const s=t.geometries.length;for(let r=0;r<s;r++)n(t.geometries[r],e)}}function r(t,e){e[0]=Math.min(e[0],t[0]),e[1]=Math.min(e[1],t[1]),e[2]=Math.max(e[2],t[0]),e[3]=Math.max(e[3],t[1])}function o(t,e){for(let n=0,o=t.length;n<o;n++)r(t[n],e)}function i(t,e){t.length&&o(t[0],e)}var s=function(t){let r=[Number.POSITIVE_INFINITY,Number.POSITIVE_INFINITY,Number.NEGATIVE_INFINITY,Number.NEGATIVE_INFINITY];switch(t.type){case"FeatureCollection":const o=t.features.length;for(let n=0;n<o;n++)e(t.features[n],r);break;case"Feature":e(t,r);break;default:n(t,r)}return r},a=c;function c(t,e,n){var r,o,i,s,a,c=t.length,l=u(t[0],e),f=[];for(n||(n=[]),r=1;r<c;r++){for(o=t[r-1],s=a=u(i=t[r],e);;){if(!(l|s)){f.push(o),s!==a?(f.push(i),r<c-1&&(n.push(f),f=[])):r===c-1&&f.push(i);break}if(l&s)break;l?l=u(o=h(o,i,l,e),e):s=u(i=h(o,i,s,e),e)}l=a}return f.length&&n.push(f),n}function h(t,e,n,r){return 8&n?[t[0]+(e[0]-t[0])*(r[3]-t[1])/(e[1]-t[1]),r[3]]:4&n?[t[0]+(e[0]-t[0])*(r[1]-t[1])/(e[1]-t[1]),r[1]]:2&n?[r[2],t[1]+(e[1]-t[1])*(r[2]-t[0])/(e[0]-t[0])]:1&n?[r[0],t[1]+(e[1]-t[1])*(r[0]-t[0])/(e[0]-t[0])]:null}function u(t,e){var n=0;return t[0]<e[0]?n|=1:t[0]>e[2]&&(n|=2),t[1]<e[1]?n|=4:t[1]>e[3]&&(n|=8),n}let l;function f(t=256){return!l&&OffscreenCanvas&&(l=new OffscreenCanvas(1,1)),l&&(l.width=l.height=t),l}function d(t){const e=t.canvas;t.clearRect(0,0,e.width,e.height)}function m(t){return t.getContext("2d")}function g(t){const e=f(t);return d(m(e)),e.transferToImageBitmap()}function p(t){if(1===t.length)return t[0];if(0===t.length)return new Error("merge tiles error,not find imagebitmaps");for(let e=0,n=t.length;e<n;e++){if(!(t[e]instanceof ImageBitmap))return new Error("merge tiles error,images not imagebitmap")}const e=t[0].width,n=f(e),r=m(n);return d(r),t.forEach((t=>{r.drawImage(t,0,0,e,e)})),n.transferToImageBitmap()}function v(t,e,n){const r=m(t);d(r),r.save();r.beginPath(),e.forEach((t=>{(t=>{for(let e=0,n=t.length;e<n;e++){const n=t[e],o=n[0],i=n[n.length-1],[s,a]=o,[c,h]=i;s===c&&a===h||n.push(o);for(let t=0,e=n.length;t<e;t++){const[e,o]=n[t];0===t?r.moveTo(e,o):r.lineTo(e,o)}}})(t)})),r.clip("evenodd"),r.drawImage(n,0,0,t.width,t.height);const o=t.transferToImageBitmap();return r.restore(),o}function w(t,e,n){if(!n)return e;t.width=e.width,t.height=e.height;const r=m(t);d(r),r.save(),r.filter=n,r.drawImage(e,0,0),r.restore();return t.transferToImageBitmap()}c.polyline=c,c.polygon=function(t,e){var n,r,o,i,s,a,c;for(r=1;r<=8;r*=2){for(n=[],i=!(u(o=t[t.length-1],e)&r),s=0;s<t.length;s++)(c=!(u(a=t[s],e)&r))!==i&&n.push(h(o,a,r,e)),c&&n.push(a),o=a,i=c;if(!(t=n).length)break}return n};const I={};function b(t){return"EPSG:3857"===t}function y(t,e){return function(t){if(!t)return!1;const e=(t.geometry||{type:null}).type;return"Polygon"===e||"MultiPolygon"===e}(e)?I[t]?new Error("the"+t+" geojson Already exists"):(I[t]=e,function(t){t.bbox=t.bbox||s(t)}(e),e):new Error("geojson.feature is not Polygon")}function x(t){const[e,n]=t,r=6378137,o=e*Math.PI/180*r,i=n*Math.PI/180;return[o,3189068.5*Math.log((1+Math.sin(i))/(1-Math.sin(i)))]}function M(t,e){if(b(t)){const t=e=>{const n=[];for(let r=0,o=e.length;r<o;r++){const o=e[r];Array.isArray(o[0])?n.push(t(o)):n[r]=x(o)}return n};return t(e)}return e}function E(t,e,n){const[r,o,i,s]=t,a=(i-r)/e,c=(s-o)/e,[h,u]=n;return[(h-r)/a,e-(u-o)/c]}function k(t,e,n,r){const[o,i,s,a]=e,c=(t,e)=>{const r=[];for(let o=0,i=t.length;o<i;o++){const i=t[o];Array.isArray(i[0])?r.push(c(i,e)):r[o]=E(e,n,i)}return r};if(b(t)){const[t,e]=x([o,i]),[n,h]=x([s,a]);return c(r,[t,e,n,h])}return c(r,e)}function T(t){return new Promise(((e,n)=>{const{tile:r,tileBBOX:o,projection:i,tileSize:s,maskId:c,returnBlobURL:h}=t;if(!r)return void n(new Error("tile is null.It should be a ImageBitmap"));if(!o)return void n(new Error("tileBBOX is null"));if(!i)return void n(new Error("projection is null"));if(!s)return void n(new Error("tileSize is null"));if(!c)return void n(new Error("maskId is null"));const u=I[c];if(!u)return void n(new Error("not find mask by maskId:"+c));const l=f(s);if(!l)return void n(new Error("not find canvas.The current environment does not support OffscreenCanvas"));const p=t=>{h?function(t){const e=f();e.width=t.width,e.height=t.height;const n=m(e);return d(n),n.drawImage(t,0,0),e.convertToBlob()}(t).then((t=>{const n=URL.createObjectURL(t);e(n)})).catch((t=>{n(t)})):e(t)},w=u.bbox;if(!w)return void p(r);const{coordinates:b,type:y}=u.geometry;if(!b.length)return void p(r);if(E=o,(x=w)[2]<E[0]||x[1]>E[3]||x[0]>E[2]||x[3]<E[1])return void p(g(s));var x,E;let T,P=b;if("Polygon"===y&&(P=[P]),function(t,e){const[n,r,o,i]=t;return n>=e[0]&&o<=e[2]&&r>=e[1]&&i<=e[3]}(w,o)){T=M(i,P);return void p(v(l,k(i,o,s,T),r))}const A=t=>{if(t.length>0){let e=1/0,n=-1/0,r=1/0,o=-1/0;for(let i=0,s=t.length;i<s;i++){const[s,a]=t[i];e=Math.min(s,e),r=Math.min(a,r),n=Math.max(s,n),o=Math.max(a,o)}if(e!==n&&r!==o)return!0}return!1},B=[];for(let t=0,e=P.length;t<e;t++){const e=P[t];for(let t=0,n=e.length;t<n;t++){const n=e[t],r=a.polygon(n,o);A(r)&&B.push([r])}}if(0===B.length)return void p(g());T=M(i,B);p(v(l,k(i,o,s,T),r))}))}const P=()=>{};const A=new Error("not find canvas.The current environment does not support OffscreenCanvas"),B={accept:"image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8","User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.26"};function O(t){return"number"==typeof t}function N(t){return Array.isArray(t)?t:[t]}const z=new class{constructor(t,e){this.max=t,this.onRemove=e||P,this.reset()}reset(){if(this.data){const t=this.data.values();for(const e of t)this.onRemove(e)}return this.data=new Map,this}clear(){this.reset(),delete this.onRemove}add(t,e){return e?(this.has(t)?(this.data.delete(t),this.data.set(t,e),this.data.size>this.max&&this.shrink()):(this.data.set(t,e),this.data.size>this.max&&this.shrink()),this):this}keys(){const t=new Array(this.data.size);let e=0;const n=this.data.keys();for(const r of n)t[e++]=r;return t}shrink(){const t=this.data.keys();let e=t.next();for(;this.data.size>this.max;){const n=this.getAndRemove(e.value);n&&this.onRemove(n),e=t.next()}}has(t){return this.data.has(t)}getAndRemove(t){if(!this.has(t))return null;const e=this.data.get(t);return this.data.delete(t),e}get(t){if(!this.has(t))return null;return this.data.get(t)}remove(t){if(!this.has(t))return this;const e=this.data.get(t);return this.data.delete(t),this.onRemove(e),this}setMaxSize(t){return this.max=t,this.data.size>this.max&&this.shrink(),this}}(200,(t=>{t&&t.close&&t.close()}));function R(t,e={},n){return new Promise(((r,o)=>{const i=t=>{createImageBitmap(t).then((t=>{r(t)})).catch((t=>{o(t)}))},s=z.get(t);if(s)i(s);else{const r=n.fetchOptions||{headers:e,referrer:n.referrer};fetch(t,r).then((t=>t.blob())).then((t=>createImageBitmap(t))).then((e=>{z.add(t,e),i(e)})).catch((t=>{o(t)}))}}))}function j(t){const{urlTemplate:e,x:n,y:r,z:o,maxAvailableZoom:i}=t,s=i&&O(i)&&i>=1;return new Promise(((a,c)=>{if(!s)return void c(new Error("maxAvailableZoom is error"));if(!e)return void c(new Error("urlTemplate is error"));if(!O(n)||!O(r)||!O(o))return void c(new Error("x/y/z is error"));const h=N(e);let u,l,g,v,I=n,b=r,y=o;const x=o-i;if(x>0){let t=n,e=r,s=o;for(;s>i;)t=Math.floor(t/2),e=Math.floor(e/2),s--;const a=Math.pow(2,x);let c=Math.floor(t*a),h=c+a,f=Math.floor(e*a),d=f+a;c>n&&(c--,h--),f>r&&(f--,d--),u=(n-c)/(h-c),l=(r-f)/(d-f),g=1/(h-c),v=1/(d-f),I=t,b=e,y=i}const M=h.map((t=>{let e="{x}";for(;t.indexOf(e)>-1;)t=t.replace(e,I);for(e="{y}";t.indexOf(e)>-1;)t=t.replace(e,b);for(e="{z}";t.indexOf(e)>-1;)t=t.replace(e,y);return t})),E=Object.assign({},B,t.headers||{}),k=M.map((e=>R(e,E,t)));Promise.all(k).then((e=>{const n=f();if(!n)return void c(A);const r=p(e);if(r instanceof Error)return void c(r);let o;const i=t.filter;if(o=i?w(n,r,i):r,x<=0)return void a(o);const{width:s,height:h}=o,I=function(t,e,n,r,o,i){t.width=e.width,t.height=e.height;const s=m(t);return d(s),s.save(),s.drawImage(e,n,r,o,i,0,0,t.width,t.height),s.restore(),t.transferToImageBitmap()}(n,o,s*u,h*l,s*g,h*v);a(I)})).catch((t=>{c(t)}))}))}t.initialize=function(){},t.onmessage=function(t,e){const n=t.data||{},r=n._type;if("getTile"!==r)if("getTileWithMaxZoom"!==r)if("clipTile"!==r){if("injectMask"===r){const t=y(n.maskId,n.geojsonFeature);return t instanceof Error?void e(t):void e()}if("removeMask"===r)return o=n.maskId,delete I[o],void e();var o;console.error("not support message type:",r)}else T(n).then((t=>{const n=[];t instanceof ImageBitmap&&n.push(t),e(null,t,n)})).catch((t=>{e(t)}));else j(n).then((t=>{e(null,t,[t])})).catch((t=>{e(t)}));else{const{url:t}=n;(function(t,e){return new Promise(((n,r)=>{if(!t)return void r(new Error("url is null"));const o=N(t),i=Object.assign({},B,e.headers||{}),s=o.map((t=>R(t,i,e)));Promise.all(s).then((t=>{const o=f();if(!o)return void r(A);const i=p(t);if(i instanceof Error)return void r(i);const s=e.filter;n(s?w(o,i,s):i)})).catch((t=>{r(t)}))}))})(t,n).then((t=>{e(null,t,[t])})).catch((t=>{e(t)}))}},Object.defineProperty(t,"__esModule",{value:!0})})`
+export default ` (function (exports) { 'use strict';
+
+  function bbox(geojson) {
+    let b = [
+      Number.POSITIVE_INFINITY,
+      Number.POSITIVE_INFINITY,
+      Number.NEGATIVE_INFINITY,
+      Number.NEGATIVE_INFINITY,
+    ];
+    switch (geojson.type) {
+      case 'FeatureCollection':
+        const len = geojson.features.length;
+        for (let i = 0; i < len; i++) {
+          feature(geojson.features[i], b);
+        }
+        break;
+      case 'Feature':
+        feature(geojson, b);
+        break;
+      default:
+        geometry(geojson, b);
+        break;
+    }
+    return b;
+  }
+
+  function feature(f, b) {
+    geometry(f.geometry, b);
+  }
+
+  function geometry(g, b) {
+    if (!g) {
+      return;
+    }
+    switch (g.type) {
+      case 'Point':
+        point(g.coordinates, b);
+        break;
+      case 'MultiPoint':
+        line(g.coordinates, b);
+        break;
+      case 'LineString':
+        line(g.coordinates, b);
+        break;
+      case 'MultiLineString':
+        multiline(g.coordinates, b);
+        break;
+      case 'Polygon':
+        polygon(g.coordinates, b);
+        break;
+      case 'MultiPolygon':
+        multipolygon(g.coordinates, b);
+        break;
+      case 'GeometryCollection':
+        const len = g.geometries.length;
+        for (let i = 0; i < len; i++) {
+          geometry(g.geometries[i], b);
+        }
+        break;
+    }
+  }
+
+  function point(p, b) {
+    b[0] = Math.min(b[0], p[0]);
+    b[1] = Math.min(b[1], p[1]);
+    b[2] = Math.max(b[2], p[0]);
+    b[3] = Math.max(b[3], p[1]);
+  }
+
+  function line(l, b) {
+    for (let i = 0, len = l.length; i < len; i++) {
+      point(l[i], b);
+    }
+  }
+
+  function multiline(ml, b) {
+    for (let i = 0, len = ml.length; i < len; i++) {
+      line(ml[i], b);
+    }
+  }
+
+  function polygon(p, b) {
+    //Just calculate the outer ring,Don't participate in the calculation of holes
+    //测试10000个鄱阳湖的数据,表现为性能可以提高25%
+    if (p.length) {
+      line(p[0], b);
+    }
+  }
+
+  function multipolygon(mp, b) {
+    for (let i = 0, len = mp.length; i < len; i++) {
+      polygon(mp[i], b);
+    }
+  }
+
+  var bbox_cjs = bbox;
+
+  var lineclip_1 = lineclip;
+
+  lineclip.polyline = lineclip;
+  lineclip.polygon = polygonclip;
+
+
+  // Cohen-Sutherland line clippign algorithm, adapted to efficiently
+  // handle polylines rather than just segments
+
+  function lineclip(points, bbox, result) {
+
+      var len = points.length,
+          codeA = bitCode(points[0], bbox),
+          part = [],
+          i, a, b, codeB, lastCode;
+
+      if (!result) result = [];
+
+      for (i = 1; i < len; i++) {
+          a = points[i - 1];
+          b = points[i];
+          codeB = lastCode = bitCode(b, bbox);
+
+          while (true) {
+
+              if (!(codeA | codeB)) { // accept
+                  part.push(a);
+
+                  if (codeB !== lastCode) { // segment went outside
+                      part.push(b);
+
+                      if (i < len - 1) { // start a new line
+                          result.push(part);
+                          part = [];
+                      }
+                  } else if (i === len - 1) {
+                      part.push(b);
+                  }
+                  break;
+
+              } else if (codeA & codeB) { // trivial reject
+                  break;
+
+              } else if (codeA) { // a outside, intersect with clip edge
+                  a = intersect(a, b, codeA, bbox);
+                  codeA = bitCode(a, bbox);
+
+              } else { // b outside
+                  b = intersect(a, b, codeB, bbox);
+                  codeB = bitCode(b, bbox);
+              }
+          }
+
+          codeA = lastCode;
+      }
+
+      if (part.length) result.push(part);
+
+      return result;
+  }
+
+  // Sutherland-Hodgeman polygon clipping algorithm
+
+  function polygonclip(points, bbox) {
+
+      var result, edge, prev, prevInside, i, p, inside;
+
+      // clip against each side of the clip rectangle
+      for (edge = 1; edge <= 8; edge *= 2) {
+          result = [];
+          prev = points[points.length - 1];
+          prevInside = !(bitCode(prev, bbox) & edge);
+
+          for (i = 0; i < points.length; i++) {
+              p = points[i];
+              inside = !(bitCode(p, bbox) & edge);
+
+              // if segment goes through the clip window, add an intersection
+              if (inside !== prevInside) result.push(intersect(prev, p, edge, bbox));
+
+              if (inside) result.push(p); // add a point if it's inside
+
+              prev = p;
+              prevInside = inside;
+          }
+
+          points = result;
+
+          if (!points.length) break;
+      }
+
+      return result;
+  }
+
+  // intersect a segment against one of the 4 lines that make up the bbox
+
+  function intersect(a, b, edge, bbox) {
+      return edge & 8 ? [a[0] + (b[0] - a[0]) * (bbox[3] - a[1]) / (b[1] - a[1]), bbox[3]] : // top
+             edge & 4 ? [a[0] + (b[0] - a[0]) * (bbox[1] - a[1]) / (b[1] - a[1]), bbox[1]] : // bottom
+             edge & 2 ? [bbox[2], a[1] + (b[1] - a[1]) * (bbox[2] - a[0]) / (b[0] - a[0])] : // right
+             edge & 1 ? [bbox[0], a[1] + (b[1] - a[1]) * (bbox[0] - a[0]) / (b[0] - a[0])] : // left
+             null;
+  }
+
+  // bit code reflects the point position relative to the bbox:
+
+  //         left  mid  right
+  //    top  1001  1000  1010
+  //    mid  0001  0000  0010
+  // bottom  0101  0100  0110
+
+  function bitCode(p, bbox) {
+      var code = 0;
+
+      if (p[0] < bbox[0]) code |= 1; // left
+      else if (p[0] > bbox[2]) code |= 2; // right
+
+      if (p[1] < bbox[1]) code |= 4; // bottom
+      else if (p[1] > bbox[3]) code |= 8; // top
+
+      return code;
+  }
+
+  function isNumber(value) {
+      return typeof value === 'number';
+  }
+  function checkTileUrl(url) {
+      if (Array.isArray(url)) {
+          return url;
+      }
+      return [url];
+  }
+
+  let globalCanvas;
+  function getCanvas(tileSize = 256) {
+      if (!globalCanvas && OffscreenCanvas) {
+          globalCanvas = new OffscreenCanvas(1, 1);
+      }
+      if (globalCanvas) {
+          globalCanvas.width = globalCanvas.height = tileSize;
+      }
+      return globalCanvas;
+  }
+  function clearCanvas(ctx) {
+      const canvas = ctx.canvas;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  function getCanvasContext(canvas) {
+      const ctx = canvas.getContext('2d');
+      return ctx;
+  }
+  function getBlankTile(tileSize) {
+      const canvas = getCanvas(tileSize);
+      const ctx = getCanvasContext(canvas);
+      clearCanvas(ctx);
+      // ctx.fillText('404', 100, 100);
+      // ctx.rect(0, 0, canvas.width, canvas.height);
+      // ctx.stroke();
+      return canvas.transferToImageBitmap();
+  }
+  function mergeTiles(images) {
+      if (images.length === 1) {
+          return images[0];
+      }
+      if (images.length === 0) {
+          return new Error('merge tiles error,not find imagebitmaps');
+      }
+      for (let i = 0, len = images.length; i < len; i++) {
+          const image = images[i];
+          if (!(image instanceof ImageBitmap)) {
+              return new Error('merge tiles error,images not imagebitmap');
+          }
+      }
+      const tileSize = images[0].width;
+      const canvas = getCanvas(tileSize);
+      const ctx = getCanvasContext(canvas);
+      clearCanvas(ctx);
+      images.forEach(image => {
+          ctx.drawImage(image, 0, 0, tileSize, tileSize);
+      });
+      return canvas.transferToImageBitmap();
+  }
+  function imageClip(canvas, polygons, image) {
+      const ctx = getCanvasContext(canvas);
+      clearCanvas(ctx);
+      ctx.save();
+      const drawPolygon = (rings) => {
+          for (let i = 0, len = rings.length; i < len; i++) {
+              const ring = rings[i];
+              const first = ring[0], last = ring[ring.length - 1];
+              const [x1, y1] = first;
+              const [x2, y2] = last;
+              if (x1 !== x2 || y1 !== y2) {
+                  ring.push(first);
+              }
+              for (let j = 0, len1 = ring.length; j < len1; j++) {
+                  const [x, y] = ring[j];
+                  if (j === 0) {
+                      ctx.moveTo(x, y);
+                  }
+                  else {
+                      ctx.lineTo(x, y);
+                  }
+              }
+          }
+      };
+      ctx.beginPath();
+      polygons.forEach(polygon => {
+          drawPolygon(polygon);
+      });
+      ctx.clip('evenodd');
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+      const bitImage = canvas.transferToImageBitmap();
+      ctx.restore();
+      return bitImage;
+  }
+  function toBlobURL(imagebitmap) {
+      const canvas = getCanvas();
+      canvas.width = imagebitmap.width;
+      canvas.height = imagebitmap.height;
+      const ctx = getCanvasContext(canvas);
+      clearCanvas(ctx);
+      ctx.drawImage(imagebitmap, 0, 0);
+      return canvas.convertToBlob();
+  }
+  function imageFilter(canvas, imagebitmap, filter) {
+      if (!filter) {
+          return imagebitmap;
+      }
+      canvas.width = imagebitmap.width;
+      canvas.height = imagebitmap.height;
+      const ctx = getCanvasContext(canvas);
+      clearCanvas(ctx);
+      ctx.save();
+      ctx.filter = filter;
+      ctx.drawImage(imagebitmap, 0, 0);
+      ctx.restore();
+      const bitImage = canvas.transferToImageBitmap();
+      return bitImage;
+  }
+  function imageTileScale(canvas, imagebitmap, dx, dy, w, h) {
+      canvas.width = imagebitmap.width;
+      canvas.height = imagebitmap.height;
+      const ctx = getCanvasContext(canvas);
+      clearCanvas(ctx);
+      ctx.save();
+      // console.log(dx,dy,w,h);
+      ctx.drawImage(imagebitmap, dx, dy, w, h, 0, 0, canvas.width, canvas.height);
+      ctx.restore();
+      const bitImage = canvas.transferToImageBitmap();
+      return bitImage;
+  }
+  function imageOpacity(image, opacity = 1) {
+      if (!isNumber(opacity) || opacity === 1 || opacity < 0 || opacity > 1) {
+          return image;
+      }
+      const canvas = getCanvas();
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const ctx = getCanvasContext(canvas);
+      clearCanvas(ctx);
+      ctx.globalAlpha = opacity;
+      ctx.drawImage(image, 0, 0);
+      const bitImage = canvas.transferToImageBitmap();
+      ctx.globalAlpha = 1;
+      return bitImage;
+  }
+
+  function bboxIntersect(bbox1, bbox2) {
+      if (bbox1[2] < bbox2[0]) {
+          return false;
+      }
+      if (bbox1[1] > bbox2[3]) {
+          return false;
+      }
+      if (bbox1[0] > bbox2[2]) {
+          return false;
+      }
+      if (bbox1[3] < bbox2[1]) {
+          return false;
+      }
+      return true;
+  }
+  function bboxInBBOX(bbox1, bbox2) {
+      const [x1, y1, x2, y2] = bbox1;
+      return x1 >= bbox2[0] && x2 <= bbox2[2] && y1 >= bbox2[1] && y2 <= bbox2[3];
+  }
+
+  const GeoJSONCache = {};
+  function isPolygon(feature) {
+      if (!feature) {
+          return false;
+      }
+      const geometry = feature.geometry || { type: null };
+      const type = geometry.type;
+      return type === 'Polygon' || type === 'MultiPolygon';
+  }
+  function isEPSG3857(projection) {
+      return projection === 'EPSG:3857';
+  }
+  function injectMask(maskId, geojson) {
+      if (!isPolygon(geojson)) {
+          return new Error('geojson.feature is not Polygon');
+      }
+      if (GeoJSONCache[maskId]) {
+          return new Error('the' + maskId + ' geojson Already exists');
+      }
+      GeoJSONCache[maskId] = geojson;
+      checkGeoJSONFeatureBBOX(geojson);
+      return geojson;
+  }
+  function removeMask(maskId) {
+      delete GeoJSONCache[maskId];
+  }
+  function checkGeoJSONFeatureBBOX(feature) {
+      feature.bbox = feature.bbox || bbox_cjs(feature);
+  }
+  function lnglat2Mercator(coordinates) {
+      const [lng, lat] = coordinates;
+      const earthRad = 6378137.0;
+      const x = lng * Math.PI / 180 * earthRad;
+      const a = lat * Math.PI / 180;
+      const y = earthRad / 2 * Math.log((1.0 + Math.sin(a)) / (1.0 - Math.sin(a)));
+      return [x, y];
+  }
+  function transformCoordinates(projection, coordinates) {
+      if (!isEPSG3857(projection)) {
+          return coordinates;
+      }
+      else {
+          const transformRing = (coord) => {
+              const result = [];
+              for (let i = 0, len = coord.length; i < len; i++) {
+                  const c = coord[i];
+                  if (Array.isArray(c[0])) {
+                      result.push(transformRing(c));
+                  }
+                  else {
+                      result[i] = lnglat2Mercator(c);
+                  }
+              }
+              return result;
+          };
+          return transformRing(coordinates);
+      }
+  }
+  function coordinate2Pixel(tileBBOX, tileSize, coordinate) {
+      const [minx, miny, maxx, maxy] = tileBBOX;
+      const dx = (maxx - minx), dy = (maxy - miny);
+      const ax = dx / tileSize, ay = dy / tileSize;
+      const [x, y] = coordinate;
+      const px = (x - minx) / ax;
+      const py = tileSize - (y - miny) / ay;
+      return [px, py];
+  }
+  function transformPixels(projection, tileBBOX, tileSize, coordinates) {
+      const [minx, miny, maxx, maxy] = tileBBOX;
+      const transformRing = (coord, bbox) => {
+          const result = [];
+          for (let i = 0, len = coord.length; i < len; i++) {
+              const c = coord[i];
+              if (Array.isArray(c[0])) {
+                  result.push(transformRing(c, bbox));
+              }
+              else {
+                  result[i] = coordinate2Pixel(bbox, tileSize, c);
+              }
+          }
+          return result;
+      };
+      if (isEPSG3857(projection)) {
+          const [mminx, mminy] = lnglat2Mercator([minx, miny]);
+          const [mmaxx, mmaxy] = lnglat2Mercator([maxx, maxy]);
+          const mTileBBOX = [mminx, mminy, mmaxx, mmaxy];
+          return transformRing(coordinates, mTileBBOX);
+      }
+      else {
+          return transformRing(coordinates, tileBBOX);
+      }
+  }
+  function clip(options) {
+      return new Promise((resolve, reject) => {
+          const { tile, tileBBOX, projection, tileSize, maskId, returnBlobURL } = options;
+          if (!tile) {
+              reject(new Error('tile is null.It should be a ImageBitmap'));
+              return;
+          }
+          if (!tileBBOX) {
+              reject(new Error('tileBBOX is null'));
+              return;
+          }
+          if (!projection) {
+              reject(new Error('projection is null'));
+              return;
+          }
+          if (!tileSize) {
+              reject(new Error('tileSize is null'));
+              return;
+          }
+          if (!maskId) {
+              reject(new Error('maskId is null'));
+              return;
+          }
+          const feature = GeoJSONCache[maskId];
+          if (!feature) {
+              reject(new Error('not find mask by maskId:' + maskId));
+              return;
+          }
+          const canvas = getCanvas(tileSize);
+          if (!canvas) {
+              reject(new Error('not find canvas.The current environment does not support OffscreenCanvas'));
+              return;
+          }
+          const returnImage = (image) => {
+              if (!returnBlobURL) {
+                  resolve(image);
+              }
+              else {
+                  toBlobURL(image).then(blob => {
+                      const url = URL.createObjectURL(blob);
+                      resolve(url);
+                  }).catch(error => {
+                      reject(error);
+                  });
+              }
+          };
+          const bbox = feature.bbox;
+          if (!bbox) {
+              returnImage(tile);
+              return;
+          }
+          const { coordinates, type } = feature.geometry;
+          if (!coordinates.length) {
+              returnImage(tile);
+              return;
+          }
+          if (!bboxIntersect(bbox, tileBBOX)) {
+              returnImage(getBlankTile(tileSize));
+              return;
+          }
+          let polygons = coordinates;
+          if (type === 'Polygon') {
+              polygons = [polygons];
+          }
+          let newCoordinates;
+          if (bboxInBBOX(bbox, tileBBOX)) {
+              newCoordinates = transformCoordinates(projection, polygons);
+              const pixels = transformPixels(projection, tileBBOX, tileSize, newCoordinates);
+              const image = imageClip(canvas, pixels, tile);
+              returnImage(image);
+              return;
+          }
+          const validateClipRing = (result) => {
+              if (result.length > 0) {
+                  let minx = Infinity, maxx = -Infinity, miny = Infinity, maxy = -Infinity;
+                  for (let j = 0, len1 = result.length; j < len1; j++) {
+                      const [x, y] = result[j];
+                      minx = Math.min(x, minx);
+                      miny = Math.min(y, miny);
+                      maxx = Math.max(x, maxx);
+                      maxy = Math.max(y, maxy);
+                  }
+                  if (minx !== maxx && miny !== maxy) {
+                      return true;
+                  }
+              }
+              return false;
+          };
+          const clipRings = [];
+          for (let i = 0, len = polygons.length; i < len; i++) {
+              const polygon = polygons[i];
+              for (let j = 0, len1 = polygon.length; j < len1; j++) {
+                  const ring = polygon[j];
+                  const result = lineclip_1.polygon(ring, tileBBOX);
+                  if (validateClipRing(result)) {
+                      clipRings.push([result]);
+                  }
+              }
+          }
+          if (clipRings.length === 0) {
+              returnImage(getBlankTile());
+              return;
+          }
+          newCoordinates = transformCoordinates(projection, clipRings);
+          const pixels = transformPixels(projection, tileBBOX, tileSize, newCoordinates);
+          const image = imageClip(canvas, pixels, tile);
+          returnImage(image);
+      });
+  }
+
+  // copy from https://github.com/maptalks/maptalks.js/blob/master/src/core/util/LRUCache.ts
+  const nullOnRemove = () => { };
+
+  class LRUCache {
+      constructor(max, onRemove) {
+          this.max = max;
+          this.onRemove = onRemove || nullOnRemove;
+          this.reset();
+      }
+
+      reset() {
+          if (this.data) {
+              const values = this.data.values();
+              for (const p of values) {
+                  this.onRemove(p);
+              }
+          }
+
+          this.data = new Map();
+          return this;
+      }
+
+      clear() {
+          this.reset();
+          delete this.onRemove;
+      }
+
+      add(key, data) {
+          if (!data) {
+              return this;
+          }
+          if (this.has(key)) {
+              this.data.delete(key);
+              this.data.set(key, data);
+              if (this.data.size > this.max) {
+                  this.shrink();
+              }
+          } else {
+              this.data.set(key, data);
+              if (this.data.size > this.max) {
+                  this.shrink();
+              }
+          }
+
+          return this;
+      }
+
+      keys() {
+          const keys = new Array(this.data.size);
+          let i = 0;
+          const iterator = this.data.keys();
+          for (const k of iterator) {
+              keys[i++] = k;
+          }
+          return keys;
+      }
+
+      shrink() {
+          const iterator = this.data.keys();
+          let item = iterator.next();
+          while (this.data.size > this.max) {
+              const removedData = this.getAndRemove(item.value);
+              if (removedData) {
+                  this.onRemove(removedData);
+              }
+              item = iterator.next();
+          }
+      }
+
+      has(key) {
+          return this.data.has(key);
+      }
+
+      getAndRemove(key) {
+          if (!this.has(key)) { return null; }
+
+          const data = this.data.get(key);
+          this.data.delete(key);
+          return data;
+      }
+
+      get(key) {
+          if (!this.has(key)) { return null; }
+
+          const data = this.data.get(key);
+          return data;
+      }
+
+      remove(key) {
+          if (!this.has(key)) { return this; }
+
+          const data = this.data.get(key);
+          this.data.delete(key);
+          this.onRemove(data);
+
+          return this;
+      }
+
+      setMaxSize(max) {
+          this.max = max;
+          if (this.data.size > this.max) {
+              this.shrink();
+          }
+          return this;
+      }
+  }
+
+  const CANVAS_ERROR_MESSAGE = new Error('not find canvas.The current environment does not support OffscreenCanvas');
+  const HEADERS = {
+      'accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.26'
+  };
+  const tileCache = new LRUCache(200, (image) => {
+      if (image && image.close) {
+          image.close();
+      }
+  });
+  function fetchTile(url, headers = {}, options) {
+      return new Promise((resolve, reject) => {
+          const copyImageBitMap = (image) => {
+              createImageBitmap(image).then(imagebit => {
+                  resolve(imagebit);
+              }).catch(error => {
+                  reject(error);
+              });
+          };
+          const image = tileCache.get(url);
+          if (image) {
+              copyImageBitMap(image);
+          }
+          else {
+              const fetchOptions = options.fetchOptions || {
+                  headers,
+                  referrer: options.referrer
+              };
+              fetch(url, fetchOptions).then(res => res.blob()).then(blob => createImageBitmap(blob)).then(image => {
+                  tileCache.add(url, image);
+                  copyImageBitMap(image);
+              }).catch(error => {
+                  reject(error);
+              });
+          }
+      });
+  }
+  function getTile(url, options) {
+      return new Promise((resolve, reject) => {
+          if (!url) {
+              reject(new Error('url is null'));
+              return;
+          }
+          const urls = checkTileUrl(url);
+          const headers = Object.assign({}, HEADERS, options.headers || {});
+          const fetchTiles = urls.map(tileUrl => {
+              return fetchTile(tileUrl, headers, options);
+          });
+          Promise.all(fetchTiles).then(imagebits => {
+              const canvas = getCanvas();
+              if (!canvas) {
+                  reject(CANVAS_ERROR_MESSAGE);
+                  return;
+              }
+              const image = mergeTiles(imagebits);
+              if (image instanceof Error) {
+                  reject(image);
+                  return;
+              }
+              const filter = options.filter;
+              let tileImage;
+              if (filter) {
+                  tileImage = imageFilter(canvas, image, filter);
+              }
+              else {
+                  tileImage = image;
+              }
+              resolve(imageOpacity(tileImage, options.opacity));
+          }).catch(error => {
+              reject(error);
+          });
+      });
+  }
+  function getTileWithMaxZoom(options) {
+      const { urlTemplate, x, y, z, maxAvailableZoom } = options;
+      const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
+      return new Promise((resolve, reject) => {
+          if (!maxZoomEnable) {
+              reject(new Error('maxAvailableZoom is error'));
+              return;
+          }
+          if (!urlTemplate) {
+              reject(new Error('urlTemplate is error'));
+              return;
+          }
+          if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
+              reject(new Error('x/y/z is error'));
+              return;
+          }
+          const urlTemplates = checkTileUrl(urlTemplate);
+          let dxScale, dyScale, wScale, hScale;
+          let tileX = x, tileY = y, tileZ = z;
+          const zoomOffset = z - maxAvailableZoom;
+          if (zoomOffset > 0) {
+              let px = x, py = y;
+              let zoom = z;
+              // parent tile
+              while (zoom > maxAvailableZoom) {
+                  px = Math.floor(px / 2);
+                  py = Math.floor(py / 2);
+                  zoom--;
+              }
+              const scale = Math.pow(2, zoomOffset);
+              // child tiles
+              let startX = Math.floor(px * scale);
+              let endX = startX + scale;
+              let startY = Math.floor(py * scale);
+              let endY = startY + scale;
+              if (startX > x) {
+                  startX--;
+                  endX--;
+              }
+              if (startY > y) {
+                  startY--;
+                  endY--;
+              }
+              // console.log(startCol, endCol, startRow, endRow);
+              dxScale = (x - startX) / (endX - startX);
+              dyScale = (y - startY) / (endY - startY);
+              wScale = 1 / (endX - startX);
+              hScale = 1 / (endY - startY);
+              // console.log(dxScale, dyScale, wScale, hScale);
+              tileX = px;
+              tileY = py;
+              tileZ = maxAvailableZoom;
+          }
+          const urls = urlTemplates.map(urlTemplate => {
+              let key = '{x}';
+              while (urlTemplate.indexOf(key) > -1) {
+                  urlTemplate = urlTemplate.replace(key, tileX);
+              }
+              key = '{y}';
+              while (urlTemplate.indexOf(key) > -1) {
+                  urlTemplate = urlTemplate.replace(key, tileY);
+              }
+              key = '{z}';
+              while (urlTemplate.indexOf(key) > -1) {
+                  urlTemplate = urlTemplate.replace(key, tileZ);
+              }
+              return urlTemplate;
+          });
+          const headers = Object.assign({}, HEADERS, options.headers || {});
+          const fetchTiles = urls.map(url => {
+              return fetchTile(url, headers, options);
+          });
+          Promise.all(fetchTiles).then(imagebits => {
+              const canvas = getCanvas();
+              if (!canvas) {
+                  reject(CANVAS_ERROR_MESSAGE);
+                  return;
+              }
+              const mergeImage = mergeTiles(imagebits);
+              if (mergeImage instanceof Error) {
+                  reject(mergeImage);
+                  return;
+              }
+              let image;
+              const filter = options.filter;
+              if (filter) {
+                  image = (imageFilter(canvas, mergeImage, filter));
+              }
+              else {
+                  image = mergeImage;
+              }
+              if (zoomOffset <= 0) {
+                  resolve(imageOpacity(image, options.opacity));
+                  return;
+              }
+              const { width, height } = image;
+              const dx = width * dxScale, dy = height * dyScale, w = width * wScale, h = height * hScale;
+              const imageBitMap = imageTileScale(canvas, image, dx, dy, w, h);
+              resolve(imageOpacity(imageBitMap, options.opacity));
+          }).catch(error => {
+              reject(error);
+          });
+      });
+  }
+
+  const initialize = function () {
+  };
+  const onmessage = function (message, postResponse) {
+      const data = message.data || {};
+      const type = data._type;
+      if (type === 'getTile') {
+          const { url } = data;
+          getTile(url, data).then(image => {
+              postResponse(null, image, [image]);
+          }).catch(error => {
+              postResponse(error);
+          });
+          return;
+      }
+      if (type === 'getTileWithMaxZoom') {
+          getTileWithMaxZoom(data).then(image => {
+              postResponse(null, image, [image]);
+          }).catch(error => {
+              postResponse(error);
+          });
+          return;
+      }
+      if (type === 'clipTile') {
+          clip(data).then(image => {
+              const buffers = [];
+              if (image instanceof ImageBitmap) {
+                  buffers.push(image);
+              }
+              postResponse(null, image, buffers);
+          }).catch(error => {
+              postResponse(error);
+          });
+          return;
+      }
+      if (type === 'injectMask') {
+          const geojson = injectMask(data.maskId, data.geojsonFeature);
+          if (geojson instanceof Error) {
+              postResponse(geojson);
+              return;
+          }
+          postResponse();
+          return;
+      }
+      if (type === 'removeMask') {
+          removeMask(data.maskId);
+          postResponse();
+          return;
+      }
+      console.error('not support message type:', type);
+  };
+
+  exports.initialize = initialize;
+  exports.onmessage = onmessage;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
+
+})`
