@@ -107,6 +107,7 @@ tileActor.getTile({
   + `options.z`:tile zoom
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
+  + `options.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
   + `options.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
   + `options.headers`:fetch headers params. if need
   + `options.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
