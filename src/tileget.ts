@@ -16,6 +16,19 @@ const tileCache = new LRUCache(200, (image) => {
     }
 });
 
+function formatTileUrlBySubdomains(url, subdomains) {
+    if (!subdomains || !subdomains.length) {
+        return url;
+    }
+    const len = subdomains.length;
+    let index = Math.floor(Math.random() * len);
+    index = Math.min(index, len - 1);
+    while (url.indexOf('{s}') > -1) {
+        url = url.replace('{s}', subdomains[index]);
+    }
+    return url;
+}
+
 function fetchTile(url: string, headers = {}, options) {
     return new Promise((resolve: (image: ImageBitmap) => void, reject) => {
         const copyImageBitMap = (image: ImageBitmap) => {
@@ -80,7 +93,7 @@ export function getTile(url, options: getTileOptions) {
 }
 
 export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
-    const { urlTemplate, x, y, z, maxAvailableZoom } = options;
+    const { urlTemplate, x, y, z, maxAvailableZoom, subdomains } = options;
     const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
     return new Promise((resolve, reject) => {
         if (!maxZoomEnable) {
@@ -96,6 +109,15 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
             return;
         }
         const urlTemplates = checkTileUrl(urlTemplate);
+        for (let i = 0, len = urlTemplates.length; i < len; i++) {
+            const urlTemplate = urlTemplates[i];
+            if (urlTemplate && urlTemplate.indexOf('{s}') > -1) {
+                if (!subdomains || subdomains.length === 0) {
+                    reject(new Error('not find subdomains'));
+                    return;
+                }
+            }
+        }
         let dxScale, dyScale, wScale, hScale;
         let tileX = x, tileY = y, tileZ = z;
         const zoomOffset = z - maxAvailableZoom;
@@ -145,7 +167,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
             while (urlTemplate.indexOf(key) > -1) {
                 urlTemplate = urlTemplate.replace(key, tileZ as unknown as string);
             }
-            return urlTemplate;
+            return formatTileUrlBySubdomains(urlTemplate, subdomains);
         });
         const headers = Object.assign({}, HEADERS, options.headers || {});
 

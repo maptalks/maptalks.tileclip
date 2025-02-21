@@ -14,6 +14,7 @@ export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {
     x: number;
     y: number;
     z: number;
+    subdomains?: Array<string>;
 };
 export type clipTileOptions = {
     tile: ImageBitmap;
