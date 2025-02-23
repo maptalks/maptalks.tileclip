@@ -78,10 +78,10 @@ const tileActor = getTileActor();
 
 * `getTile(options)` get tile [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap) by fetch in worker, return `Promise`
   + `options.url`:tile url orl tiles urls
-  + `options.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
-  + `options.headers`:fetch headers params. if need
-  + `options.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
-  + `options.opacity`: tile opacity if need
+  + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
+  + `options?.headers`:fetch headers params. if need
+  + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
+  + `options?.opacity`: tile opacity if need
 
 ```js
 tileActor.getTile({
@@ -107,11 +107,11 @@ tileActor.getTile({
   + `options.z`:tile zoom
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
-  + `options.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
-  + `options.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
-  + `options.headers`:fetch headers params. if need
-  + `options.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
-  + `options.opacity`: tile opacity if need
+  + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
+  + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
+  + `options?.headers`:fetch headers params. if need
+  + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
+  + `options?.opacity`: tile opacity if need
 
 ```js
 const {
@@ -195,7 +195,7 @@ const result = tileActor.maskHasInjected(maskId);
   + `options.projection`: Projection code, such as : EPSG:3857
   + `options.tileSize`:tile size 
   + `options.maskId`:mask key
-  + `options.returnBlobURL`: to return 
+  + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
 ```js
