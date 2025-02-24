@@ -1,9 +1,7 @@
 import { getTileOptions, getTileWithMaxZoomOptions } from './index';
 import { getCanvas, imageFilter, imageOpacity, imageTileScale, mergeTiles } from './canvas';
 import LRUCache from './LRUCache';
-import { isNumber, checkTileUrl } from './util';
-
-const CANVAS_ERROR_MESSAGE = new Error('not find canvas.The current environment does not support OffscreenCanvas');
+import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE } from './util';
 
 const HEADERS = {
     'accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',

@@ -3,6 +3,7 @@ import lineclip from 'lineclip';
 import { getBlankTile, getCanvas, imageClip, toBlobURL } from './canvas';
 import { bboxInBBOX, bboxIntersect, BBOXtype } from './bbox';
 import { clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon } from './index';
+import { CANVAS_ERROR_MESSAGE } from './util';
 
 const GeoJSONCache = {};
 
@@ -132,7 +133,7 @@ export function clip(options: clipTileOptions) {
         }
         const canvas = getCanvas(tileSize);
         if (!canvas) {
-            reject(new Error('not find canvas.The current environment does not support OffscreenCanvas'));
+            reject(CANVAS_ERROR_MESSAGE);
             return;
         }
 
