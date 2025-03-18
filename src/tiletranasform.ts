@@ -130,7 +130,7 @@ function cal3857Tiles(x: number, y: number, z: number, zoomOffset = 0) {
 }
 
 
-function tilesImageData(image, tilesbbox, tilebbox, projection, bbox) {
+function tilesImageData(image, tilesbbox, tilebbox, projection) {
     const { width, height } = image;
     const [minx, miny, maxx, maxy] = tilesbbox;
     const ax = (maxx - minx) / width, ay = (maxy - miny) / height;
@@ -200,7 +200,7 @@ function tilesImageData(image, tilesbbox, tilebbox, projection, bbox) {
     };
 }
 
-function transformTiles(pixelsresult, mbbox, result) {
+function transformTiles(pixelsresult, mbbox) {
     const [xmin, ymin, xmax, ymax] = mbbox;
     const ax = (xmax - xmin) / TILESIZE, ay = (ymax - ymin) / TILESIZE;
     const { pixels, bbox } = pixelsresult;
@@ -265,7 +265,7 @@ function transformTiles(pixelsresult, mbbox, result) {
 
 export function tileTransform(options) {
     return new Promise((resolve, reject) => {
-        const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, projection, zoomOffset, tileBBOX } = options;
+        const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog } = options;
         const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
         if (!projection) {
             reject(new Error('not find projection'));
@@ -307,17 +307,16 @@ export function tileTransform(options) {
                 return;
             }
             result.loadCount = 0;
-
             const loadTile = () => {
                 if (result.loadCount >= tiles.length) {
                     const image = mergeTiles(tiles);
                     let image1;
                     if (projection === 'EPSG:4326') {
-                        const imageData = tilesImageData(image, result.tilesbbox, result.bbox, projection, result.bbox);
-                        image1 = transformTiles(imageData, result.mbbox, result);
+                        const imageData = tilesImageData(image, result.tilesbbox, result.bbox, projection);
+                        image1 = transformTiles(imageData, result.mbbox);
                     } else {
-                        const imageData = tilesImageData(image, result.tilesbbox, result.mbbox, projection, result.bbox);
-                        image1 = transformTiles(imageData, result.bbox, result);
+                        const imageData = tilesImageData(image, result.tilesbbox, result.mbbox, projection);
+                        image1 = transformTiles(imageData, result.bbox);
                     }
                     resolve(image1 || getBlankTile());
                 } else {
@@ -328,6 +327,9 @@ export function tileTransform(options) {
                         result.loadCount++;
                         loadTile();
                     }).catch(error => {
+                        if (errorLog) {
+                            console.error(error);
+                        }
                         tile.tileImage = getBlankTile();;
                         result.loadCount++;
                         loadTile();

@@ -38,7 +38,8 @@ export type clipTileOptions = {
 }
 
 export type transformTileOptions = getTileWithMaxZoomOptions & {
-    projection: 'EPSG:4326' | 'EPSG:3857'
+    projection: 'EPSG:4326' | 'EPSG:3857';
+    errorLog?: boolean
 }
 
 export type GeoJSONPolygon = {
