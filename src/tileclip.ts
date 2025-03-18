@@ -3,7 +3,7 @@ import lineclip from 'lineclip';
 import { getBlankTile, getCanvas, imageClip, toBlobURL } from './canvas';
 import { bboxInBBOX, bboxIntersect, BBOXtype } from './bbox';
 import { clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon } from './index';
-import { CANVAS_ERROR_MESSAGE } from './util';
+import { CANVAS_ERROR_MESSAGE, lnglat2Mercator } from './util';
 
 const GeoJSONCache = {};
 
@@ -40,14 +40,6 @@ function checkGeoJSONFeatureBBOX(feature: GeoJSONPolygon | GeoJSONMultiPolygon) 
     feature.bbox = feature.bbox || geojsonbbox(feature);
 }
 
-function lnglat2Mercator(coordinates: [number, number]) {
-    const [lng, lat] = coordinates;
-    const earthRad = 6378137.0;
-    const x = lng * Math.PI / 180 * earthRad;
-    const a = lat * Math.PI / 180;
-    const y = earthRad / 2 * Math.log((1.0 + Math.sin(a)) / (1.0 - Math.sin(a)));
-    return [x, y];
-}
 
 function transformCoordinates(projection: string, coordinates) {
     if (!isEPSG3857(projection)) {

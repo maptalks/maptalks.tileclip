@@ -37,6 +37,10 @@ export type clipTileOptions = {
     returnBlobURL?: boolean;
 }
 
+export type transformTileOptions = getTileWithMaxZoomOptions & {
+    projection: 'EPSG:4326' | 'EPSG:3857'
+}
+
 export type GeoJSONPolygon = {
     type: 'Feature',
     geometry: {
@@ -78,6 +82,20 @@ class TileActor extends worker.Actor {
         return new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             options.referrer = options.referrer || document.location.href;
             this.send(Object.assign({}, { _type: 'getTileWithMaxZoom' }, options), [], (error, image) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(image);
+                }
+            });
+        });
+    }
+
+    transformTile(options: transformTileOptions) {
+        options = Object.assign({}, options);
+        return new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+            options.referrer = options.referrer || document.location.href;
+            this.send(Object.assign({}, { _type: 'transformTile' }, options), [], (error, image) => {
                 if (error) {
                     reject(error);
                 } else {

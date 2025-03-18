@@ -45,6 +45,7 @@ export type GeoJSONMultiPolygon = {
 declare class TileActor extends worker.Actor {
     getTile(options: getTileOptions): Promise<ImageBitmap>;
     getTileWithMaxZoom(options: getTileWithMaxZoomOptions): Promise<ImageBitmap>;
+    transformTile(options: getTileWithMaxZoomOptions): Promise<ImageBitmap>;
     clipTile(options: clipTileOptions): Promise<string | ImageBitmap>;
     injectMask(maskId: string, geojsonFeature: GeoJSONPolygon | GeoJSONMultiPolygon): Promise<unknown>;
     removeMask(maskId: string): Promise<unknown>;

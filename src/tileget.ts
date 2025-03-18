@@ -1,5 +1,5 @@
 import { getTileOptions, getTileWithMaxZoomOptions } from './index';
-import { getCanvas, imageFilter, imageOpacity, imageTileScale, mergeTiles } from './canvas';
+import { getCanvas, imageFilter, imageOpacity, imageTileScale, mergeImages } from './canvas';
 import LRUCache from './LRUCache';
 import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE } from './util';
 
@@ -71,7 +71,7 @@ export function getTile(url, options: getTileOptions) {
                 reject(CANVAS_ERROR_MESSAGE);
                 return;
             }
-            const image = mergeTiles(imagebits);
+            const image = mergeImages(imagebits);
             if (image instanceof Error) {
                 reject(image);
                 return;
@@ -180,7 +180,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
                 return;
             }
 
-            const mergeImage = mergeTiles(imagebits);
+            const mergeImage = mergeImages(imagebits);
             if (mergeImage instanceof Error) {
                 reject(mergeImage);
                 return;

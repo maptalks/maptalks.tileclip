@@ -1,4 +1,5 @@
-import { isNumber } from "./util";
+import { toPoints } from "./bbox";
+import { isNumber, lnglat2Mercator } from "./util";
 
 let globalCanvas: OffscreenCanvas;
 
@@ -12,13 +13,15 @@ export function getCanvas(tileSize = 256) {
     return globalCanvas;
 }
 
-function clearCanvas(ctx: OffscreenCanvasRenderingContext2D) {
+export function clearCanvas(ctx: OffscreenCanvasRenderingContext2D) {
     const canvas = ctx.canvas;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 export function getCanvasContext(canvas: OffscreenCanvas) {
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', {
+        willReadFrequently: true
+    });
     return ctx;
 }
 
@@ -32,7 +35,7 @@ export function getBlankTile(tileSize?: number) {
     return canvas.transferToImageBitmap();
 }
 
-export function mergeTiles(images: Array<ImageBitmap>) {
+export function mergeImages(images: Array<ImageBitmap>) {
     if (images.length === 1) {
         return images[0];
     }
@@ -54,6 +57,8 @@ export function mergeTiles(images: Array<ImageBitmap>) {
     });
     return canvas.transferToImageBitmap();
 }
+
+
 
 export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap) {
     const ctx = getCanvasContext(canvas);
@@ -145,3 +150,73 @@ export function imageOpacity(image: ImageBitmap, opacity = 1) {
     ctx.globalAlpha = 1;
     return bitImage;
 }
+
+
+export function mergeTiles(tiles) {
+    let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+    let tileSize = 256;
+    tiles.forEach(tile => {
+        const [x, y] = tile;
+        minx = Math.min(x, minx);
+        miny = Math.min(y, miny);
+        maxx = Math.max(x, maxx);
+        maxy = Math.max(y, maxy);
+        tileSize = tile.tileImage.width;
+    });
+    const width = (maxx - minx + 1) * tileSize;
+    const height = (maxy - miny + 1) * tileSize;
+    const canvas = getCanvas();
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = getCanvasContext(canvas);
+    clearCanvas(ctx);
+    tiles.forEach(tile => {
+        const [x, y] = tile;
+        const dx = (x - minx) * tileSize;
+        const dy = (y - miny) * tileSize;
+        ctx.drawImage(tile.tileImage, dx, dy, tileSize, tileSize);
+    });
+    return canvas.transferToImageBitmap();
+}
+
+// export function clipTile(result, image) {
+//     const { tilesbbox, mbbox } = result;
+//     // console.log(bbox, tilembbox);
+//     const coordinates = toPoints(tilesbbox);
+//     const mCoordinates = coordinates.map(c => {
+//         let [x, y] = c;
+//         x = Math.min(x, 180);
+//         x = Math.max(-180, x);
+//         y = Math.max(-85, y);
+//         y = Math.min(85, y);
+
+//         const mc = lnglat2Mercator([x, y]);
+//         console.log(c, mc);
+//         return mc;
+//     });
+//     let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+//     mCoordinates.forEach(c => {
+//         const [x, y] = c;
+//         // console.log(x,y);
+//         minx = Math.min(x, minx);
+//         miny = Math.min(y, miny);
+//         maxx = Math.max(x, maxx);
+//         maxy = Math.max(y, maxy);
+//     });
+//     const ax = image.width / (maxx - minx);
+//     const ay = image.height / (maxy - miny);
+//     // console.log(miny, maxy, ay);
+//     // console.log(ax, ay);
+//     const [x1, y1, x2, y2] = mbbox;
+//     const px1 = Math.floor((x1 - minx) * ax);
+//     const px2 = Math.floor((x2 - minx) * ax);
+//     const py2 = Math.floor(image.height - (y1 - miny) * ay);
+//     const py1 = Math.floor(image.height - (y2 - miny) * ay);
+//     const w = px2 - px1, h = py2 - py1;
+//     // console.log(px1, px2, py1, py2, w, h);
+//     const canvas = getCanvas();
+//     const ctx = getCanvasContext(canvas);
+//     clearCanvas(ctx);
+//     ctx.drawImage(image, px1, py1, w, h, 0, 0, canvas.width, canvas.height);
+//     return canvas.transferToImageBitmap();
+// }

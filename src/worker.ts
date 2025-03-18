@@ -1,5 +1,6 @@
 import { clip, injectMask, removeMask } from './tileclip';
 import { getTile, getTileWithMaxZoom } from './tileget';
+import { tileTransform } from './tiletranasform';
 
 export const initialize = function () {
 };
@@ -26,6 +27,18 @@ export const onmessage = function (message, postResponse) {
     }
     if (type === 'clipTile') {
         clip(data).then(image => {
+            const buffers = [];
+            if (image instanceof ImageBitmap) {
+                buffers.push(image);
+            }
+            postResponse(null, image, buffers);
+        }).catch(error => {
+            postResponse(error);
+        });
+        return;
+    }
+    if (type === 'transformTile') {
+        tileTransform(data).then(image => {
             const buffers = [];
             if (image instanceof ImageBitmap) {
                 buffers.push(image);
