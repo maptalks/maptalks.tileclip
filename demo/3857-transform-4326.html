@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Interactions - Draw tool to draw geometries</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+    }
+
+    .map {
+        width: 100%;
+    }
+</style>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.css' />
+<script type='text/javascript' src='https://cdn.jsdelivr.net/npm/maptalks-gl/dist/maptalks-gl.js'></script>
+<script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
+
+
+<body>
+    <div class="container">
+        <div id="map1" class="map"></div>
+        <!-- <div id="map2" class="map"></div> -->
+    </div>
+    <script>
+
+
+
+        const tileActor = maptalks.getTileActor();
+        const maskId = '1';
+        const baseLayer = new maptalks.TileLayer('base', {
+            // repeat: false,
+            // debug: true,
+            urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
+            // urlTemplate: "https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
+            subdomains: ["a", "b", "c", "d"],
+            // bufferPixel: 1
+        })
+
+        const urlTemplate = "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}";
+
+        baseLayer.on('renderercreate', function (e) {
+            //load tile image
+            //   img(Image): an Image object
+            //   url(String): the url of the tile
+            e.renderer.loadTileBitmap = function (url, tile, callback) {
+                const { x, y, z } = tile;
+                tileActor.transformTile({
+                    x,
+                    y,
+                    z,
+                    urlTemplate,
+                    projection: 'EPSG:3857',
+                    maxAvailableZoom: 18
+                }).then(imagebitmap => {
+                    callback(imagebitmap);
+                }).catch(error => {
+                    //do some things
+                    console.error(error);
+                })
+            };
+        });
+
+        var map = new maptalks.Map('map1', {
+            zoomControl: true,
+            "center": [121.65586045, 31.12453538], "zoom": 7.064897200334302, "pitch": 0, "bearing": 0,
+            spatialReference: {
+                projection: "EPSG:4326",
+            },
+        });
+        baseLayer.addTo(map);
+
+        const layer = new maptalks.VectorLayer('layer').addTo(map);
+
+
+        const symbol = {
+            polygonOpacity: 0,
+            lineColor: 'red'
+        }
+
+        // fetch('./上海市.json').then(res => res.json()).then(geojson => {
+        //     const polygons = maptalks.GeoJSON.toGeometry(geojson, (geo => {
+        //         geo.setSymbol(symbol);
+        //     }));
+        //     layer.addGeometry(polygons);
+        //     tileActor.injectMask(maskId, geojson.features[0]).then(data => {
+        //         baseLayer.addTo(map);
+        //         console.log(tileActor.maskHasInjected(maskId))
+        //     }).catch(error => {
+        //         console.error(error);
+        //     })
+        // })
+
+
+        // var map2 = new maptalks.Map('map2', {
+        //     zoomControl: true,
+        //     "center": [121.65586045, 31.12453538], "zoom": 13.064897200334302, "pitch": 0, "bearing": 0,
+        //     // spatialReference: {
+        //     //     projection: "EPSG:4326",
+        //     // },
+        // });
+        // const baseLayer1 = new maptalks.TileLayer('base', {
+        //     repeat: false,
+        //     debug: true,
+        //     urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
+        //     // urlTemplate: "https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
+        //     subdomains: ["a", "b", "c", "d"],
+        //     // bufferPixel: 1
+        // });
+        // baseLayer1.addTo(map2);
+
+    </script>
+</body>
+
+</html>
