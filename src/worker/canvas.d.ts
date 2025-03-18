@@ -1,4 +1,5 @@
 export declare function getCanvas(tileSize?: number): OffscreenCanvas;
+export declare function resizeCanvas(canvas: OffscreenCanvas, width: number, height: number): void;
 export declare function clearCanvas(ctx: OffscreenCanvasRenderingContext2D): void;
 export declare function getCanvasContext(canvas: OffscreenCanvas): OffscreenCanvasRenderingContext2D;
 export declare function getBlankTile(tileSize?: number): ImageBitmap;

@@ -3,8 +3,8 @@ import { getTileWithMaxZoom } from "./tileget";
 import { SphericalMercator } from '@mapbox/sphericalmercator';
 // import tileCover from '@mapbox/tile-cover';
 import { isNumber, lnglat2Mercator } from "./util";
-import { clearCanvas, getBlankTile, getCanvas, getCanvasContext, mergeTiles } from "./canvas";
-import { bboxOfBBOXList, toBBOX, toPoints } from "./bbox";
+import { clearCanvas, getBlankTile, getCanvas, getCanvasContext, mergeTiles, resizeCanvas } from "./canvas";
+import { bboxOfBBOXList, BBOXtype, toBBOX, toPoints } from "./bbox";
 
 const FirstRes = 1.40625, mFirstRes = 156543.03392804097;
 const TILESIZE = 256;
@@ -27,7 +27,7 @@ function get3857Res(zoom: number) {
 }
 
 
-function tile4326BBOX(x, y, z) {
+function tile4326BBOX(x: number, y: number, z: number): BBOXtype {
     const [orginX, orginY] = ORIGIN;
     const res = get4326Res(z) * TILESIZE;
 
@@ -41,9 +41,10 @@ function tile4326BBOX(x, y, z) {
     maxrow = Math.floor(maxrow);
 
     const xmin = orginX + (mincol) * res;
-    const xmax = orginX + (maxcol + 1) * res;
-    const ymin = (maxrow) * res - orginY;
-    const ymax = (minrow + 1) * res - orginY;
+    const xmax = orginX + (mincol + 1) * res;
+    const ymin = -orginY + (minrow) * res;
+    const ymax = -orginY + (minrow + 1) * res;
+
     return [xmin, ymin, xmax, ymax];
 }
 
@@ -53,13 +54,17 @@ function cal4326Tiles(x: number, y: number, z: number, zoomOffset = 0) {
     const [orginX, orginY] = ORIGIN;
     const res = get4326Res(z) * TILESIZE;
     const tileBBOX = merc.bbox(x, y, z);
+    // console.log(tileBBOX);
     const [minx, miny, maxx, maxy] = tileBBOX;
     let mincol = (minx - orginX) / res, maxcol = (maxx - orginX) / res;
+    // const MAXROW = Math.floor(orginY * 2 / res);
+    // let minrow = MAXROW - (orginY - miny) / res, maxrow = MAXROW - (orginY - maxy) / res;
     let minrow = (orginY - maxy) / res, maxrow = (orginY - miny) / res;
     mincol = Math.floor(mincol);
     maxcol = Math.floor(maxcol);
     minrow = Math.floor(minrow);
     maxrow = Math.floor(maxrow);
+    // console.log(minrow, maxrow, MAXROW);
     if (maxcol < mincol || maxrow < minrow) {
         return;
     }
@@ -69,10 +74,13 @@ function cal4326Tiles(x: number, y: number, z: number, zoomOffset = 0) {
             tiles.push([col - 1, row, z + zoomOffset]);
         }
     }
+   
     const xmin = orginX + (mincol - 1) * res;
     const xmax = orginX + (maxcol) * res;
-    const ymin = (maxrow - 1) * res - orginY;
-    const ymax = (minrow) * res - orginY;
+    const ymin = orginY - (maxrow + 1) * res;
+    const ymax = orginY - (minrow) * res;
+
+    // console.log(xmin, xmax, ymin, ymax);
     const coordinates: Array<[number, number]> = toPoints(tileBBOX).map(c => {
         return lnglat2Mercator(c) as [number, number];
     })
@@ -92,6 +100,7 @@ function cal3857Tiles(x: number, y: number, z: number, zoomOffset = 0) {
     const [orginX, orginY] = MORIGIN;
     const res = get3857Res(z) * TILESIZE;
     const tileBBOX = tile4326BBOX(x, y, z);
+    // console.log(tileBBOX);
     const mbbox = toBBOX(toPoints(tileBBOX as any).map(c => {
         const result = merc.forward(c);
         return result;
@@ -154,8 +163,7 @@ function tilesImageData(image, tilesbbox, tilebbox, projection) {
     // console.log(x1, x2, y1, y2);
     const w = x2 - x1, h = y2 - y1;
     const tileCanvas = getCanvas();
-    tileCanvas.width = w;
-    tileCanvas.height = h;
+    resizeCanvas(tileCanvas, w, h);
 
     const ctx = getCanvasContext(tileCanvas);
     clearCanvas(ctx);
@@ -195,7 +203,7 @@ function tilesImageData(image, tilesbbox, tilebbox, projection) {
         bbox: [xmin, ymin, xmax, ymax],
         width: w,
         height: h,
-        // image: tileCanvas.transferToImageBitmap()
+        image: tileCanvas.transferToImageBitmap()
         // canvas: tileCanvas
     };
 }
@@ -213,8 +221,7 @@ function transformTiles(pixelsresult, mbbox) {
         return;
     }
     const canvas = getCanvas();
-    canvas.width = width;
-    canvas.height = height;
+    resizeCanvas(canvas, width, height);
     const ctx = getCanvasContext(canvas);
     clearCanvas(ctx);
 
@@ -248,8 +255,7 @@ function transformTiles(pixelsresult, mbbox) {
     const px = Math.round((xmin - minx) / ax);
     const py = Math.round((maxy - ymax) / ay);
     const canvas1 = getCanvas();
-    canvas.width = TILESIZE;
-    canvas.height = TILESIZE;
+    resizeCanvas(canvas1, TILESIZE, TILESIZE);
     const ctx1 = getCanvasContext(canvas);
     clearCanvas(ctx1);
     ctx1.drawImage(image, px - 1, py, TILESIZE, TILESIZE, 0, 0, TILESIZE, TILESIZE);
@@ -314,11 +320,13 @@ export function tileTransform(options) {
                     if (projection === 'EPSG:4326') {
                         const imageData = tilesImageData(image, result.tilesbbox, result.bbox, projection);
                         image1 = transformTiles(imageData, result.mbbox);
+                        resolve(image1 || getBlankTile());
                     } else {
                         const imageData = tilesImageData(image, result.tilesbbox, result.mbbox, projection);
                         image1 = transformTiles(imageData, result.bbox);
+                        resolve(image1 || getBlankTile());
                     }
-                    resolve(image1 || getBlankTile());
+                    // resolve(image1 || getBlankTile());
                 } else {
                     const tile = tiles[result.loadCount];
                     const [x, y, z] = tile;

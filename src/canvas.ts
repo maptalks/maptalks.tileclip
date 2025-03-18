@@ -8,9 +8,17 @@ export function getCanvas(tileSize = 256) {
         globalCanvas = new OffscreenCanvas(1, 1);
     }
     if (globalCanvas) {
-        globalCanvas.width = globalCanvas.height = tileSize;
+        resizeCanvas(globalCanvas, tileSize, tileSize);
     }
     return globalCanvas;
+}
+
+export function resizeCanvas(canvas: OffscreenCanvas, width: number, height: number) {
+    if (canvas) {
+        canvas.width = width;
+        canvas.height = height;
+    }
+
 }
 
 export function clearCanvas(ctx: OffscreenCanvasRenderingContext2D) {
@@ -97,8 +105,7 @@ export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap)
 
 export function toBlobURL(imagebitmap: ImageBitmap) {
     const canvas = getCanvas();
-    canvas.width = imagebitmap.width;
-    canvas.height = imagebitmap.height;
+    resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
     const ctx = getCanvasContext(canvas);
     clearCanvas(ctx);
     ctx.drawImage(imagebitmap, 0, 0);
@@ -109,8 +116,7 @@ export function imageFilter(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, f
     if (!filter) {
         return imagebitmap;
     }
-    canvas.width = imagebitmap.width;
-    canvas.height = imagebitmap.height;
+    resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
     const ctx = getCanvasContext(canvas);
     clearCanvas(ctx);
     ctx.save();
@@ -122,8 +128,7 @@ export function imageFilter(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, f
 }
 
 export function imageTileScale(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, dx: number, dy: number, w: number, h: number) {
-    canvas.width = imagebitmap.width;
-    canvas.height = imagebitmap.height;
+    resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
     const ctx = getCanvasContext(canvas);
     clearCanvas(ctx);
     ctx.save();
@@ -140,8 +145,7 @@ export function imageOpacity(image: ImageBitmap, opacity = 1) {
         return image;
     }
     const canvas = getCanvas();
-    canvas.width = image.width;
-    canvas.height = image.height;
+    resizeCanvas(canvas, image.width, image.height);
     const ctx = getCanvasContext(canvas);
     clearCanvas(ctx);
     ctx.globalAlpha = opacity;
@@ -166,8 +170,7 @@ export function mergeTiles(tiles) {
     const width = (maxx - minx + 1) * tileSize;
     const height = (maxy - miny + 1) * tileSize;
     const canvas = getCanvas();
-    canvas.width = width;
-    canvas.height = height;
+    resizeCanvas(canvas, width, height);
     const ctx = getCanvasContext(canvas);
     clearCanvas(ctx);
     tiles.forEach(tile => {
