@@ -64,10 +64,9 @@ export type GeoJSONMultiPolygon = {
 class TileActor extends worker.Actor {
 
     getTile(options: getTileOptions) {
-        options = Object.assign({}, options);
+        options = Object.assign({ referrer: document.location.href }, options, { _type: 'getTile' });
         return new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
-            options.referrer = options.referrer || document.location.href;
-            this.send(Object.assign({}, { _type: 'getTile' }, options), [], (error, image) => {
+            this.send(Object.assign(options), [], (error, image) => {
                 if (error) {
                     reject(error);
                 } else {
@@ -78,10 +77,10 @@ class TileActor extends worker.Actor {
     }
 
     getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
-        options = Object.assign({}, options);
+        options = Object.assign({ referrer: document.location.href }, options, { _type: 'getTileWithMaxZoom' });
         return new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             options.referrer = options.referrer || document.location.href;
-            this.send(Object.assign({}, { _type: 'getTileWithMaxZoom' }, options), [], (error, image) => {
+            this.send(options, [], (error, image) => {
                 if (error) {
                     reject(error);
                 } else {
@@ -92,10 +91,10 @@ class TileActor extends worker.Actor {
     }
 
     transformTile(options: transformTileOptions) {
-        options = Object.assign({}, options);
+        options = Object.assign({ referrer: document.location.href }, options, { _type: 'transformTile' });
         return new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             options.referrer = options.referrer || document.location.href;
-            this.send(Object.assign({}, { _type: 'transformTile' }, options), [], (error, image) => {
+            this.send(options, [], (error, image) => {
                 if (error) {
                     reject(error);
                 } else {
@@ -106,13 +105,13 @@ class TileActor extends worker.Actor {
     }
 
     clipTile(options: clipTileOptions) {
-        options = Object.assign({}, options);
+        options = Object.assign({}, options, { _type: 'clipTile' });
         return new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
             const buffers: ArrayBuffer[] = [];
             if (options.tile && options.tile instanceof ImageBitmap) {
                 buffers.push(options.tile as unknown as ArrayBuffer);
             }
-            this.send(Object.assign({}, { _type: 'clipTile' }, options), buffers, (error, image) => {
+            this.send(options, buffers, (error, image) => {
                 if (error) {
                     reject(error);
                 } else {
