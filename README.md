@@ -28,6 +28,8 @@
 * [maxAvailableZoom polygon clip](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-polygon-clip.html)
 * [maxAvailableZoom tiles polygon clip](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-polygon-clip-array.html)
 * [underground by clip tile](https://maptalks.github.io/maptalks.tileclip/demo/underground.html)
+* [transform EPSG4326 to EPSG3857](https://maptalks.github.io/maptalks.tileclip/demo/4326-transform-3857.html)
+* [transform EPSG3857 to EPSG4326](https://maptalks.github.io/maptalks.tileclip/demo/3857-transform-4326.html)
 * [leaflet demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet.html)
 
 ## Install
@@ -140,6 +142,42 @@ tileActor.getTileWithMaxZoom({
     consle.log(imagebitmap);
 }).catch(error => {
     //do some things
+})
+```
+
+* `transformTile(options)` Reprojection tile in worker, return `Promise`
+  + `options.x`:tile col
+  + `options.y`:tile row
+  + `options.z`:tile zoom
+  + `options.projection`: Projection code, only support `EPSG:4326`,  `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
+  + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
+  + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
+  + `options?.errorLog`: Is there a printing error
+  + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
+  + `options?.headers`:fetch headers params. if need
+  + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
+  + `options?.opacity`: tile opacity if need
+
+```js
+const {
+    x,
+    y,
+    z
+} = tile;
+const maxAvailableZoom = 18;
+tileActor.transformTile({
+    x,
+    y,
+    z,
+    urlTemplate,
+    projection: 'EPSG:4326',
+    maxAvailableZoom: 18,
+}).then(imagebitmap => {
+    callback(imagebitmap);
+}).catch(error => {
+    //do some things
+    console.error(error);
 })
 ```
 
