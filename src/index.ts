@@ -17,6 +17,7 @@ export type getTileOptions = {
     headers?: Record<string, string>;
     fetchOptions?: Record<string, any>;
     opacity?: number;
+    returnBlobURL?: boolean;
 }
 
 export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {

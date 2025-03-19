@@ -3,7 +3,7 @@ import { getTileWithMaxZoom } from "./tileget";
 import { SphericalMercator } from '@mapbox/sphericalmercator';
 // import tileCover from '@mapbox/tile-cover';
 import { isNumber, lnglat2Mercator } from "./util";
-import { clearCanvas, getBlankTile, getCanvas, getCanvasContext, mergeTiles, resizeCanvas } from "./canvas";
+import { clearCanvas, getBlankTile, getCanvas, getCanvasContext, mergeTiles, resizeCanvas, toBlobURL } from "./canvas";
 import { bboxOfBBOXList, BBOXtype, toBBOX, toPoints } from "./bbox";
 
 const FirstRes = 1.40625, mFirstRes = 156543.03392804097;
@@ -361,7 +361,7 @@ function checkBoundaryBlank(ctx: OffscreenCanvasRenderingContext2D) {
 
 export function tileTransform(options) {
     return new Promise((resolve, reject) => {
-        const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog, debug } = options;
+        const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog, debug, returnBlobURL } = options;
         const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
         if (!projection) {
             reject(new Error('not find projection'));
@@ -388,6 +388,19 @@ export function tileTransform(options) {
         //     return;
         // }
 
+        const returnImage = (opImage) => {
+            if (!returnBlobURL) {
+                resolve(opImage);
+            } else {
+                toBlobURL(opImage).then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    resolve(url);
+                }).catch(error => {
+                    reject(error);
+                });
+            }
+        }
+
         const loadTiles = () => {
             let result;
             if (projection === 'EPSG:4326') {
@@ -399,7 +412,7 @@ export function tileTransform(options) {
             // console.log(result);
             const { tiles } = result || {};
             if (!tiles || tiles.length === 0) {
-                resolve(getBlankTile());
+                returnImage(getBlankTile());
                 return;
             }
             result.loadCount = 0;
@@ -410,16 +423,16 @@ export function tileTransform(options) {
                     if (projection === 'EPSG:4326') {
                         const imageData = tilesImageData(image, result.tilesbbox, result.bbox, projection);
                         image1 = transformTiles(imageData, result.mbbox, debug);
-                        resolve(image1 || getBlankTile());
+                        returnImage(image1 || getBlankTile());
                     } else {
                         const imageData = tilesImageData(image, result.tilesbbox, result.mbbox, projection);
                         image1 = transformTiles(imageData, result.bbox, debug);
-                        resolve(image1 || getBlankTile());
+                        returnImage(image1 || getBlankTile());
                     }
                 } else {
                     const tile = tiles[result.loadCount];
                     const [x, y, z] = tile;
-                    getTileWithMaxZoom(Object.assign({}, options, { x, y, z })).then(image => {
+                    getTileWithMaxZoom(Object.assign({}, options, { x, y, z, returnBlobURL: false })).then(image => {
                         tile.tileImage = image;
                         result.loadCount++;
                         loadTile();

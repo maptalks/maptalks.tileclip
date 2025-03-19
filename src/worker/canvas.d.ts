@@ -3,7 +3,7 @@ export declare function resizeCanvas(canvas: OffscreenCanvas, width: number, hei
 export declare function clearCanvas(ctx: OffscreenCanvasRenderingContext2D): void;
 export declare function getCanvasContext(canvas: OffscreenCanvas): OffscreenCanvasRenderingContext2D;
 export declare function getBlankTile(tileSize?: number): ImageBitmap;
-export declare function mergeImages(images: Array<ImageBitmap>): ImageBitmap | Error;
+export declare function mergeImages(images: Array<ImageBitmap>): Error | ImageBitmap;
 export declare function imageClip(canvas: OffscreenCanvas, polygons: any, image: ImageBitmap): ImageBitmap;
 export declare function toBlobURL(imagebitmap: ImageBitmap): Promise<Blob>;
 export declare function imageFilter(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, filter: string): ImageBitmap;

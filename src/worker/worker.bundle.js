@@ -403,9 +403,6 @@ export default ` (function (exports) { 'use strict';
           const dx = (x - minx) * tileSize;
           const dy = (y - miny) * tileSize;
           let tileImage = tile.tileImage;
-          // if (isErrorTile(x, y)) {
-          //     tileImage = neighborTile(x, y) || tileImage;
-          // }
           ctx.drawImage(tileImage, dx, dy, tileSize, tileSize);
           if (debug) {
               ctx.fillText([x, y, z].join('_').toString(), dx + 100, dy + 100);
@@ -864,6 +861,7 @@ export default ` (function (exports) { 'use strict';
           const fetchTiles = urls.map(tileUrl => {
               return fetchTile(tileUrl, headers, options);
           });
+          const { returnBlobURL } = options;
           Promise.all(fetchTiles).then(imagebits => {
               const canvas = getCanvas();
               if (!canvas) {
@@ -883,14 +881,25 @@ export default ` (function (exports) { 'use strict';
               else {
                   tileImage = image;
               }
-              resolve(imageOpacity(tileImage, options.opacity));
+              const opImage = imageOpacity(tileImage, options.opacity);
+              if (!returnBlobURL) {
+                  resolve(opImage);
+              }
+              else {
+                  toBlobURL(opImage).then(blob => {
+                      const url = URL.createObjectURL(blob);
+                      resolve(url);
+                  }).catch(error => {
+                      reject(error);
+                  });
+              }
           }).catch(error => {
               reject(error);
           });
       });
   }
   function getTileWithMaxZoom(options) {
-      const { urlTemplate, x, y, z, maxAvailableZoom, subdomains } = options;
+      const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, returnBlobURL } = options;
       const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
       return new Promise((resolve, reject) => {
           if (!maxZoomEnable) {
@@ -989,14 +998,27 @@ export default ` (function (exports) { 'use strict';
               else {
                   image = mergeImage;
               }
+              let opImage;
               if (zoomOffset <= 0) {
-                  resolve(imageOpacity(image, options.opacity));
-                  return;
+                  opImage = (imageOpacity(image, options.opacity));
               }
-              const { width, height } = image;
-              const dx = width * dxScale, dy = height * dyScale, w = width * wScale, h = height * hScale;
-              const imageBitMap = imageTileScale(canvas, image, dx, dy, w, h);
-              resolve(imageOpacity(imageBitMap, options.opacity));
+              else {
+                  const { width, height } = image;
+                  const dx = width * dxScale, dy = height * dyScale, w = width * wScale, h = height * hScale;
+                  const imageBitMap = imageTileScale(canvas, image, dx, dy, w, h);
+                  opImage = imageOpacity(imageBitMap, options.opacity);
+              }
+              if (!returnBlobURL) {
+                  resolve(opImage);
+              }
+              else {
+                  toBlobURL(opImage).then(blob => {
+                      const url = URL.createObjectURL(blob);
+                      resolve(url);
+                  }).catch(error => {
+                      reject(error);
+                  });
+              }
           }).catch(error => {
               reject(error);
           });
@@ -1490,7 +1512,7 @@ export default ` (function (exports) { 'use strict';
   }
   function tileTransform(options) {
       return new Promise((resolve, reject) => {
-          const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog, debug } = options;
+          const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog, debug, returnBlobURL } = options;
           const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
           if (!projection) {
               reject(new Error('not find projection'));
@@ -1516,6 +1538,19 @@ export default ` (function (exports) { 'use strict';
           //     resolve(getBlankTile());
           //     return;
           // }
+          const returnImage = (opImage) => {
+              if (!returnBlobURL) {
+                  resolve(opImage);
+              }
+              else {
+                  toBlobURL(opImage).then(blob => {
+                      const url = URL.createObjectURL(blob);
+                      resolve(url);
+                  }).catch(error => {
+                      reject(error);
+                  });
+              }
+          };
           const loadTiles = () => {
               let result;
               if (projection === 'EPSG:4326') {
@@ -1527,7 +1562,7 @@ export default ` (function (exports) { 'use strict';
               // console.log(result);
               const { tiles } = result || {};
               if (!tiles || tiles.length === 0) {
-                  resolve(getBlankTile());
+                  returnImage(getBlankTile());
                   return;
               }
               result.loadCount = 0;
@@ -1538,18 +1573,18 @@ export default ` (function (exports) { 'use strict';
                       if (projection === 'EPSG:4326') {
                           const imageData = tilesImageData(image, result.tilesbbox, result.bbox, projection);
                           image1 = transformTiles(imageData, result.mbbox, debug);
-                          resolve(image1 || getBlankTile());
+                          returnImage(image1 || getBlankTile());
                       }
                       else {
                           const imageData = tilesImageData(image, result.tilesbbox, result.mbbox, projection);
                           image1 = transformTiles(imageData, result.bbox, debug);
-                          resolve(image1 || getBlankTile());
+                          returnImage(image1 || getBlankTile());
                       }
                   }
                   else {
                       const tile = tiles[result.loadCount];
                       const [x, y, z] = tile;
-                      getTileWithMaxZoom(Object.assign({}, options, { x, y, z })).then(image => {
+                      getTileWithMaxZoom(Object.assign({}, options, { x, y, z, returnBlobURL: false })).then(image => {
                           tile.tileImage = image;
                           result.loadCount++;
                           loadTile();
@@ -1577,7 +1612,11 @@ export default ` (function (exports) { 'use strict';
       if (type === 'getTile') {
           const { url } = data;
           getTile(url, data).then(image => {
-              postResponse(null, image, [image]);
+              const buffers = [];
+              if (image instanceof ImageBitmap) {
+                  buffers.push(image);
+              }
+              postResponse(null, image, buffers);
           }).catch(error => {
               postResponse(error);
           });
@@ -1585,7 +1624,11 @@ export default ` (function (exports) { 'use strict';
       }
       if (type === 'getTileWithMaxZoom') {
           getTileWithMaxZoom(data).then(image => {
-              postResponse(null, image, [image]);
+              const buffers = [];
+              if (image instanceof ImageBitmap) {
+                  buffers.push(image);
+              }
+              postResponse(null, image, buffers);
           }).catch(error => {
               postResponse(error);
           });

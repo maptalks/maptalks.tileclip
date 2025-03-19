@@ -1,5 +1,5 @@
 import { getTileOptions, getTileWithMaxZoomOptions } from './index';
-import { getCanvas, imageFilter, imageOpacity, imageTileScale, mergeImages } from './canvas';
+import { getCanvas, imageFilter, imageOpacity, imageTileScale, mergeImages, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
 import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE } from './util';
 
@@ -65,6 +65,7 @@ export function getTile(url, options: getTileOptions) {
         const fetchTiles = urls.map(tileUrl => {
             return fetchTile(tileUrl, headers, options)
         });
+        const { returnBlobURL } = options;
         Promise.all(fetchTiles).then(imagebits => {
             const canvas = getCanvas();
             if (!canvas) {
@@ -83,7 +84,18 @@ export function getTile(url, options: getTileOptions) {
             } else {
                 tileImage = image;
             }
-            resolve(imageOpacity(tileImage, options.opacity));
+
+            const opImage = imageOpacity(tileImage, options.opacity);
+            if (!returnBlobURL) {
+                resolve(opImage);
+            } else {
+                toBlobURL(opImage).then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    resolve(url);
+                }).catch(error => {
+                    reject(error);
+                });
+            }
         }).catch(error => {
             reject(error);
         })
@@ -91,7 +103,7 @@ export function getTile(url, options: getTileOptions) {
 }
 
 export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
-    const { urlTemplate, x, y, z, maxAvailableZoom, subdomains } = options;
+    const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, returnBlobURL } = options;
     const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
     return new Promise((resolve, reject) => {
         if (!maxZoomEnable) {
@@ -192,14 +204,25 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
             } else {
                 image = mergeImage;
             }
+            let opImage;
             if (zoomOffset <= 0) {
-                resolve(imageOpacity(image, options.opacity));
-                return;
+                opImage = (imageOpacity(image, options.opacity));
+            } else {
+                const { width, height } = image;
+                const dx = width * dxScale, dy = height * dyScale, w = width * wScale, h = height * hScale;
+                const imageBitMap = imageTileScale(canvas, image, dx, dy, w, h);
+                opImage = imageOpacity(imageBitMap, options.opacity);
             }
-            const { width, height } = image;
-            const dx = width * dxScale, dy = height * dyScale, w = width * wScale, h = height * hScale;
-            const imageBitMap = imageTileScale(canvas, image, dx, dy, w, h);
-            resolve(imageOpacity(imageBitMap, options.opacity));
+            if (!returnBlobURL) {
+                resolve(opImage);
+            } else {
+                toBlobURL(opImage).then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    resolve(url);
+                }).catch(error => {
+                    reject(error);
+                });
+            }
         }).catch(error => {
             reject(error);
         })

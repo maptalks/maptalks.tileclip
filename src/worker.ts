@@ -11,7 +11,11 @@ export const onmessage = function (message, postResponse) {
     if (type === 'getTile') {
         const { url } = data;
         getTile(url, data).then(image => {
-            postResponse(null, image, [image]);
+            const buffers = [];
+            if (image instanceof ImageBitmap) {
+                buffers.push(image);
+            }
+            postResponse(null, image, buffers);
         }).catch(error => {
             postResponse(error);
         });
@@ -19,7 +23,11 @@ export const onmessage = function (message, postResponse) {
     }
     if (type === 'getTileWithMaxZoom') {
         getTileWithMaxZoom(data).then(image => {
-            postResponse(null, image, [image]);
+            const buffers = [];
+            if (image instanceof ImageBitmap) {
+                buffers.push(image);
+            }
+            postResponse(null, image, buffers);
         }).catch(error => {
             postResponse(error);
         });
