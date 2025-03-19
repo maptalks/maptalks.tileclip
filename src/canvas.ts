@@ -156,7 +156,7 @@ export function imageOpacity(image: ImageBitmap, opacity = 1) {
 }
 
 
-export function mergeTiles(tiles) {
+export function mergeTiles(tiles, debug: boolean) {
     let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
     let tileSize = 256;
     tiles.forEach(tile => {
@@ -173,11 +173,22 @@ export function mergeTiles(tiles) {
     resizeCanvas(canvas, width, height);
     const ctx = getCanvasContext(canvas);
     clearCanvas(ctx);
+    if (debug) {
+        ctx.font = "bold 48px serif";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'red';
+    }
     tiles.forEach(tile => {
-        const [x, y] = tile;
+        const [x, y, z] = tile;
         const dx = (x - minx) * tileSize;
         const dy = (y - miny) * tileSize;
-        ctx.drawImage(tile.tileImage, dx, dy, tileSize, tileSize);
+        let tileImage = tile.tileImage;
+        ctx.drawImage(tileImage, dx, dy, tileSize, tileSize);
+        if (debug) {
+            ctx.fillText([x, y, z].join('_').toString(), dx + 100, dy + 100);
+        }
+
     });
     return canvas.transferToImageBitmap();
 }

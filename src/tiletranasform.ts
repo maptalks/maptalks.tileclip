@@ -74,7 +74,7 @@ function cal4326Tiles(x: number, y: number, z: number, zoomOffset = 0) {
             tiles.push([col - 1, row, z + zoomOffset]);
         }
     }
-   
+
     const xmin = orginX + (mincol - 1) * res;
     const xmax = orginX + (maxcol) * res;
     const ymin = orginY - (maxrow + 1) * res;
@@ -208,7 +208,7 @@ function tilesImageData(image, tilesbbox, tilebbox, projection) {
     };
 }
 
-function transformTiles(pixelsresult, mbbox) {
+function transformTiles(pixelsresult, mbbox, debug) {
     const [xmin, ymin, xmax, ymax] = mbbox;
     const ax = (xmax - xmin) / TILESIZE, ay = (ymax - ymin) / TILESIZE;
     const { pixels, bbox } = pixelsresult;
@@ -259,11 +259,101 @@ function transformTiles(pixelsresult, mbbox) {
     const ctx1 = getCanvasContext(canvas);
     clearCanvas(ctx1);
     ctx1.drawImage(image, px - 1, py, TILESIZE, TILESIZE, 0, 0, TILESIZE, TILESIZE);
-    // ctx1.textAlign = 'center';
-    // ctx1.textBaseline = 'middle';
-    // ctx1.fillStyle = 'red';
-    // ctx1.fillText('design by deyihu', TILESIZE / 2, TILESIZE / 2);
+    checkBoundaryBlank(ctx1);
+    if (debug) {
+        ctx1.lineWidth = 0.4;
+        ctx1.strokeStyle = 'red';
+        ctx1.rect(0, 0, TILESIZE, TILESIZE);
+        ctx1.stroke();
+    }
     return canvas1.transferToImageBitmap();
+}
+
+function checkBoundaryBlank(ctx: OffscreenCanvasRenderingContext2D) {
+    const canvas = ctx.canvas;
+    const { width, height } = canvas;
+
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+    const leftIsBlank = () => {
+        for (let row = 1; row <= height; row++) {
+            const idx = (width * 4) * (row - 1) + 0;
+            const a = data[idx + 3];
+            if (a > 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // const topIsBlank = () => {
+    //     for (let col = 1; col <= width; col++) {
+    //         const idx = (col - 1) * 4;
+    //         const a = data[idx + 3];
+    //         if (a > 0) {
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+    // }
+
+    const bottomIsBlank = () => {
+        for (let col = 1; col <= width; col++) {
+            const idx = (col - 1) * 4 + (height - 1) * width * 4;
+            const a = data[idx + 3];
+            if (a > 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+    if (leftIsBlank()) {
+        for (let row = 1; row <= height; row++) {
+            const idx1 = (width * 4) * (row - 1) + 0;
+            const idx2 = idx1 + 4;
+            const r = data[idx2];
+            const g = data[idx2 + 1];
+            const b = data[idx2 + 2];
+            const a = data[idx2 + 3];
+
+            data[idx1] = r;
+            data[idx1 + 1] = g;
+            data[idx1 + 2] = b;
+            data[idx1 + 3] = a;
+        }
+    }
+    if (bottomIsBlank()) {
+        for (let col = 1; col <= width; col++) {
+            const idx1 = (col - 1) * 4 + (height - 1) * width * 4;
+            const idx2 = (col - 1) * 4 + (height - 2) * width * 4;
+            const r = data[idx2];
+            const g = data[idx2 + 1];
+            const b = data[idx2 + 2];
+            const a = data[idx2 + 3];
+
+            data[idx1] = r;
+            data[idx1 + 1] = g;
+            data[idx1 + 2] = b;
+            data[idx1 + 3] = a;
+        }
+    }
+    // if (topIsBlank()) {
+    //     console.log(true);
+    //     for (let col = 1; col <= width; col++) {
+    //         const idx1 = (col - 1) * 4;
+    //         const idx2 = (col - 1) * 4 + width * 4;
+    //         const r = data[idx2];
+    //         const g = data[idx2 + 1];
+    //         const b = data[idx2 + 2];
+    //         const a = data[idx2 + 3];
+
+    //         data[idx1] = r;
+    //         data[idx1 + 1] = g;
+    //         data[idx1 + 2] = b;
+    //         data[idx1 + 3] = a;
+    //     }
+    // }
+    ctx.putImageData(imageData, 0, 0);
 }
 
 
@@ -271,7 +361,7 @@ function transformTiles(pixelsresult, mbbox) {
 
 export function tileTransform(options) {
     return new Promise((resolve, reject) => {
-        const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog } = options;
+        const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog, debug } = options;
         const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
         if (!projection) {
             reject(new Error('not find projection'));
@@ -315,18 +405,17 @@ export function tileTransform(options) {
             result.loadCount = 0;
             const loadTile = () => {
                 if (result.loadCount >= tiles.length) {
-                    const image = mergeTiles(tiles);
+                    const image = mergeTiles(tiles, debug);
                     let image1;
                     if (projection === 'EPSG:4326') {
                         const imageData = tilesImageData(image, result.tilesbbox, result.bbox, projection);
-                        image1 = transformTiles(imageData, result.mbbox);
+                        image1 = transformTiles(imageData, result.mbbox, debug);
                         resolve(image1 || getBlankTile());
                     } else {
                         const imageData = tilesImageData(image, result.tilesbbox, result.mbbox, projection);
-                        image1 = transformTiles(imageData, result.bbox);
+                        image1 = transformTiles(imageData, result.bbox, debug);
                         resolve(image1 || getBlankTile());
                     }
-                    // resolve(image1 || getBlankTile());
                 } else {
                     const tile = tiles[result.loadCount];
                     const [x, y, z] = tile;
