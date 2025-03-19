@@ -5,17 +5,21 @@ import { tileTransform } from './tiletranasform';
 export const initialize = function () {
 };
 
+function checkBuffers(image) {
+    const buffers = [];
+    if (image && image instanceof ImageBitmap) {
+        buffers.push(image);
+    }
+    return buffers;
+}
+
 export const onmessage = function (message, postResponse) {
     const data = message.data || {};
     const type = data._type;
     if (type === 'getTile') {
         const { url } = data;
         getTile(url, data).then(image => {
-            const buffers = [];
-            if (image instanceof ImageBitmap) {
-                buffers.push(image);
-            }
-            postResponse(null, image, buffers);
+            postResponse(null, image, checkBuffers(image));
         }).catch(error => {
             postResponse(error);
         });
@@ -23,11 +27,7 @@ export const onmessage = function (message, postResponse) {
     }
     if (type === 'getTileWithMaxZoom') {
         getTileWithMaxZoom(data).then(image => {
-            const buffers = [];
-            if (image instanceof ImageBitmap) {
-                buffers.push(image);
-            }
-            postResponse(null, image, buffers);
+            postResponse(null, image, checkBuffers(image));
         }).catch(error => {
             postResponse(error);
         });
@@ -35,11 +35,7 @@ export const onmessage = function (message, postResponse) {
     }
     if (type === 'clipTile') {
         clip(data).then(image => {
-            const buffers = [];
-            if (image instanceof ImageBitmap) {
-                buffers.push(image);
-            }
-            postResponse(null, image, buffers);
+            postResponse(null, image, checkBuffers(image));
         }).catch(error => {
             postResponse(error);
         });
@@ -47,11 +43,7 @@ export const onmessage = function (message, postResponse) {
     }
     if (type === 'transformTile') {
         tileTransform(data).then(image => {
-            const buffers = [];
-            if (image instanceof ImageBitmap) {
-                buffers.push(image);
-            }
-            postResponse(null, image, buffers);
+            postResponse(null, image, checkBuffers(image));
         }).catch(error => {
             postResponse(error);
         });

@@ -63,10 +63,14 @@ export type GeoJSONMultiPolygon = {
     bbox?: BBOXtype
 }
 
+function checkOptions(options, type: string) {
+    return Object.assign({ referrer: document.location.href }, options, { _type: type });
+}
+
 class TileActor extends worker.Actor {
 
     getTile(options: getTileOptions) {
-        options = Object.assign({ referrer: document.location.href }, options, { _type: 'getTile' });
+        options = checkOptions(options, 'getTile')
         return new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             this.send(Object.assign(options), [], (error, image) => {
                 if (error) {
@@ -79,7 +83,7 @@ class TileActor extends worker.Actor {
     }
 
     getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
-        options = Object.assign({ referrer: document.location.href }, options, { _type: 'getTileWithMaxZoom' });
+        options = checkOptions(options, 'getTileWithMaxZoom')
         return new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             options.referrer = options.referrer || document.location.href;
             this.send(options, [], (error, image) => {
@@ -93,7 +97,7 @@ class TileActor extends worker.Actor {
     }
 
     transformTile(options: transformTileOptions) {
-        options = Object.assign({ referrer: document.location.href }, options, { _type: 'transformTile' });
+        options = checkOptions(options, 'transformTile')
         return new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             options.referrer = options.referrer || document.location.href;
             this.send(options, [], (error, image) => {
@@ -107,7 +111,7 @@ class TileActor extends worker.Actor {
     }
 
     clipTile(options: clipTileOptions) {
-        options = Object.assign({}, options, { _type: 'clipTile' });
+        options = checkOptions(options, 'clipTile')
         return new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
             const buffers: ArrayBuffer[] = [];
             if (options.tile && options.tile instanceof ImageBitmap) {
