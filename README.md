@@ -30,7 +30,9 @@
 * [underground by clip tile](https://maptalks.github.io/maptalks.tileclip/demo/underground.html)
 * [transform EPSG4326 to EPSG3857](https://maptalks.github.io/maptalks.tileclip/demo/4326-transform-3857.html)
 * [transform EPSG3857 to EPSG4326](https://maptalks.github.io/maptalks.tileclip/demo/3857-transform-4326.html)
-* [leaflet demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet.html)
+* [leaflet clip demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet.html)
+* [leaflet gettile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-simple.html)
+* [leaflet transform tile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-transform.html)
 
 ## Install
 
@@ -84,6 +86,9 @@ const tileActor = getTileActor();
   + `options?.headers`:fetch headers params. if need
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
   + `options?.opacity`: tile opacity if need
+  + `options?.returnBlobURL`: to return 
+  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+
 
 ```js
 tileActor.getTile({
@@ -114,6 +119,8 @@ tileActor.getTile({
   + `options?.headers`:fetch headers params. if need
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
   + `options?.opacity`: tile opacity if need
+  + `options?.returnBlobURL`: to return 
+  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
 ```js
 const {
@@ -158,6 +165,8 @@ tileActor.getTileWithMaxZoom({
   + `options?.headers`:fetch headers params. if need
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
   + `options?.opacity`: tile opacity if need
+  + `options?.returnBlobURL`: to return 
+  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
 ```js
 const {
