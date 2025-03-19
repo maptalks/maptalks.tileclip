@@ -21,7 +21,7 @@ export function resizeCanvas(canvas: OffscreenCanvas, width: number, height: num
 
 }
 
-export function clearCanvas(ctx: OffscreenCanvasRenderingContext2D) {
+function clearCanvas(ctx: OffscreenCanvasRenderingContext2D) {
     const canvas = ctx.canvas;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
@@ -30,13 +30,13 @@ export function getCanvasContext(canvas: OffscreenCanvas) {
     const ctx = canvas.getContext('2d', {
         willReadFrequently: true
     });
+    clearCanvas(ctx);
     return ctx;
 }
 
 export function getBlankTile(tileSize?: number) {
     const canvas = getCanvas(tileSize);
     const ctx = getCanvasContext(canvas);
-    clearCanvas(ctx);
     // ctx.fillText('404', 100, 100);
     // ctx.rect(0, 0, canvas.width, canvas.height);
     // ctx.stroke();
@@ -59,7 +59,6 @@ export function mergeImages(images: Array<ImageBitmap>) {
     const tileSize = images[0].width;
     const canvas = getCanvas(tileSize);
     const ctx = getCanvasContext(canvas);
-    clearCanvas(ctx);
     images.forEach(image => {
         ctx.drawImage(image, 0, 0, tileSize, tileSize);
     });
@@ -70,7 +69,6 @@ export function mergeImages(images: Array<ImageBitmap>) {
 
 export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap) {
     const ctx = getCanvasContext(canvas);
-    clearCanvas(ctx);
     ctx.save();
 
     const drawPolygon = (rings) => {
@@ -107,7 +105,6 @@ export function toBlobURL(imagebitmap: ImageBitmap) {
     const canvas = getCanvas();
     resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
     const ctx = getCanvasContext(canvas);
-    clearCanvas(ctx);
     ctx.drawImage(imagebitmap, 0, 0);
     return canvas.convertToBlob();
 }
@@ -118,7 +115,6 @@ export function imageFilter(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, f
     }
     resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
     const ctx = getCanvasContext(canvas);
-    clearCanvas(ctx);
     ctx.save();
     ctx.filter = filter;
     ctx.drawImage(imagebitmap, 0, 0);
@@ -130,7 +126,6 @@ export function imageFilter(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, f
 export function imageTileScale(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, dx: number, dy: number, w: number, h: number) {
     resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
     const ctx = getCanvasContext(canvas);
-    clearCanvas(ctx);
     ctx.save();
 
     // console.log(dx,dy,w,h);
@@ -147,7 +142,6 @@ export function imageOpacity(image: ImageBitmap, opacity = 1) {
     const canvas = getCanvas();
     resizeCanvas(canvas, image.width, image.height);
     const ctx = getCanvasContext(canvas);
-    clearCanvas(ctx);
     ctx.globalAlpha = opacity;
     ctx.drawImage(image, 0, 0);
     const bitImage = canvas.transferToImageBitmap();
@@ -172,7 +166,6 @@ export function mergeTiles(tiles, debug: boolean) {
     const canvas = getCanvas();
     resizeCanvas(canvas, width, height);
     const ctx = getCanvasContext(canvas);
-    clearCanvas(ctx);
     if (debug) {
         ctx.font = "bold 48px serif";
         ctx.textAlign = 'center';
@@ -192,45 +185,3 @@ export function mergeTiles(tiles, debug: boolean) {
     });
     return canvas.transferToImageBitmap();
 }
-
-// export function clipTile(result, image) {
-//     const { tilesbbox, mbbox } = result;
-//     // console.log(bbox, tilembbox);
-//     const coordinates = toPoints(tilesbbox);
-//     const mCoordinates = coordinates.map(c => {
-//         let [x, y] = c;
-//         x = Math.min(x, 180);
-//         x = Math.max(-180, x);
-//         y = Math.max(-85, y);
-//         y = Math.min(85, y);
-
-//         const mc = lnglat2Mercator([x, y]);
-//         console.log(c, mc);
-//         return mc;
-//     });
-//     let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
-//     mCoordinates.forEach(c => {
-//         const [x, y] = c;
-//         // console.log(x,y);
-//         minx = Math.min(x, minx);
-//         miny = Math.min(y, miny);
-//         maxx = Math.max(x, maxx);
-//         maxy = Math.max(y, maxy);
-//     });
-//     const ax = image.width / (maxx - minx);
-//     const ay = image.height / (maxy - miny);
-//     // console.log(miny, maxy, ay);
-//     // console.log(ax, ay);
-//     const [x1, y1, x2, y2] = mbbox;
-//     const px1 = Math.floor((x1 - minx) * ax);
-//     const px2 = Math.floor((x2 - minx) * ax);
-//     const py2 = Math.floor(image.height - (y1 - miny) * ay);
-//     const py1 = Math.floor(image.height - (y2 - miny) * ay);
-//     const w = px2 - px1, h = py2 - py1;
-//     // console.log(px1, px2, py1, py2, w, h);
-//     const canvas = getCanvas();
-//     const ctx = getCanvasContext(canvas);
-//     clearCanvas(ctx);
-//     ctx.drawImage(image, px1, py1, w, h, 0, 0, canvas.width, canvas.height);
-//     return canvas.transferToImageBitmap();
-// }

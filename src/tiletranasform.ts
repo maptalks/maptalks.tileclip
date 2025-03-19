@@ -3,7 +3,7 @@ import { getTileWithMaxZoom } from "./tileget";
 import { SphericalMercator } from '@mapbox/sphericalmercator';
 // import tileCover from '@mapbox/tile-cover';
 import { isNumber, lnglat2Mercator } from "./util";
-import { clearCanvas, getBlankTile, getCanvas, getCanvasContext, mergeTiles, resizeCanvas, toBlobURL } from "./canvas";
+import { getBlankTile, getCanvas, getCanvasContext, mergeTiles, resizeCanvas, toBlobURL } from "./canvas";
 import { bboxOfBBOXList, BBOXtype, toBBOX, toPoints } from "./bbox";
 
 const FirstRes = 1.40625, mFirstRes = 156543.03392804097;
@@ -165,7 +165,6 @@ function tilesImageData(image, tilesbbox, tilebbox, projection) {
     resizeCanvas(tileCanvas, w, h);
 
     const ctx = getCanvasContext(tileCanvas);
-    clearCanvas(ctx);
     ctx.drawImage(image, x1, y1, w, h, 0, 0, w, h);
 
     const imageData = ctx.getImageData(0, 0, w, h).data;
@@ -222,7 +221,6 @@ function transformTiles(pixelsresult, mbbox, debug) {
     const canvas = getCanvas();
     resizeCanvas(canvas, width, height);
     const ctx = getCanvasContext(canvas);
-    clearCanvas(ctx);
 
     function transformPixel(x, y) {
         let col = Math.round((x - minx) / ax + 1);
@@ -256,7 +254,6 @@ function transformTiles(pixelsresult, mbbox, debug) {
     const canvas1 = getCanvas();
     resizeCanvas(canvas1, TILESIZE, TILESIZE);
     const ctx1 = getCanvasContext(canvas);
-    clearCanvas(ctx1);
     ctx1.drawImage(image, px - 1, py, TILESIZE, TILESIZE, 0, 0, TILESIZE, TILESIZE);
     checkBoundaryBlank(ctx1);
     if (debug) {
