@@ -12,9 +12,8 @@ const ORIGIN = [-180, 90];
 const MORIGIN = [-20037508.342787, 20037508.342787];
 const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
 
-const TILE_SIZE = 256;
 const merc = new SphericalMercator({
-    size: TILE_SIZE,
+    size: TILESIZE,
     // antimeridian: true
 });
 
