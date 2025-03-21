@@ -10,6 +10,7 @@
 
 ## Examples
 
+### Common
 * [simple get tile](https://maptalks.github.io/maptalks.tileclip/demo/tile.html)
 * [merge tiles](https://maptalks.github.io/maptalks.tileclip/demo/tile-array.html)
 * [get tile with filter](https://maptalks.github.io/maptalks.tileclip/demo/polygon-hole-clip-filter.html)
@@ -17,19 +18,29 @@
 * [clip by polygon with holes](https://maptalks.github.io/maptalks.tileclip/demo/polygon-hole-clip.html)
 * [clip by multipolygon](https://maptalks.github.io/maptalks.tileclip/demo/multipolygon-clip.html)
 * [clip by multipolygon with holes](https://maptalks.github.io/maptalks.tileclip/demo/multipolygon-hole-clip.html)
-* [EPSG:4326](https://maptalks.github.io/maptalks.tileclip/demo/4326.html)
-* [custom SpatialReference](https://maptalks.github.io/maptalks.tileclip/demo/custom-sp.html)
-* [update mask](https://maptalks.github.io/maptalks.tileclip/demo/update-mask.html)
-* [mask remove or add](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-remve.html)
-* [identify projection](https://maptalks.github.io/maptalks.tileclip/demo/identify.html)
-* [water mark](https://maptalks.github.io/maptalks.tileclip/demo/watermark.html)
+
 * [maxAvailableZoom](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom.html)
 * [maxAvailableZoom tiles](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-array.html)
 * [maxAvailableZoom polygon clip](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-polygon-clip.html)
 * [maxAvailableZoom tiles polygon clip](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-polygon-clip-array.html)
-* [underground by clip tile](https://maptalks.github.io/maptalks.tileclip/demo/underground.html)
+
+* [update mask](https://maptalks.github.io/maptalks.tileclip/demo/update-mask.html)
+* [mask remove or add](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-remve.html)
+* [water mark](https://maptalks.github.io/maptalks.tileclip/demo/watermark.html)
+
+
+### Custom Prj
+* [EPSG:4326](https://maptalks.github.io/maptalks.tileclip/demo/4326.html)
+* [custom SpatialReference](https://maptalks.github.io/maptalks.tileclip/demo/custom-sp.html)
+* [identify projection](https://maptalks.github.io/maptalks.tileclip/demo/identify.html)
+* [EPSG:9807](https://maptalks.github.io/maptalks.tileclip/demo/epsg9807.html)
+
+### Transform
 * [transform EPSG4326 to EPSG3857](https://maptalks.github.io/maptalks.tileclip/demo/4326-transform-3857.html)
 * [transform EPSG3857 to EPSG4326](https://maptalks.github.io/maptalks.tileclip/demo/3857-transform-4326.html)
+
+## Others
+* [underground by clip tile](https://maptalks.github.io/maptalks.tileclip/demo/underground.html)
 * [leaflet clip demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet.html)
 * [leaflet gettile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-simple.html)
 * [leaflet transform tile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-transform.html)
@@ -89,7 +100,6 @@ const tileActor = getTileActor();
   + `options?.opacity`: tile opacity if need
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
-
 
 ```js
 tileActor.getTile({
@@ -158,7 +168,7 @@ tileActor.getTileWithMaxZoom({
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,   `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,    `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
