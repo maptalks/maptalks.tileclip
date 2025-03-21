@@ -85,6 +85,7 @@ const tileActor = getTileActor();
   + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
   + `options?.headers`:fetch headers params. if need
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
+  + `options?.timeout`: fetch timeout
   + `options?.opacity`: tile opacity if need
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
@@ -118,6 +119,7 @@ tileActor.getTile({
   + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
   + `options?.headers`:fetch headers params. if need
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
+  + `options?.timeout`: fetch timeout
   + `options?.opacity`: tile opacity if need
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
@@ -164,6 +166,7 @@ tileActor.getTileWithMaxZoom({
   + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
   + `options?.headers`:fetch headers params. if need
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
+  + `options?.timeout`: fetch timeout
   + `options?.opacity`: tile opacity if need
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
