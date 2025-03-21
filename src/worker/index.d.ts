@@ -6,6 +6,7 @@ export type getTileOptions = {
     filter?: string;
     headers?: Record<string, string>;
     fetchOptions?: Record<string, any>;
+    timeout?: number;
     opacity?: number;
     returnBlobURL?: boolean;
 };

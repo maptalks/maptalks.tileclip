@@ -44,6 +44,20 @@ function fetchTile(url: string, headers = {}, options) {
                 headers,
                 referrer: options.referrer
             };
+            const timeout = options.timeout || 0;
+            let signal: AbortSignal;
+            if (timeout && isNumber(timeout) && timeout > 0) {
+                const control = new AbortController();
+                signal = control.signal;
+
+                setTimeout(() => {
+                    control.abort('fetch tile data timeout,the url is:' + url);
+                }, timeout);
+            }
+            delete fetchOptions.timeout;
+            if (signal) {
+                fetchOptions.signal = signal;
+            }
             fetch(url, fetchOptions).then(res => res.blob()).then(blob => createImageBitmap(blob)).then(image => {
                 tileCache.add(url, image);
                 copyImageBitMap(image);
