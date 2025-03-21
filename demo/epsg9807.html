@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Interactions - Draw tool to draw geometries</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+</style>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.css' />
+<script type='text/javascript' src='https://cdn.jsdelivr.net/npm/maptalks-gl/dist/maptalks-gl.js'></script>
+<script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
+
+<body>
+    <div id="map" class="container"></div>
+    <script>
+
+        const tileActor = maptalks.getTileActor();
+        const maskId = '青浦区';
+        const spatialReference = {
+            projection: {
+                code: "EPSG:9807",
+                // zone: 51,
+                // code: 'utm',
+                falseEasting: 350000,
+                falseNorthing: -2800000,
+                scaleFactor: 1,
+                centralMeridian: 120.7833333333333,
+                latitudeOfOrigin: 0,
+            },
+            resolutions: (function () {
+                // let res = Math.pow(2, 8);
+                const RES = 156367.78906250003;
+
+                const resolutions = [];
+                for (let i = 0; i <= 22; i++) {
+                    resolutions.push(RES / Math.pow(2, i));
+                }
+                // for (let i = 0; i < 23; i++) {
+                //     resolutions[i] = res;
+                //     res *= 0.5;
+                // }
+                return resolutions;
+            })(),
+            fullExtent: {
+                left: -38219.52622692019,
+                bottom: 545398.8815674061,
+                right: 882668.8582661198,
+                top: 913228.7641038558,
+            },
+        };
+
+        const baseLayer = new maptalks.TileLayer('base0', {
+            tileSystem: [1, -1, -5273200, 7202100],
+            spatialReference,
+            // offset,
+            urlTemplate: "./suzhou-yuanqu-tiles/{z}/{x}/{y}.png",
+        })
+
+
+
+
+
+        var map = new maptalks.Map('map', {
+            zoomControl: true,
+            spatialReference,
+            "center": [120.54991929, 31.26912119], "zoom": 9.272537688043863, "pitch": 0, "bearing": 0
+        });
+
+        baseLayer.on('renderercreate', function (e) {
+            //load tile image
+            //   img(Image): an Image object
+            //   url(String): the url of the tile
+
+            function prjBBOX(bbox) {
+                const prj = map.getProjection();
+                const [minx, miny, maxx, maxy] = bbox;
+                const min = new maptalks.Coordinate(minx, miny);
+                const max = new maptalks.Coordinate(maxx, maxy);
+                const pmin = prj.project(min);
+                const pmax = prj.project(max);
+                return [pmin.x, pmin.y, pmax.x, pmax.y];
+            }
+
+            e.renderer.loadTileBitmap = function (url, tile, callback) {
+                const { x, y, z } = tile;
+                const urlTemplate = baseLayer.options.urlTemplate;
+                const maxAvailableZoom = 11;
+                tileActor.getTileWithMaxZoom({
+                    x,
+                    y,
+                    z,
+                    urlTemplate: decodeURIComponent(maptalks.Util.getAbsoluteURL(urlTemplate)),
+                    maxAvailableZoom
+                    // filter: 'sepia(100%) invert(90%)'
+                }).then(imagebitmap => {
+                    const bbox = baseLayer._getTileBBox(tile);
+                    const prjBbox = prjBBOX(bbox);
+                    tileActor.clipTile({
+                        tile: imagebitmap,
+                        tileBBOX: prjBbox,
+                        projection: baseLayer.getProjection().code,
+                        tileSize: baseLayer.getTileSize().width,
+                        maskId,
+                    }).then(image => {
+                        callback(image);
+                    }).catch(error => {
+                        //do some things
+                        console.error(error);
+                    })
+                }).catch(error => {
+                    //do some things
+                    console.error(error);
+                })
+            };
+        });
+
+
+
+        const sceneConfig = {
+            postProcess: {
+                enable: true,
+                antialias: { enable: true }
+            }
+        };
+        const groupLayer = new maptalks.GroupGLLayer('group', [], { sceneConfig });
+        groupLayer.addTo(map);
+
+        const layer = new maptalks.VectorLayer('layer').addTo(map);
+
+        function prjGeoJSONGeometry(features) {
+            const prj = map.getProjection();
+            const coordinates = features[0].geometry.coordinates;
+
+            function transform(coord) {
+                if (Array.isArray(coord[0])) {
+                    return coord.map((c => {
+                        return transform(c);
+                    }));
+                } else {
+                    const [x, y] = coord;
+                    const c = new maptalks.Coordinate(x, y);
+                    const p = prj.project(c);
+                    return [p.x, p.y];
+                }
+            }
+
+            return features.map(f => {
+                const { type, coordinates } = f.geometry;
+                return {
+                    ...f,
+                    geometry: {
+                        type,
+                        coordinates: transform(coordinates)
+                    }
+                }
+            });
+        }
+
+        const symbol = {
+            polygonOpacity: 0,
+            lineColor: 'red'
+        }
+
+        fetch('./jinjihu.geojson').then(res => res.json()).then(geojson => {
+            const polygons = maptalks.GeoJSON.toGeometry(geojson, (geo => {
+                geo.setSymbol(symbol);
+            }));
+            layer.addGeometry(polygons);
+            map.setView({
+                "center": [120.68983454, 31.31185713], "zoom": 10.505511103731221, "pitch": 0, "bearing": 0
+            });
+            const masks = prjGeoJSONGeometry(geojson.features);
+            console.log(masks);
+            tileActor.injectMask(maskId, masks[0]).then(data => {
+                baseLayer.addTo(groupLayer);
+            }).catch(error => {
+                console.error(error);
+            })
+        })
+
+
+
+    </script>
+</body>
+
+</html>
