@@ -27,7 +27,45 @@ function formatTileUrlBySubdomains(url, subdomains) {
     return url;
 }
 
+const CONTROLCACHE: Record<string, Array<AbortController>> = {};
+
+function cacheFetch(taskId: string, control: AbortController) {
+    CONTROLCACHE[taskId] = CONTROLCACHE[taskId] || [];
+    CONTROLCACHE[taskId].push(control);
+}
+
+export function cancelFetch(taskId: string) {
+    const controlList = CONTROLCACHE[taskId] || [];
+    if (controlList.length) {
+        controlList.forEach(control => {
+            control.abort(new Error('fetch tile data cancel'));
+        });
+    }
+    delete CONTROLCACHE[taskId];
+}
+
+function finishFetch(control: AbortController) {
+    const deletekeys = [];
+    for (let key in CONTROLCACHE) {
+        const controlList = CONTROLCACHE[key] || [];
+        if (controlList.length) {
+            const index = controlList.indexOf(control);
+            if (index > -1) {
+                controlList.splice(index, 1);
+            }
+        }
+        if (controlList.length === 0) {
+            deletekeys.push(key);
+        }
+    }
+    deletekeys.forEach(key => {
+        delete CONTROLCACHE[key];
+    });
+
+}
+
 function fetchTile(url: string, headers = {}, options) {
+    // console.log(abortControlCache);
     return new Promise((resolve: (image: ImageBitmap) => void, reject) => {
         const copyImageBitMap = (image: ImageBitmap) => {
             createImageBitmap(image).then(imagebit => {
@@ -36,6 +74,11 @@ function fetchTile(url: string, headers = {}, options) {
                 reject(error);
             });
         };
+        const taskId = options.__taskId;
+        if (!taskId) {
+            reject(new Error('taskId is null'));
+            return;
+        }
         const image = tileCache.get(url);
         if (image) {
             copyImageBitMap(image);
@@ -45,23 +88,22 @@ function fetchTile(url: string, headers = {}, options) {
                 referrer: options.referrer
             };
             const timeout = options.timeout || 0;
-            let signal: AbortSignal;
+            const control = new AbortController();
+            const signal = control.signal;
             if (timeout && isNumber(timeout) && timeout > 0) {
-                const control = new AbortController();
-                signal = control.signal;
-
                 setTimeout(() => {
-                    control.abort('fetch tile data timeout,the url is:' + url);
+                    control.abort(new Error('fetch tile data timeout,the url is:' + url));
                 }, timeout);
             }
+            fetchOptions.signal = signal;
             delete fetchOptions.timeout;
-            if (signal) {
-                fetchOptions.signal = signal;
-            }
+            cacheFetch(taskId, control);
             fetch(url, fetchOptions).then(res => res.blob()).then(blob => createImageBitmap(blob)).then(image => {
                 tileCache.add(url, image);
+                finishFetch(control);
                 copyImageBitMap(image);
             }).catch(error => {
+                finishFetch(control);
                 reject(error);
             });
         }

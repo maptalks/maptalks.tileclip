@@ -49,6 +49,7 @@ export type GeoJSONMultiPolygon = {
     bbox?: BBOXtype;
 };
 declare class TileActor extends worker.Actor {
+    _cancelTask(options: any): void;
     getTile(options: getTileOptions): Promise<ImageBitmap>;
     getTileWithMaxZoom(options: getTileWithMaxZoomOptions): Promise<ImageBitmap>;
     transformTile(options: transformTileOptions): Promise<ImageBitmap>;

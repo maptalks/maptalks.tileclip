@@ -1,5 +1,5 @@
 import { clip, injectMask, removeMask } from './tileclip';
-import { getTile, getTileWithMaxZoom } from './tileget';
+import { cancelFetch, getTile, getTileWithMaxZoom } from './tileget';
 import { tileTransform } from './tiletranasform';
 
 export const initialize = function () {
@@ -60,6 +60,12 @@ export const onmessage = function (message, postResponse) {
     }
     if (type === 'removeMask') {
         removeMask(data.maskId);
+        postResponse();
+        return;
+    }
+    if (type === 'cancelFetch') {
+        const taskId = data.taskId;
+        cancelFetch(taskId);
         postResponse();
         return;
     }
