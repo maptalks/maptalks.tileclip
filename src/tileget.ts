@@ -1,7 +1,7 @@
 import { getTileOptions, getTileWithMaxZoomOptions } from './index';
 import { getCanvas, imageFilter, imageOpacity, imageTileScale, mergeImages, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
-import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE } from './util';
+import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE, FetchCancelError, FetchTimeoutError } from './util';
 
 const HEADERS = {
     'accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
@@ -38,7 +38,7 @@ export function cancelFetch(taskId: string) {
     const controlList = CONTROLCACHE[taskId] || [];
     if (controlList.length) {
         controlList.forEach(control => {
-            control.abort(new Error('fetch tile data cancel'));
+            control.abort(FetchCancelError);
         });
     }
     delete CONTROLCACHE[taskId];
@@ -92,7 +92,7 @@ function fetchTile(url: string, headers = {}, options) {
             const signal = control.signal;
             if (timeout && isNumber(timeout) && timeout > 0) {
                 setTimeout(() => {
-                    control.abort(new Error('fetch tile data timeout,the url is:' + url));
+                    control.abort(FetchTimeoutError);
                 }, timeout);
             }
             fetchOptions.signal = signal;

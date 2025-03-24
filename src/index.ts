@@ -3,7 +3,7 @@ import { registerWorkerAdapter, worker } from 'maptalks';
 import WORKERCODE from './worker/worker.bundle.js';
 import { isPolygon } from './tileclip';
 import { BBOXtype } from './bbox';
-import { isNumber } from './util.js';
+import { FetchCancelError, isNumber } from './util.js';
 
 const WORKERNAME = '__maptalks.tileclip';
 
@@ -69,6 +69,7 @@ function checkOptions(options, type: string) {
     return Object.assign({ referrer: document.location.href }, options, { _type: type }, { __taskId: uuid(), __workerId: getWorkerId() });
 }
 
+
 class TileActor extends worker.Actor {
 
 
@@ -94,8 +95,8 @@ class TileActor extends worker.Actor {
         const workerId = (options as any).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             this.send(Object.assign(options), [], (error, image) => {
-                if (error) {
-                    reject(error);
+                if (error || (promise as any).canceled) {
+                    reject(error || FetchCancelError);
                 } else {
                     resolve(image);
                 }
@@ -109,10 +110,9 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'getTileWithMaxZoom');
         const workerId = (options as any).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
-            options.referrer = options.referrer || document.location.href;
             this.send(options, [], (error, image) => {
-                if (error) {
-                    reject(error);
+                if (error || (promise as any).canceled) {
+                    reject(error || FetchCancelError);
                 } else {
                     resolve(image);
                 }
@@ -126,10 +126,9 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'transformTile');
         const workerId = (options as any).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
-            options.referrer = options.referrer || document.location.href;
             this.send(options, [], (error, image) => {
-                if (error) {
-                    reject(error);
+                if (error || (promise as any).canceled) {
+                    reject(error || FetchCancelError);
                 } else {
                     resolve(image);
                 }
@@ -248,5 +247,6 @@ function uuid() {
 function wrapPromise(promise: Promise<any>, options) {
     (promise as any).cancel = () => {
         getTileActor()._cancelTask(options);
+        (promise as any).canceled = true;
     }
 }

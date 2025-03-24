@@ -20,3 +20,6 @@ export function lnglat2Mercator(coordinates: Array<number>) {
     const y = earthRad / 2 * Math.log((1.0 + Math.sin(a)) / (1.0 - Math.sin(a)));
     return [x, y];
 }
+
+export const FetchCancelError = new Error('fetch tile data cancel');
+export const FetchTimeoutError = new Error('fetch tile data timeout');
