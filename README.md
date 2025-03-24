@@ -11,6 +11,7 @@
 ## Examples
 
 ### Common
+
 * [simple get tile](https://maptalks.github.io/maptalks.tileclip/demo/tile.html)
 * [merge tiles](https://maptalks.github.io/maptalks.tileclip/demo/tile-array.html)
 * [get tile with filter](https://maptalks.github.io/maptalks.tileclip/demo/polygon-hole-clip-filter.html)
@@ -28,18 +29,20 @@
 * [mask remove or add](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-remve.html)
 * [water mark](https://maptalks.github.io/maptalks.tileclip/demo/watermark.html)
 
-
 ### Custom Prj
+
 * [EPSG:4326](https://maptalks.github.io/maptalks.tileclip/demo/4326.html)
 * [custom SpatialReference](https://maptalks.github.io/maptalks.tileclip/demo/custom-sp.html)
 * [identify projection](https://maptalks.github.io/maptalks.tileclip/demo/identify.html)
 * [EPSG:9807](https://maptalks.github.io/maptalks.tileclip/demo/epsg9807.html)
 
 ### Transform
+
 * [transform EPSG4326 to EPSG3857](https://maptalks.github.io/maptalks.tileclip/demo/4326-transform-3857.html)
 * [transform EPSG3857 to EPSG4326](https://maptalks.github.io/maptalks.tileclip/demo/3857-transform-4326.html)
 
 ## Others
+
 * [underground by clip tile](https://maptalks.github.io/maptalks.tileclip/demo/underground.html)
 * [leaflet clip demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet.html)
 * [leaflet gettile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-simple.html)
@@ -91,6 +94,8 @@ const tileActor = getTileActor();
 
 #### methods
 
+all methods return Promise with `cancel()` method
+
 * `getTile(options)` get tile [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap) by fetch in worker, return `Promise`
   + `options.url`:tile url orl tiles urls
   + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
@@ -116,6 +121,22 @@ tileActor.getTile({
     consle.log(imagebitmap);
 }).catch(error => {
     //do some things
+})
+
+//or if you want to cancel task
+const promise = tileActor.getTile({
+   ...
+});
+//mock cancel fetch task
+setTimeout(() => {
+    promise.cancel();
+}, 2000);
+
+promise.then((imagebitmap) => {
+
+}).catch(error => {
+    //do some things
+    console.error(error);
 })
 ```
 
@@ -162,13 +183,31 @@ tileActor.getTileWithMaxZoom({
 }).catch(error => {
     //do some things
 })
+
+
+//or if you want to cancel task
+const promise = tileActor.getTileWithMaxZoom({
+   ...
+});
+//mock cancel fetch task
+setTimeout(() => {
+    promise.cancel();
+}, 2000);
+
+promise.then((imagebitmap) => {
+
+}).catch(error => {
+    //do some things
+    console.error(error);
+})
+
 ```
 
 * `transformTile(options)` Reprojection tile in worker, return `Promise`
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,    `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,        `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -201,6 +240,25 @@ tileActor.transformTile({
     //do some things
     console.error(error);
 })
+
+
+
+//or if you want to cancel task
+const promise = tileActor.transformTile({
+   ...
+});
+//mock cancel fetch task
+setTimeout(() => {
+    promise.cancel();
+}, 2000);
+
+promise.then((imagebitmap) => {
+
+}).catch(error => {
+    //do some things
+    console.error(error);
+})
+
 ```
 
 * `injectMask(maskId,Polygon/MultiPolygon)` inject Mask(GeoJSON. Polygon) for clip tiles . return `Promise`
