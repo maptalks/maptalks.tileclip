@@ -14,7 +14,8 @@
 
 * [simple get tile](https://maptalks.github.io/maptalks.tileclip/demo/tile.html)
 * [merge tiles](https://maptalks.github.io/maptalks.tileclip/demo/tile-array.html)
-* [get tile with filter](https://maptalks.github.io/maptalks.tileclip/demo/polygon-hole-clip-filter.html)
+* [tiles filter by geojson mask](https://maptalks.github.io/maptalks.tileclip/demo/tile-mask-filter.html)
+* [css filter](https://maptalks.github.io/maptalks.tileclip/demo/cssfilter.html)
 * [clip by polygon](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip.html)
 * [clip by polygon with holes](https://maptalks.github.io/maptalks.tileclip/demo/polygon-hole-clip.html)
 * [clip by multipolygon](https://maptalks.github.io/maptalks.tileclip/demo/multipolygon-clip.html)
