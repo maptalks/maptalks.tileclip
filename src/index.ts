@@ -140,7 +140,8 @@ class TileActor extends worker.Actor {
 
     clipTile(options: clipTileOptions) {
         options = checkOptions(options, 'clipTile');
-        delete (options as any).taskId;
+        delete (options as any).__taskId;
+        delete (options as any).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
             const buffers: ArrayBuffer[] = [];
             if (options.tile && options.tile instanceof ImageBitmap) {
