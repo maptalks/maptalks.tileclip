@@ -3,22 +3,11 @@ import lineclip from 'lineclip';
 import { getBlankTile, getCanvas, imageClip, toBlobURL } from './canvas';
 import { bboxInBBOX, bboxIntersect, BBOXtype } from './bbox';
 import { clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon } from './index';
-import { CANVAS_ERROR_MESSAGE, createError, lnglat2Mercator } from './util';
+import { CANVAS_ERROR_MESSAGE, createError, lnglat2Mercator, isPolygon, isEPSG3857 } from './util';
 
 const GeoJSONCache = {};
 
-export function isPolygon(feature: GeoJSONPolygon | GeoJSONMultiPolygon) {
-    if (!feature) {
-        return false;
-    }
-    const geometry = feature.geometry || { type: null };
-    const type = geometry.type;
-    return type === 'Polygon' || type === 'MultiPolygon';
-}
 
-export function isEPSG3857(projection: string) {
-    return projection === 'EPSG:3857';
-}
 
 export function injectMask(maskId: string, geojson: GeoJSONPolygon | GeoJSONMultiPolygon) {
     if (!isPolygon(geojson)) {

@@ -1,3 +1,4 @@
+import { GeoJSONMultiPolygon, GeoJSONPolygon } from './index';
 
 export function isNumber(value) {
     return typeof value === 'number';
@@ -28,3 +29,17 @@ export function lnglat2Mercator(coordinates: Array<number>) {
 
 export const FetchCancelError = createError('fetch tile data cancel');
 export const FetchTimeoutError = createError('fetch tile data timeout');
+
+
+export function isPolygon(feature: GeoJSONPolygon | GeoJSONMultiPolygon) {
+    if (!feature) {
+        return false;
+    }
+    const geometry = feature.geometry || { type: null };
+    const type = geometry.type;
+    return type === 'Polygon' || type === 'MultiPolygon';
+}
+
+export function isEPSG3857(projection: string) {
+    return projection === 'EPSG:3857';
+}
