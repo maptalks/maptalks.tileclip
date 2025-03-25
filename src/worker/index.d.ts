@@ -30,6 +30,10 @@ export type transformTileOptions = getTileWithMaxZoomOptions & {
     projection: 'EPSG:4326' | 'EPSG:3857';
     errorLog?: boolean;
 };
+type privateOptions = getTileOptions & {
+    __taskId?: number;
+    __workerId?: number;
+};
 export type GeoJSONPolygon = {
     type: 'Feature';
     geometry: {
@@ -49,7 +53,7 @@ export type GeoJSONMultiPolygon = {
     bbox?: BBOXtype;
 };
 declare class TileActor extends worker.Actor {
-    _cancelTask(options: any): void;
+    _cancelTask(options: privateOptions): void;
     getTile(options: getTileOptions): Promise<ImageBitmap>;
     getTileWithMaxZoom(options: getTileWithMaxZoomOptions): Promise<ImageBitmap>;
     transformTile(options: transformTileOptions): Promise<ImageBitmap>;
