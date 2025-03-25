@@ -2,7 +2,7 @@ import { getTileWithMaxZoom } from "./tileget";
 //@ts-ignore
 import { SphericalMercator } from '@mapbox/sphericalmercator';
 // import tileCover from '@mapbox/tile-cover';
-import { isNumber, lnglat2Mercator } from "./util";
+import { createError, isNumber, lnglat2Mercator } from "./util";
 import { getBlankTile, getCanvas, getCanvasContext, mergeTiles, resizeCanvas, toBlobURL } from "./canvas";
 import { bboxOfBBOXList, BBOXtype, toBBOX, toPoints } from "./bbox";
 
@@ -360,23 +360,23 @@ export function tileTransform(options) {
         const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog, debug, returnBlobURL } = options;
         const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
         if (!projection) {
-            reject(new Error('not find projection'));
+            reject(createError('not find projection'));
             return;
         }
         if (SUPPORTPROJECTION.indexOf(projection) === -1) {
-            reject(new Error('not support projection:' + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
+            reject(createError('not support projection:' + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
             return;
         }
         if (!maxZoomEnable) {
-            reject(new Error('maxAvailableZoom is error'));
+            reject(createError('maxAvailableZoom is error'));
             return;
         }
         if (!urlTemplate) {
-            reject(new Error('urlTemplate is error'));
+            reject(createError('urlTemplate is error'));
             return;
         }
         if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
-            reject(new Error('x/y/z is error'));
+            reject(createError('x/y/z is error'));
             return;
         }
         // if (x < 0 || y < 0) {

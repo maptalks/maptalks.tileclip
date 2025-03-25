@@ -1,5 +1,4 @@
-import { toPoints } from "./bbox";
-import { isNumber, lnglat2Mercator } from "./util";
+import { createError, isNumber } from "./util";
 
 let globalCanvas: OffscreenCanvas;
 
@@ -48,12 +47,12 @@ export function mergeImages(images: Array<ImageBitmap>) {
         return images[0];
     }
     if (images.length === 0) {
-        return new Error('merge tiles error,not find imagebitmaps');
+        return createError('merge tiles error,not find imagebitmaps');
     }
     for (let i = 0, len = images.length; i < len; i++) {
         const image = images[i];
         if (!(image instanceof ImageBitmap)) {
-            return new Error('merge tiles error,images not imagebitmap');
+            return createError('merge tiles error,images not imagebitmap');
         }
     }
     const tileSize = images[0].width;

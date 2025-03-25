@@ -3,7 +3,7 @@ import lineclip from 'lineclip';
 import { getBlankTile, getCanvas, imageClip, toBlobURL } from './canvas';
 import { bboxInBBOX, bboxIntersect, BBOXtype } from './bbox';
 import { clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon } from './index';
-import { CANVAS_ERROR_MESSAGE, lnglat2Mercator } from './util';
+import { CANVAS_ERROR_MESSAGE, createError, lnglat2Mercator } from './util';
 
 const GeoJSONCache = {};
 
@@ -22,10 +22,10 @@ export function isEPSG3857(projection: string) {
 
 export function injectMask(maskId: string, geojson: GeoJSONPolygon | GeoJSONMultiPolygon) {
     if (!isPolygon(geojson)) {
-        return new Error('geojson.feature is not Polygon');
+        return createError('geojson.feature is not Polygon');
     }
     if (GeoJSONCache[maskId]) {
-        return new Error('the' + maskId + ' geojson Already exists');
+        return createError('the' + maskId + ' geojson Already exists');
     }
     GeoJSONCache[maskId] = geojson;
     checkGeoJSONFeatureBBOX(geojson);
@@ -99,28 +99,28 @@ export function clip(options: clipTileOptions) {
     return new Promise((resolve, reject) => {
         const { tile, tileBBOX, projection, tileSize, maskId, returnBlobURL } = options;
         if (!tile) {
-            reject(new Error('tile is null.It should be a ImageBitmap'));
+            reject(createError('tile is null.It should be a ImageBitmap'));
             return;
         }
         if (!tileBBOX) {
-            reject(new Error('tileBBOX is null'));
+            reject(createError('tileBBOX is null'));
             return;
         }
         if (!projection) {
-            reject(new Error('projection is null'));
+            reject(createError('projection is null'));
             return;
         }
         if (!tileSize) {
-            reject(new Error('tileSize is null'));
+            reject(createError('tileSize is null'));
             return;
         }
         if (!maskId) {
-            reject(new Error('maskId is null'));
+            reject(createError('maskId is null'));
             return;
         }
         const feature = GeoJSONCache[maskId];
         if (!feature) {
-            reject(new Error('not find mask by maskId:' + maskId));
+            reject(createError('not find mask by maskId:' + maskId));
             return;
         }
         const canvas = getCanvas(tileSize);

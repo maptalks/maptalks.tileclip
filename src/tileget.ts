@@ -1,7 +1,7 @@
 import { getTileOptions, getTileWithMaxZoomOptions } from './index';
 import { getCanvas, imageFilter, imageOpacity, imageTileScale, mergeImages, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
-import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE, FetchCancelError, FetchTimeoutError } from './util';
+import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE, FetchCancelError, FetchTimeoutError, createError } from './util';
 
 const HEADERS = {
     'accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
@@ -76,7 +76,7 @@ function fetchTile(url: string, headers = {}, options) {
         };
         const taskId = options.__taskId;
         if (!taskId) {
-            reject(new Error('taskId is null'));
+            reject(createError('taskId is null'));
             return;
         }
         const image = tileCache.get(url);
@@ -113,7 +113,7 @@ function fetchTile(url: string, headers = {}, options) {
 export function getTile(url, options: getTileOptions) {
     return new Promise((resolve, reject) => {
         if (!url) {
-            reject(new Error('url is null'));
+            reject(createError('url is null'));
             return;
         }
         const urls = checkTileUrl(url);
@@ -163,15 +163,15 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
     const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
     return new Promise((resolve, reject) => {
         if (!maxZoomEnable) {
-            reject(new Error('maxAvailableZoom is error'));
+            reject(createError('maxAvailableZoom is error'));
             return;
         }
         if (!urlTemplate) {
-            reject(new Error('urlTemplate is error'));
+            reject(createError('urlTemplate is error'));
             return;
         }
         if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
-            reject(new Error('x/y/z is error'));
+            reject(createError('x/y/z is error'));
             return;
         }
         const urlTemplates = checkTileUrl(urlTemplate);
@@ -179,7 +179,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
             const urlTemplate = urlTemplates[i];
             if (urlTemplate && urlTemplate.indexOf('{s}') > -1) {
                 if (!subdomains || subdomains.length === 0) {
-                    reject(new Error('not find subdomains'));
+                    reject(createError('not find subdomains'));
                     return;
                 }
             }

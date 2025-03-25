@@ -3,6 +3,10 @@ export function isNumber(value) {
     return typeof value === 'number';
 }
 
+export function createError(message: string): Error {
+    return new Error(message);
+}
+
 export function checkTileUrl(url: string | Array<string>): Array<string> {
     if (Array.isArray(url)) {
         return url;
@@ -10,7 +14,7 @@ export function checkTileUrl(url: string | Array<string>): Array<string> {
     return [url];
 }
 
-export const CANVAS_ERROR_MESSAGE = new Error('not find canvas.The current environment does not support OffscreenCanvas');
+export const CANVAS_ERROR_MESSAGE = createError('not find canvas.The current environment does not support OffscreenCanvas');
 
 export function lnglat2Mercator(coordinates: Array<number>) {
     const [lng, lat] = coordinates;
@@ -21,5 +25,6 @@ export function lnglat2Mercator(coordinates: Array<number>) {
     return [x, y];
 }
 
-export const FetchCancelError = new Error('fetch tile data cancel');
-export const FetchTimeoutError = new Error('fetch tile data timeout');
+
+export const FetchCancelError = createError('fetch tile data cancel');
+export const FetchTimeoutError = createError('fetch tile data timeout');

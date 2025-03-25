@@ -3,7 +3,7 @@ import { registerWorkerAdapter, worker } from 'maptalks';
 import WORKERCODE from './worker/worker.bundle.js';
 import { isPolygon } from './tileclip';
 import { BBOXtype } from './bbox';
-import { FetchCancelError, isNumber } from './util.js';
+import { createError, FetchCancelError, isNumber } from './util.js';
 
 const WORKERNAME = '__maptalks.tileclip';
 
@@ -45,6 +45,11 @@ export type transformTileOptions = getTileWithMaxZoomOptions & {
     errorLog?: boolean
 }
 
+type privateOptions = getTileOptions & {
+    __taskId?: number;
+    __workerId?: number;
+}
+
 export type GeoJSONPolygon = {
     type: 'Feature',
     geometry: {
@@ -66,21 +71,20 @@ export type GeoJSONMultiPolygon = {
 }
 
 function checkOptions(options, type: string) {
-    return Object.assign({ referrer: document.location.href }, options, { _type: type }, { __taskId: uuid(), __workerId: getWorkerId() });
+    return Object.assign({ referrer: document.location.href }, options, { _type: type, __taskId: uuid(), __workerId: getWorkerId() });
 }
 
 
 class TileActor extends worker.Actor {
 
-
-    _cancelTask(options) {
+    _cancelTask(options: privateOptions) {
         const workerId = options.__workerId;
-        const taskId = options.__taskId;
-        if (!isNumber(workerId) || !isNumber(taskId)) {
+        const __taskId = options.__taskId;
+        if (!isNumber(workerId) || !isNumber(__taskId)) {
             return;
         }
-        if (taskId) {
-            this.send({ _type: 'cancelFetch', taskId }, [], (error, image) => {
+        if (__taskId) {
+            this.send({ _type: 'cancelFetch', __taskId }, [], (error, image) => {
                 // if (error) {
                 //     reject(error);
                 // } else {
@@ -92,7 +96,7 @@ class TileActor extends worker.Actor {
 
     getTile(options: getTileOptions) {
         options = checkOptions(options, 'getTile');
-        const workerId = (options as any).__workerId;
+        const workerId = (options as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             this.send(Object.assign(options), [], (error, image) => {
                 if (error || (promise as any).canceled) {
@@ -108,7 +112,7 @@ class TileActor extends worker.Actor {
 
     getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
         options = checkOptions(options, 'getTileWithMaxZoom');
-        const workerId = (options as any).__workerId;
+        const workerId = (options as unknown as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             this.send(options, [], (error, image) => {
                 if (error || (promise as any).canceled) {
@@ -124,7 +128,7 @@ class TileActor extends worker.Actor {
 
     transformTile(options: transformTileOptions) {
         options = checkOptions(options, 'transformTile');
-        const workerId = (options as any).__workerId;
+        const workerId = (options as unknown as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             this.send(options, [], (error, image) => {
                 if (error || (promise as any).canceled) {
@@ -140,8 +144,8 @@ class TileActor extends worker.Actor {
 
     clipTile(options: clipTileOptions) {
         options = checkOptions(options, 'clipTile');
-        delete (options as any).__taskId;
-        delete (options as any).__workerId;
+        delete (options as unknown as privateOptions).__taskId;
+        delete (options as unknown as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
             const buffers: ArrayBuffer[] = [];
             if (options.tile && options.tile instanceof ImageBitmap) {
@@ -162,15 +166,15 @@ class TileActor extends worker.Actor {
     injectMask(maskId: string, geojsonFeature: GeoJSONPolygon | GeoJSONMultiPolygon) {
         const promise = new Promise((resolve, reject) => {
             if (!maskId) {
-                reject(new Error('maskId is null'));
+                reject(createError('maskId is null'));
                 return;
             }
             if (maskMap[maskId]) {
-                reject(new Error(`${maskId} has injected`));
+                reject(createError(`${maskId} has injected`));
                 return;
             }
             if (!isPolygon(geojsonFeature)) {
-                reject(new Error('geojsonFeature is not Polygon,It should be GeoJSON Polygon/MultiPolygon'));
+                reject(createError('geojsonFeature is not Polygon,It should be GeoJSON Polygon/MultiPolygon'));
                 return;
             }
             this.broadcast({
@@ -193,7 +197,7 @@ class TileActor extends worker.Actor {
     removeMask(maskId: string) {
         const promise = new Promise((resolve, reject) => {
             if (!maskId) {
-                reject(new Error('maskId is null'));
+                reject(createError('maskId is null'));
                 return;
             }
             this.broadcast({

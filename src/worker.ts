@@ -1,6 +1,7 @@
 import { clip, injectMask, removeMask } from './tileclip';
 import { cancelFetch, getTile, getTileWithMaxZoom } from './tileget';
 import { tileTransform } from './tiletranasform';
+import { createError } from './util';
 
 export const initialize = function () {
 };
@@ -64,7 +65,11 @@ export const onmessage = function (message, postResponse) {
         return;
     }
     if (type === 'cancelFetch') {
-        const taskId = data.taskId;
+        const taskId = data.taskId || data.__taskId;
+        if (!taskId) {
+            postResponse(createError('cancelFetch need taskId'));
+            return;
+        }
         cancelFetch(taskId);
         postResponse();
         return;
