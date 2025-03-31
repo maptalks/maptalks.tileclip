@@ -8,7 +8,7 @@
   "scripts": {
     "lint": "eslint src/**/*.js",
     "tsc": "npx tsc  --listFiles",
-    "dev": "npm run tsc && cross-env NODE_ENV=dev  rollup  -c -w",
+    "dev": "cross-env NODE_ENV=dev  rollup  -c -w",
     "build": "npm run tsc && cross-env NODE_ENV=prd  rollup  -c"
   },
   "files": [
