@@ -54,8 +54,29 @@
 
         }).addTo(map);
 
-        function setImages(result) {
+        const prefix = `temp_${imagelayer.getId()}_`;
+        function clearCache() {
+            const caches = maptalks.ResourceProxy.allResource();
+            const keys = Object.keys(caches).filter(key => {
+                return key.includes(prefix)
+            });
+            keys.forEach(key => {
+                const image = maptalks.ResourceProxy.getResource(key);
+                if (image && image.close) {
+                    image.close();
+                }
+                maptalks.ResourceProxy.removeResource(key);
+            })
 
+        }
+
+        function addCache(key, image) {
+            // const { row, col } = item;
+            maptalks.ResourceProxy.addResource(key, image);
+        }
+
+        function setImages(result) {
+            clearCache();
             const { width, height, items } = result;
             const [minx, miny, maxx, maxy] = bbox;
             const ax = (maxx - minx) / width;
@@ -70,8 +91,11 @@
             });
             const images = items.map(item => {
                 // console.log(item.image);
+                const id = maptalks.Util.GUID();
+                const key = `${prefix}${id}`;
+                addCache(key, item.image);
                 return {
-                    url: item.image,
+                    url: `$${key}`,
                     extent: item.bbox
                 }
             });
@@ -87,7 +111,7 @@
             console.log('readimage ing');
             tileActor.imageSlicing({
                 url: fileUrl,
-                returnBlobURL: true,
+                // returnBlobURL: true,
                 debug: true,
                 // filter: 'sepia(100%) invert(90%)'
             }).then(result => {
