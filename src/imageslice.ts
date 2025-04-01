@@ -35,10 +35,10 @@ export function imageSlicing(options: getTileOptions) {
             const items = [];
             for (let row = 1; row <= rows; row++) {
                 const y1 = (row - 1) * SIZE;
-                const y2 = row * SIZE;
+                const y2 = Math.min(height, row * SIZE);
                 for (let col = 1; col <= cols; col++) {
                     const x1 = (col - 1) * SIZE;
-                    const x2 = col * SIZE;
+                    const x2 = Math.min(width, col * SIZE);
                     const w = x2 - x1, h = y2 - y1;
                     resizeCanvas(canvas, w, h);
                     const ctx = getCanvasContext(canvas);
