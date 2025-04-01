@@ -98,7 +98,7 @@ const tileActor = getTileActor();
 all methods return Promise with `cancel()` method
 
 * `getTile(options)` get tile [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap) by fetch in worker, return `Promise`
-  + `options.url`:tile url orl tiles urls
+  + `options.url`:tile url or tiles urls
   + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
   + `options?.headers`:fetch headers params. if need
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
@@ -109,7 +109,7 @@ all methods return Promise with `cancel()` method
 
 ```js
 tileActor.getTile({
-    url: 'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/12/1663/3425',
+    url: 'https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/12/1663/3425',
     //or url:[ur1,ur2],
     fetchOptions: {
         referrer: document.location.href,
@@ -126,7 +126,7 @@ tileActor.getTile({
 
 //or if you want to cancel task
 const promise = tileActor.getTile({
-   ...
+    ...
 });
 //mock cancel fetch task
 setTimeout(() => {
@@ -146,7 +146,7 @@ promise.then((imagebitmap) => {
   + `options.y`:tile row
   + `options.z`:tile zoom
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
-  + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
+  + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
   + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
   + `options?.headers`:fetch headers params. if need
@@ -185,10 +185,9 @@ tileActor.getTileWithMaxZoom({
     //do some things
 })
 
-
 //or if you want to cancel task
 const promise = tileActor.getTileWithMaxZoom({
-   ...
+    ...
 });
 //mock cancel fetch task
 setTimeout(() => {
@@ -201,18 +200,17 @@ promise.then((imagebitmap) => {
     //do some things
     console.error(error);
 })
-
 ```
 
 * `transformTile(options)` Reprojection tile in worker, return `Promise`
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,        `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,           `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
-  + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
+  + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
-  + `options?.errorLog`: Is there a printing error
+  + `options?.errorog`: Is there a printing error
   + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
   + `options?.headers`:fetch headers params. if need
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
@@ -242,11 +240,9 @@ tileActor.transformTile({
     console.error(error);
 })
 
-
-
 //or if you want to cancel task
 const promise = tileActor.transformTile({
-   ...
+    ...
 });
 //mock cancel fetch task
 setTimeout(() => {
@@ -259,7 +255,6 @@ promise.then((imagebitmap) => {
     //do some things
     console.error(error);
 })
-
 ```
 
 * `injectMask(maskId,Polygon/MultiPolygon)` inject Mask(GeoJSON. Polygon) for clip tiles . return `Promise`
@@ -328,7 +323,7 @@ const maskId = 'china';
 
 const baseLayer = new maptalks.TileLayer('base', {
     debug: true,
-    urlTemplate: '/arcgisonline/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    urlTemplate: '/arcgisonline/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x}',
     subdomains: ["a", "b", "c", "d"],
     // bufferPixel: 1
 })
@@ -377,3 +372,36 @@ tileActor.injectMask(maskId, polygon).then(data => {
     console.error(error);
 })
 ```
+
+* `imageSlicing(options)` slice big image  in worker, return `Promise`
+  + `options.url`:image url or images urls
+  + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
+  + `options?.headers`:fetch headers params. if need
+  + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
+  + `options?.timeout`: fetch timeout
+  + `options?.opacity`: tile opacity if need
+  + `options?.returnBlobURL`: to return 
+  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+
+```js
+tileActor.imageSlicing({
+
+    url: './big.png',
+    //or url:[ur1,ur2],
+    fetchOptions: {
+        referrer: document.location.href,
+        headers: {
+            ...
+        }
+        ...
+    }
+
+}).then(result => {
+
+    consle.log(result);
+
+}).catch(error => {
+
+    //do some things
+
+})

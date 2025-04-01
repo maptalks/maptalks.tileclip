@@ -267,6 +267,9 @@ class TileActor extends worker.Actor {
                             const start = i * pageSize;
                             const end = start + pageSize;
                             const subItems = items.slice(start, end);
+                            if (subItems.length === 0) {
+                                continue;
+                            }
                             const opts = Object.assign({}, options);
                             (opts as any)._type = 'imageToBlobURL';
                             (opts as any).items = subItems;
@@ -284,8 +287,6 @@ class TileActor extends worker.Actor {
                                 }
                             }, workerId);
                         }
-
-
                     }
                 }
             });
