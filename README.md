@@ -45,6 +45,7 @@
 ## Others
 
 * [underground by clip tile](https://maptalks.github.io/maptalks.tileclip/demo/underground.html)
+* [big image slice](https://maptalks.github.io/maptalks.tileclip/demo/imageslicing.html)
 * [leaflet clip demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet.html)
 * [leaflet gettile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-simple.html)
 * [leaflet transform tile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-transform.html)

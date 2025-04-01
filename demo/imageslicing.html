@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Interactions - Draw tool to draw geometries</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+</style>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.css' />
+<script type='text/javascript' src='https://cdn.jsdelivr.net/npm/maptalks-gl/dist/maptalks-gl.js'></script>
+<script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
+
+<body>
+    <input type="file" accept=".jpg,.png,.webp" id="file" />
+    <div id="map" class="container"></div>
+    <script>
+
+        const tileActor = maptalks.getTileActor();
+        const maskId = '1';
+
+        var map = new maptalks.Map('map', {
+            "center": [121.65586045, 31.12453538], "zoom": 9.064897200334302, "pitch": 0, "bearing": 0,
+        });
+
+        const baseLayer = new maptalks.TileLayer('base', {
+            // debug: true,
+            // urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
+            urlTemplate: "https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
+            subdomains: ["a", "b", "c", "d"],
+            // bufferPixel: 1
+        }).addTo(map);
+
+        // const layer = new maptalks.VectorLayer('layer').addTo(map);
+
+        const imagelayer = new maptalks.ImageLayer('imagelayer', {
+
+        }).addTo(map);
+
+        function setImages(result) {
+            const bbox = [120, 31, 121, 32];
+            const { width, height, items } = result;
+            const [minx, miny, maxx, maxy] = bbox;
+            const ax = (maxx - minx) / width;
+            const ay = (maxy - miny) / height;
+            items.reverse().forEach(item => {
+                const { x, y, width, height, image } = item;
+                const x1 = minx + x * ax;
+                const x2 = x1 + width * ax;
+                const y1 = maxy - y * ay;
+                const y2 = y1 + height * ay;
+                item.bbox = [x1, y1, x2, y2];
+            });
+            const images = items.map(item => {
+                return {
+                    url: item.image,
+                    extent: item.bbox
+                }
+            });
+            imagelayer.setImages(images);
+        }
+
+        let fileUrl;
+
+        function readImage() {
+            if (!fileUrl) {
+                return;
+            }
+            console.log('readimage ing');
+            tileActor.imageSlicing({
+                url: fileUrl,
+                returnBlobURL: true,
+                debug: true
+            }).then(result => {
+                console.log(result);
+                setImages(result);
+                URL.revokeObjectURL(fileUrl);
+                console.log('readimage end');
+            }).catch(error => {
+                console.error(error);
+                URL.revokeObjectURL(fileUrl);
+            })
+        }
+
+        document.querySelector('#file').addEventListener('change', e => {
+            const file = e.target.files[0];
+            console.log(file);
+            console.log(`文件大小:${Math.round(file.size / 1024 / 1024)}M`);
+            fileUrl = URL.createObjectURL(file);
+            readImage();
+        })
+
+    </script>
+</body>
+
+</html>
