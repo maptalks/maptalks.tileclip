@@ -31,7 +31,7 @@
         const maskId = '1';
 
         var map = new maptalks.Map('map', {
-            "center": [121.65586045, 31.12453538], "zoom": 9.064897200334302, "pitch": 0, "bearing": 0,
+            "center": [120.61945133, 31.39713087], "zoom": 9.064897200334302, "pitch": 0, "bearing": 0,
         });
 
         const baseLayer = new maptalks.TileLayer('base', {
@@ -55,6 +55,7 @@
         }).addTo(map);
 
         const prefix = `temp_${imagelayer.getId()}_`;
+        
         function clearCache() {
             const caches = maptalks.ResourceProxy.allResource();
             const keys = Object.keys(caches).filter(key => {
