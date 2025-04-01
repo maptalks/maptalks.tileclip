@@ -20,6 +20,7 @@
 <script type='text/javascript' src='https://cdn.jsdelivr.net/npm/maptalks-gl/dist/maptalks-gl.js'></script>
 <script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
 
+
 <body>
     <input type="file" accept=".jpg,.png,.webp" id="file" />
     <div id="map" class="container"></div>
@@ -40,14 +41,20 @@
             // bufferPixel: 1
         }).addTo(map);
 
-        // const layer = new maptalks.VectorLayer('layer').addTo(map);
+        const bbox = [120, 31, 121, 32];
+
+        const layer = new maptalks.VectorLayer('layer').addTo(map);
+
+        const extent = new maptalks.Extent(bbox);
+
+        const polygon = new maptalks.Polygon(extent.toArray()).addTo(layer);
 
         const imagelayer = new maptalks.ImageLayer('imagelayer', {
 
         }).addTo(map);
 
         function setImages(result) {
-            const bbox = [120, 31, 121, 32];
+
             const { width, height, items } = result;
             const [minx, miny, maxx, maxy] = bbox;
             const ax = (maxx - minx) / width;
@@ -56,11 +63,12 @@
                 const { x, y, width, height, image } = item;
                 const x1 = minx + x * ax;
                 const x2 = x1 + width * ax;
-                const y1 = maxy - y * ay;
+                const y1 = miny + y * ay;
                 const y2 = y1 + height * ay;
                 item.bbox = [x1, y1, x2, y2];
             });
             const images = items.map(item => {
+                console.log(item.image);
                 return {
                     url: item.image,
                     extent: item.bbox
@@ -79,7 +87,8 @@
             tileActor.imageSlicing({
                 url: fileUrl,
                 returnBlobURL: true,
-                debug: true
+                debug: true,
+                // filter: 'sepia(100%) invert(90%)'
             }).then(result => {
                 console.log(result);
                 setImages(result);
