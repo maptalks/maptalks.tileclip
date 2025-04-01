@@ -20,7 +20,7 @@ export function resizeCanvas(canvas: OffscreenCanvas, width: number, height: num
 
 }
 
-function clearCanvas(ctx: OffscreenCanvasRenderingContext2D) {
+export function clearCanvas(ctx: OffscreenCanvasRenderingContext2D) {
     const canvas = ctx.canvas;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }

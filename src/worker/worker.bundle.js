@@ -1,1 +1,1830 @@
-export default `(function(t){"use strict";function e(t,e){n(t.geometry,e)}function n(t,e){if(t)switch(t.type){case"Point":o(t.coordinates,e);break;case"MultiPoint":case"LineString":r(t.coordinates,e);break;case"MultiLineString":!function(t,e){for(let n=0,o=t.length;n<o;n++)r(t[n],e)}(t.coordinates,e);break;case"Polygon":i(t.coordinates,e);break;case"MultiPolygon":!function(t,e){for(let n=0,o=t.length;n<o;n++)i(t[n],e)}(t.coordinates,e);break;case"GeometryCollection":const a=t.geometries.length;for(let o=0;o<a;o++)n(t.geometries[o],e)}}function o(t,e){e[0]=Math.min(e[0],t[0]),e[1]=Math.min(e[1],t[1]),e[2]=Math.max(e[2],t[0]),e[3]=Math.max(e[3],t[1])}function r(t,e){for(let n=0,r=t.length;n<r;n++)o(t[n],e)}function i(t,e){t.length&&r(t[0],e)}var a=function(t){let o=[Number.POSITIVE_INFINITY,Number.POSITIVE_INFINITY,Number.NEGATIVE_INFINITY,Number.NEGATIVE_INFINITY];switch(t.type){case"FeatureCollection":const r=t.features.length;for(let n=0;n<r;n++)e(t.features[n],o);break;case"Feature":e(t,o);break;default:n(t,o)}return o},s=h;function h(t,e,n){var o,r,i,a,s,h=t.length,u=l(t[0],e),f=[];for(n||(n=[]),o=1;o<h;o++){for(r=t[o-1],a=s=l(i=t[o],e);;){if(!(u|a)){f.push(r),a!==s?(f.push(i),o<h-1&&(n.push(f),f=[])):o===h-1&&f.push(i);break}if(u&a)break;u?u=l(r=c(r,i,u,e),e):a=l(i=c(r,i,a,e),e)}u=s}return f.length&&n.push(f),n}function c(t,e,n,o){return 8&n?[t[0]+(e[0]-t[0])*(o[3]-t[1])/(e[1]-t[1]),o[3]]:4&n?[t[0]+(e[0]-t[0])*(o[1]-t[1])/(e[1]-t[1]),o[1]]:2&n?[o[2],t[1]+(e[1]-t[1])*(o[2]-t[0])/(e[0]-t[0])]:1&n?[o[0],t[1]+(e[1]-t[1])*(o[0]-t[0])/(e[0]-t[0])]:null}function l(t,e){var n=0;return t[0]<e[0]?n|=1:t[0]>e[2]&&(n|=2),t[1]<e[1]?n|=4:t[1]>e[3]&&(n|=8),n}function u(t){return"number"==typeof t}function f(t){return new Error(t)}function m(t){return Array.isArray(t)?t:[t]}h.polyline=h,h.polygon=function(t,e){var n,o,r,i,a,s,h;for(o=1;o<=8;o*=2){for(n=[],i=!(l(r=t[t.length-1],e)&o),a=0;a<t.length;a++)(h=!(l(s=t[a],e)&o))!==i&&n.push(c(r,s,o,e)),h&&n.push(s),r=s,i=h;if(!(t=n).length)break}return n};const d=f("not find canvas.The current environment does not support OffscreenCanvas");function g(t){const[e,n]=t,o=6378137,r=e*Math.PI/180*o,i=n*Math.PI/180;return[r,3189068.5*Math.log((1+Math.sin(i))/(1-Math.sin(i)))]}const p=f("fetch tile data cancel"),M=f("fetch tile data timeout");function b(t){return"EPSG:3857"===t}let x;function v(t=256){return!x&&OffscreenCanvas&&(x=new OffscreenCanvas(1,1)),x&&I(x,t,t),x}function I(t,e,n){t&&(t.width=e,t.height=n)}function y(t){const e=t.getContext("2d",{willReadFrequently:!0});return function(t){const e=t.canvas;t.clearRect(0,0,e.width,e.height)}(e),e}function w(t){const e=v(t);return y(e),e.transferToImageBitmap()}function z(t){if(1===t.length)return t[0];if(0===t.length)return f("merge tiles error,not find imagebitmaps");for(let e=0,n=t.length;e<n;e++){if(!(t[e]instanceof ImageBitmap))return f("merge tiles error,images not imagebitmap")}const e=t[0].width,n=v(e),o=y(n);return t.forEach((t=>{o.drawImage(t,0,0,e,e)})),n.transferToImageBitmap()}function P(t,e,n){const o=y(t);o.save();o.beginPath(),e.forEach((t=>{(t=>{for(let e=0,n=t.length;e<n;e++){const n=t[e],r=n[0],i=n[n.length-1],[a,s]=r,[h,c]=i;a===h&&s===c||n.push(r);for(let t=0,e=n.length;t<e;t++){const[e,r]=n[t];0===t?o.moveTo(e,r):o.lineTo(e,r)}}})(t)})),o.clip("evenodd"),o.drawImage(n,0,0,t.width,t.height);const r=t.transferToImageBitmap();return o.restore(),r}function k(t){const e=v();I(e,t.width,t.height);return y(e).drawImage(t,0,0),e.convertToBlob()}function T(t,e,n){if(!n)return e;I(t,e.width,e.height);const o=y(t);o.save(),o.filter=n,o.drawImage(e,0,0),o.restore();return t.transferToImageBitmap()}function B(t,e=1){if(!u(e)||1===e||e<0||e>1)return t;const n=v();I(n,t.width,t.height);const o=y(n);o.globalAlpha=e,o.drawImage(t,0,0);const r=n.transferToImageBitmap();return o.globalAlpha=1,r}function A(t){const[e,n,o,r]=t;return[[e,n],[o,n],[o,r],[e,r]]}function E(t){let e=1/0,n=1/0,o=-1/0,r=-1/0;return t.forEach((t=>{e=Math.min(e,t[0]),o=Math.max(o,t[0]),n=Math.min(n,t[1]),r=Math.max(r,t[1])})),[e,n,o,r]}const O={};function R(t,e){return function(t){if(!t)return!1;const e=(t.geometry||{type:null}).type;return"Polygon"===e||"MultiPolygon"===e}(e)?O[t]?f("the"+t+" geojson Already exists"):(O[t]=e,function(t){t.bbox=t.bbox||a(t)}(e),e):f("geojson.feature is not Polygon")}function C(t,e){if(b(t)){const t=e=>{const n=[];for(let o=0,r=e.length;o<r;o++){const r=e[o];Array.isArray(r[0])?n.push(t(r)):n[o]=g(r)}return n};return t(e)}return e}function N(t,e,n){const[o,r,i,a]=t,s=(i-o)/e,h=(a-r)/e,[c,l]=n;return[(c-o)/s,e-(l-r)/h]}function S(t,e,n,o){const[r,i,a,s]=e,h=(t,e)=>{const o=[];for(let r=0,i=t.length;r<i;r++){const i=t[r];Array.isArray(i[0])?o.push(h(i,e)):o[r]=N(e,n,i)}return o};if(b(t)){const[t,e]=g([r,i]),[n,c]=g([a,s]);return h(o,[t,e,n,c])}return h(o,e)}const j=()=>{};const L={accept:"image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8","User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.26"},U=new class{constructor(t,e){this.max=t,this.onRemove=e||j,this.reset()}reset(){if(this.data){const t=this.data.values();for(const e of t)this.onRemove(e)}return this.data=new Map,this}clear(){this.reset(),delete this.onRemove}add(t,e){return e?(this.has(t)?(this.data.delete(t),this.data.set(t,e),this.data.size>this.max&&this.shrink()):(this.data.set(t,e),this.data.size>this.max&&this.shrink()),this):this}keys(){const t=new Array(this.data.size);let e=0;const n=this.data.keys();for(const o of n)t[e++]=o;return t}shrink(){const t=this.data.keys();let e=t.next();for(;this.data.size>this.max;){const n=this.getAndRemove(e.value);n&&this.onRemove(n),e=t.next()}}has(t){return this.data.has(t)}getAndRemove(t){if(!this.has(t))return null;const e=this.data.get(t);return this.data.delete(t),e}get(t){if(!this.has(t))return null;return this.data.get(t)}remove(t){if(!this.has(t))return this;const e=this.data.get(t);return this.data.delete(t),this.onRemove(e),this}setMaxSize(t){return this.max=t,this.data.size>this.max&&this.shrink(),this}}(200,(t=>{t&&t.close&&t.close()}));const Y={};function G(t){const e=[];for(let n in Y){const o=Y[n]||[];if(o.length){const e=o.indexOf(t);e>-1&&o.splice(e,1)}0===o.length&&e.push(n)}e.forEach((t=>{delete Y[t]}))}function _(t,e={},n){return new Promise(((o,r)=>{const i=t=>{createImageBitmap(t).then((t=>{o(t)})).catch((t=>{r(t)}))},a=n.__taskId;if(!a)return void r(f("taskId is null"));const s=U.get(t);if(s)i(s);else{const o=n.fetchOptions||{headers:e,referrer:n.referrer},s=n.timeout||0,h=new AbortController,c=h.signal;s&&u(s)&&s>0&&setTimeout((()=>{h.abort(M)}),s),o.signal=c,delete o.timeout,function(t,e){Y[t]=Y[t]||[],Y[t].push(e)}(a,h),fetch(t,o).then((t=>t.blob())).then((t=>createImageBitmap(t))).then((e=>{U.add(t,e),G(h),i(e)})).catch((t=>{G(h),r(t)}))}}))}function F(t){const{urlTemplate:e,x:n,y:o,z:r,maxAvailableZoom:i,subdomains:a,returnBlobURL:s}=t,h=i&&u(i)&&i>=1;return new Promise(((c,l)=>{if(!h)return void l(f("maxAvailableZoom is error"));if(!e)return void l(f("urlTemplate is error"));if(!u(n)||!u(o)||!u(r))return void l(f("x/y/z is error"));const g=m(e);for(let t=0,e=g.length;t<e;t++){const e=g[t];if(e&&e.indexOf("{s}")>-1&&(!a||0===a.length))return void l(f("not find subdomains"))}let p,M,b,x,w=n,P=o,A=r;const E=r-i;if(E>0){let t=n,e=o,a=r;for(;a>i;)t=Math.floor(t/2),e=Math.floor(e/2),a--;const s=Math.pow(2,E);let h=Math.floor(t*s),c=h+s,l=Math.floor(e*s),u=l+s;h>n&&(h--,c--),l>o&&(l--,u--),p=(n-h)/(c-h),M=(o-l)/(u-l),b=1/(c-h),x=1/(u-l),w=t,P=e,A=i}const O=g.map((t=>{let e="{x}";for(;t.indexOf(e)>-1;)t=t.replace(e,w);for(e="{y}";t.indexOf(e)>-1;)t=t.replace(e,P);for(e="{z}";t.indexOf(e)>-1;)t=t.replace(e,A);return function(t,e){if(!e||!e.length)return t;const n=e.length;let o=Math.floor(Math.random()*n);for(o=Math.min(o,n-1);t.indexOf("{s}")>-1;)t=t.replace("{s}",e[o]);return t}(t,a)})),R=Object.assign({},L,t.headers||{}),C=O.map((e=>_(e,R,t)));Promise.all(C).then((e=>{const n=v();if(!n)return void l(d);const o=z(e);if(o instanceof Error)return void l(o);let r;const i=t.filter;let a;if(r=i?T(n,o,i):o,E<=0)a=B(r,t.opacity);else{const{width:e,height:o}=r,i=function(t,e,n,o,r,i){I(t,e.width,e.height);const a=y(t);return a.save(),a.drawImage(e,n,o,r,i,0,0,t.width,t.height),a.restore(),t.transferToImageBitmap()}(n,r,e*p,o*M,e*b,o*x);a=B(i,t.opacity)}s?k(a).then((t=>{const e=URL.createObjectURL(t);c(e)})).catch((t=>{l(t)})):c(a)})).catch((t=>{l(t)}))}))}const W=Math.PI/180,D=180/Math.PI,Z=6378137,V=20037508.342789244,X="900913",q={};function K(t){return Number(t)===t&&t%1!=0}const H=256,J=[-180,90],Q=[-20037508.342787,20037508.342787],$=["EPSG:4326","EPSG:3857"],tt=new class{#t;#e;#n;#o;#r;#i;constructor(t={}){if(this.#t=t.size||256,this.#e=t.antimeridian?2:1,!q[this.#t]){let t=this.#t;const e=q[this.#t]={};e.Bc=[],e.Cc=[],e.zc=[],e.Ac=[];for(let n=0;n<30;n++)e.Bc.push(t/360),e.Cc.push(t/(2*Math.PI)),e.zc.push(t/2),e.Ac.push(t),t*=2}this.#n=q[this.#t].Bc,this.#o=q[this.#t].Cc,this.#r=q[this.#t].zc,this.#i=q[this.#t].Ac}px(t,e){if(K(e)){const n=this.#t*Math.pow(2,e),o=n/2,r=n/360,i=n/(2*Math.PI),a=n,s=Math.min(Math.max(Math.sin(W*t[1]),-.9999),.9999);let h=o+t[0]*r,c=o+.5*Math.log((1+s)/(1-s))*-i;return h>a*this.#e&&(h=a*this.#e),c>a&&(c=a),[h,c]}{const n=this.#r[e],o=Math.min(Math.max(Math.sin(W*t[1]),-.9999),.9999);let r=Math.round(n+t[0]*this.#n[e]),i=Math.round(n+.5*Math.log((1+o)/(1-o))*-this.#o[e]);return r>this.#i[e]*this.#e&&(r=this.#i[e]*this.#e),i>this.#i[e]&&(i=this.#i[e]),[r,i]}}ll(t,e){if(K(e)){const n=this.#t*Math.pow(2,e),o=n/360,r=n/(2*Math.PI),i=n/2,a=(t[1]-i)/-r;return[(t[0]-i)/o,D*(2*Math.atan(Math.exp(a))-.5*Math.PI)]}{const n=(t[1]-this.#r[e])/-this.#o[e];return[(t[0]-this.#r[e])/this.#n[e],D*(2*Math.atan(Math.exp(n))-.5*Math.PI)]}}convert(t,e){return e===X?[...this.forward(t.slice(0,2)),...this.forward(t.slice(2,4))]:[...this.inverse(t.slice(0,2)),...this.inverse(t.slice(2,4))]}inverse(t){return[t[0]*D/Z,(.5*Math.PI-2*Math.atan(Math.exp(-t[1]/Z)))*D]}forward(t){const e=[Z*t[0]*W,Z*Math.log(Math.tan(.25*Math.PI+.5*t[1]*W))];return e[0]>V&&(e[0]=V),e[0]<-V&&(e[0]=-V),e[1]>V&&(e[1]=V),e[1]<-V&&(e[1]=-V),e}bbox(t,e,n,o,r){o&&(e=Math.pow(2,n)-1-e);const i=[t*this.#t,(+e+1)*this.#t],a=[(+t+1)*this.#t,e*this.#t],s=[...this.ll(i,n),...this.ll(a,n)];return r===X?this.convert(s,X):s}xyz(t,e,n,o){const r=o===X?this.convert(t,"WGS84"):t,i=[r[0],r[1]],a=[r[2],r[3]],s=this.px(i,e),h=this.px(a,e),c=[Math.floor(s[0]/this.#t),Math.floor((h[0]-1)/this.#t)],l=[Math.floor(h[1]/this.#t),Math.floor((s[1]-1)/this.#t)],u={minX:Math.min.apply(Math,c)<0?0:Math.min.apply(Math,c),minY:Math.min.apply(Math,l)<0?0:Math.min.apply(Math,l),maxX:Math.max.apply(Math,c),maxY:Math.max.apply(Math,l)};if(n){const t={minY:Math.pow(2,e)-1-u.maxY,maxY:Math.pow(2,e)-1-u.minY};u.minY=t.minY,u.maxY=t.maxY}return u}}({size:H});function et(t){return 1.40625/Math.pow(2,t)}function nt(t,e,n,o=0){o=o||0;const[r,i]=Q,a=(s=n,156543.03392804097/Math.pow(2,s)*H);var s;const h=function(t,e,n){const[o,r]=J,i=et(n)*H;let a=t,s=e;return a=Math.floor(a),s=Math.floor(s),[o+a*i,s*i-r,o+(a+1)*i,(s+1)*i-r]}(t,e,n),c=E(A(h).map((t=>tt.forward(t)))),[l,u,f,m]=c;let d=(l-r)/a,g=(f-r)/a,p=(i-m)/a,M=(i-u)/a;if(d=Math.floor(d),g=Math.floor(g),p=Math.floor(p),M=Math.floor(M),g<d||M<p)return;const b=[];for(let t=p;t<=M;t++)for(let e=d;e<=g;e++)b.push([e,t,n+o]);const x=b.map((t=>{const[e,n,o]=t;return tt.bbox(e,n,o,!1,"900913")})),[v,I,y,w]=function(t){let e=1/0,n=1/0,o=-1/0,r=-1/0;return t.forEach((t=>{const[i,a,s,h]=t;e=Math.min(e,i),o=Math.max(o,s),n=Math.min(n,a),r=Math.max(r,h)})),[e,n,o,r]}(x);return{tiles:b,tilesbbox:[v,I,y,w],bbox:h,mbbox:c,x:t,y:e,z:n}}function ot(t,e,n,o){const{width:r,height:i}=t,[a,s,h,c]=e,l=(h-a)/r,u=(c-s)/i;let[f,m,d,g]=n;f-=l,d+=l,m-=u,g+=u;let p=(f-a)/l,M=(c-g)/u,b=(d-a)/l,x=(c-m)/u;p=Math.floor(p),M=Math.floor(M),b=Math.ceil(b),x=Math.ceil(x);const w=b-p,z=x-M,P=v();I(P,w,z);const k=y(P);k.drawImage(t,p,M,w,z,0,0,w,z);const T=k.getImageData(0,0,w,z).data,B=[];let A=1/0,E=1/0,O=-1/0,R=-1/0,C=-1;const N="EPSG:4326"===o?tt.forward:tt.inverse;for(let t=1;t<=z;t++){const e=g-(t-1)*u,n=e-u;for(let o=1;o<=w;o++){const r=(t-1)*w*4+4*(o-1),i=T[r],a=T[r+1],s=T[r+2],h=T[r+3],c=f+(o-1)*l,u=N([c,e]);A=Math.min(A,u[0]),O=Math.max(O,u[0]),E=Math.min(E,u[1]),R=Math.max(R,u[1]);const m=[c,n];B[++C]={point:u,point1:N(m),r:i,g:a,b:s,a:h}}}return{pixels:B,bbox:[A,E,O,R],width:w,height:z,image:P.transferToImageBitmap()}}function rt(t,e,n){const[o,r,i,a]=e,s=(i-o)/H,h=(a-r)/H,{pixels:c,bbox:l}=t,[u,f,m,d]=l;let g=(m-u)/s,p=(d-f)/h;if(g=Math.round(g),p=Math.round(p),isNaN(g)||isNaN(p)||0===Math.min(g,p)||Math.abs(g)===1/0||Math.abs(p)===1/0)return;const M=v();I(M,g,p);const b=y(M);function x(t,e){let n=Math.round((t-u)/s+1);n=Math.min(n,g);let o=Math.round((d-e)/h+1);return o=Math.min(o,p),[n,o]}const w=b.createImageData(g,p),z=w.data;for(let t=0,e=c.length;t<e;t++){const{point:e,point1:n,r:o,g:r,b:i,a:a}=c[t],[s,h]=e,[l,u]=n,[f,m]=x(s,h),[d,p]=x(l,u);for(let t=m;t<=p;t++){const e=(t-1)*g*4+4*(f-1);z[e]=o,z[e+1]=r,z[e+2]=i,z[e+3]=a}}b.putImageData(w,0,0);const P=M.transferToImageBitmap(),k=Math.round((o-u)/s),T=Math.round((d-a)/h),B=v();I(B,H,H);const A=y(M);return A.drawImage(P,k-1,T,H,H,0,0,H,H),function(t){const e=t.canvas,{width:n,height:o}=e,r=t.getImageData(0,0,n,o),i=r.data,a=()=>{for(let t=1;t<=o;t++){if(i[4*n*(t-1)+0+3]>0)return!1}return!0},s=()=>{for(let t=1;t<=n;t++){if(i[4*(t-1)+(o-1)*n*4+3]>0)return!1}return!0};if(a())for(let t=1;t<=o;t++){const e=4*n*(t-1)+0,o=e+4,r=i[o],a=i[o+1],s=i[o+2],h=i[o+3];i[e]=r,i[e+1]=a,i[e+2]=s,i[e+3]=h}if(s())for(let t=1;t<=n;t++){const e=4*(t-1)+(o-1)*n*4,r=4*(t-1)+(o-2)*n*4,a=i[r],s=i[r+1],h=i[r+2],c=i[r+3];i[e]=a,i[e+1]=s,i[e+2]=h,i[e+3]=c}t.putImageData(r,0,0)}(A),n&&(A.lineWidth=.4,A.strokeStyle="red",A.rect(0,0,H,H),A.stroke()),B.transferToImageBitmap()}function it(t){return new Promise(((e,n)=>{const{urlTemplate:o,x:r,y:i,z:a,maxAvailableZoom:s,projection:h,zoomOffset:c,errorLog:l,debug:m,returnBlobURL:d}=t,p=s&&u(s)&&s>=1;if(!h)return void n(f("not find projection"));if(-1===$.indexOf(h))return void n(f("not support projection:"+h+".the support:"+$.join(",").toString()));if(!p)return void n(f("maxAvailableZoom is error"));if(!o)return void n(f("urlTemplate is error"));if(!u(r)||!u(i)||!u(a))return void n(f("x/y/z is error"));const M=t=>{d?k(t).then((t=>{const n=URL.createObjectURL(t);e(n)})).catch((t=>{n(t)})):e(t)};(()=>{let e;"EPSG:4326"===h?e=function(t,e,n,o=0){o=o||0;const[r,i]=J,a=et(n)*H,s=tt.bbox(t,e,n),[h,c,l,u]=s;let f=(h-r)/a,m=(l-r)/a,d=(i-u)/a,p=(i-c)/a;if(f=Math.floor(f),m=Math.floor(m),d=Math.floor(d),p=Math.floor(p),m<f||p<d)return;const M=[];for(let t=d;t<=p;t++)for(let e=f;e<=m;e++)M.push([e-1,t,n+o]);return{tiles:M,tilesbbox:[r+(f-1)*a,i-(p+1)*a,r+m*a,i-d*a],bbox:s,mbbox:E(A(s).map((t=>g(t)))),x:t,y:e,z:n}}(r,i,a,c||0):"EPSG:3857"===h&&(e=nt(r,i,a,c||0));const{tiles:n}=e||{};if(!n||0===n.length)return void M(w());e.loadCount=0;const o=()=>{if(e.loadCount>=n.length){const t=function(t,e){let n=1/0,o=1/0,r=-1/0,i=-1/0,a=256;t.forEach((t=>{const[e,s]=t;n=Math.min(e,n),o=Math.min(s,o),r=Math.max(e,r),i=Math.max(s,i),a=t.tileImage.width}));const s=(r-n+1)*a,h=(i-o+1)*a,c=v();I(c,s,h);const l=y(c);return e&&(l.font="bold 48px serif",l.textAlign="center",l.textBaseline="middle",l.fillStyle="red"),t.forEach((t=>{const[r,i,s]=t,h=(r-n)*a,c=(i-o)*a;let u=t.tileImage;l.drawImage(u,h,c,a,a),e&&l.fillText([r,i,s].join("_").toString(),h+100,c+100)})),c.transferToImageBitmap()}(n,m);let o;if("EPSG:4326"===h){o=rt(ot(t,e.tilesbbox,e.bbox,h),e.mbbox,m),M(o||w())}else{o=rt(ot(t,e.tilesbbox,e.mbbox,h),e.bbox,m),M(o||w())}}else{const r=n[e.loadCount],[i,a,s]=r;F(Object.assign({},t,{x:i,y:a,z:s,returnBlobURL:!1})).then((t=>{r.tileImage=t,e.loadCount++,o()})).catch((t=>{l&&console.error(t),r.tileImage=w(),e.loadCount++,o()}))}};o()})()}))}function at(t){const e=[];return t&&t instanceof ImageBitmap&&e.push(t),e}t.initialize=function(){},t.onmessage=function(t,e){const n=t.data||{},o=n._type;if("getTile"!==o){var r;if("getTileWithMaxZoom"!==o)if("clipTile"!==o)if("transformTile"!==o){if("injectMask"===o){const t=R(n.maskId,n.geojsonFeature);return t instanceof Error?void e(t):void e()}if("removeMask"===o)return i=n.maskId,delete O[i],void e();var i;if("cancelFetch"===o){const t=n.taskId||n.__taskId;return t?(function(t){const e=Y[t]||[];e.length&&e.forEach((t=>{t.abort(p)})),delete Y[t]}(t),void e()):void e(f("cancelFetch need taskId"))}console.error("not support message type:",o)}else it(n).then((t=>{e(null,t,at(t))})).catch((t=>{e(t)}));else(r=n,new Promise(((t,e)=>{const{tile:n,tileBBOX:o,projection:i,tileSize:a,maskId:h,returnBlobURL:c}=r;if(!n)return void e(f("tile is null.It should be a ImageBitmap"));if(!o)return void e(f("tileBBOX is null"));if(!i)return void e(f("projection is null"));if(!a)return void e(f("tileSize is null"));if(!h)return void e(f("maskId is null"));const l=O[h];if(!l)return void e(f("not find mask by maskId:"+h));const u=v(a);if(!u)return void e(d);const m=n=>{c?k(n).then((e=>{const n=URL.createObjectURL(e);t(n)})).catch((t=>{e(t)})):t(n)},g=l.bbox;if(!g)return void m(n);const{coordinates:p,type:M}=l.geometry;if(!p.length)return void m(n);if(x=o,(b=g)[2]<x[0]||b[1]>x[3]||b[0]>x[2]||b[3]<x[1])return void m(w(a));var b,x;let I,y=p;if("Polygon"===M&&(y=[y]),function(t,e){const[n,o,r,i]=t;return n>=e[0]&&r<=e[2]&&o>=e[1]&&i<=e[3]}(g,o))return I=C(i,y),void m(P(u,S(i,o,a,I),n));const z=t=>{if(t.length>0){let e=1/0,n=-1/0,o=1/0,r=-1/0;for(let i=0,a=t.length;i<a;i++){const[a,s]=t[i];e=Math.min(a,e),o=Math.min(s,o),n=Math.max(a,n),r=Math.max(s,r)}if(e!==n&&o!==r)return!0}return!1},T=[];for(let t=0,e=y.length;t<e;t++){const e=y[t];for(let t=0,n=e.length;t<n;t++){const n=e[t],r=s.polygon(n,o);z(r)&&T.push([r])}}0!==T.length?(I=C(i,T),m(P(u,S(i,o,a,I),n))):m(w())}))).then((t=>{e(null,t,at(t))})).catch((t=>{e(t)}));else F(n).then((t=>{e(null,t,at(t))})).catch((t=>{e(t)}))}else{const{url:t}=n;(function(t,e){return new Promise(((n,o)=>{if(!t)return void o(f("url is null"));const r=m(t),i=Object.assign({},L,e.headers||{}),a=r.map((t=>_(t,i,e))),{returnBlobURL:s}=e;Promise.all(a).then((t=>{const r=v();if(!r)return void o(d);const i=z(t);if(i instanceof Error)return void o(i);const a=e.filter;let h;h=a?T(r,i,a):i;const c=B(h,e.opacity);s?k(c).then((t=>{const e=URL.createObjectURL(t);n(e)})).catch((t=>{o(t)})):n(c)})).catch((t=>{o(t)}))}))})(t,n).then((t=>{e(null,t,at(t))})).catch((t=>{e(t)}))}},Object.defineProperty(t,"__esModule",{value:!0})})`
+export default ` (function (exports) { 'use strict';
+
+    function isNumber(value) {
+        return typeof value === 'number';
+    }
+    function createError(message) {
+        return new Error(message);
+    }
+    function checkTileUrl(url) {
+        if (Array.isArray(url)) {
+            return url;
+        }
+        return [url];
+    }
+    const CANVAS_ERROR_MESSAGE = createError('not find canvas.The current environment does not support OffscreenCanvas');
+    function lnglat2Mercator(coordinates) {
+        const [lng, lat] = coordinates;
+        const earthRad = 6378137.0;
+        const x = lng * Math.PI / 180 * earthRad;
+        const a = lat * Math.PI / 180;
+        const y = earthRad / 2 * Math.log((1.0 + Math.sin(a)) / (1.0 - Math.sin(a)));
+        return [x, y];
+    }
+    const FetchCancelError = createError('fetch tile data cancel');
+    const FetchTimeoutError = createError('fetch tile data timeout');
+    function isPolygon(feature) {
+        if (!feature) {
+            return false;
+        }
+        const geometry = feature.geometry || { type: null };
+        const type = geometry.type;
+        return type === 'Polygon' || type === 'MultiPolygon';
+    }
+    function isEPSG3857(projection) {
+        return projection === 'EPSG:3857';
+    }
+    const HEADERS = {
+        'accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.26'
+    };
+    let globalId = 0;
+    function uuid() {
+        globalId++;
+        return globalId;
+    }
+
+    let globalCanvas;
+    function getCanvas(tileSize = 256) {
+        if (!globalCanvas && OffscreenCanvas) {
+            globalCanvas = new OffscreenCanvas(1, 1);
+        }
+        if (globalCanvas) {
+            resizeCanvas(globalCanvas, tileSize, tileSize);
+        }
+        return globalCanvas;
+    }
+    function resizeCanvas(canvas, width, height) {
+        if (canvas) {
+            canvas.width = width;
+            canvas.height = height;
+        }
+    }
+    function clearCanvas(ctx) {
+        const canvas = ctx.canvas;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    function getCanvasContext(canvas) {
+        const ctx = canvas.getContext('2d', {
+            willReadFrequently: true
+        });
+        clearCanvas(ctx);
+        return ctx;
+    }
+    function getBlankTile(tileSize) {
+        const canvas = getCanvas(tileSize);
+        getCanvasContext(canvas);
+        // ctx.fillText('404', 100, 100);
+        // ctx.rect(0, 0, canvas.width, canvas.height);
+        // ctx.stroke();
+        return canvas.transferToImageBitmap();
+    }
+    function mergeImages(images) {
+        if (images.length === 1) {
+            return images[0];
+        }
+        if (images.length === 0) {
+            return createError('merge tiles error,not find imagebitmaps');
+        }
+        for (let i = 0, len = images.length; i < len; i++) {
+            const image = images[i];
+            if (!(image instanceof ImageBitmap)) {
+                return createError('merge tiles error,images not imagebitmap');
+            }
+        }
+        const tileSize = images[0].width;
+        const canvas = getCanvas(tileSize);
+        const ctx = getCanvasContext(canvas);
+        images.forEach(image => {
+            ctx.drawImage(image, 0, 0, tileSize, tileSize);
+        });
+        return canvas.transferToImageBitmap();
+    }
+    function imageClip(canvas, polygons, image) {
+        const ctx = getCanvasContext(canvas);
+        ctx.save();
+        const drawPolygon = (rings) => {
+            for (let i = 0, len = rings.length; i < len; i++) {
+                const ring = rings[i];
+                const first = ring[0], last = ring[ring.length - 1];
+                const [x1, y1] = first;
+                const [x2, y2] = last;
+                if (x1 !== x2 || y1 !== y2) {
+                    ring.push(first);
+                }
+                for (let j = 0, len1 = ring.length; j < len1; j++) {
+                    const [x, y] = ring[j];
+                    if (j === 0) {
+                        ctx.moveTo(x, y);
+                    }
+                    else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+            }
+        };
+        ctx.beginPath();
+        polygons.forEach(polygon => {
+            drawPolygon(polygon);
+        });
+        ctx.clip('evenodd');
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        const bitImage = canvas.transferToImageBitmap();
+        ctx.restore();
+        return bitImage;
+    }
+    function toBlobURL(imagebitmap) {
+        const canvas = getCanvas();
+        resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
+        const ctx = getCanvasContext(canvas);
+        ctx.drawImage(imagebitmap, 0, 0);
+        return canvas.convertToBlob();
+    }
+    function imageFilter(canvas, imagebitmap, filter) {
+        if (!filter) {
+            return imagebitmap;
+        }
+        resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
+        const ctx = getCanvasContext(canvas);
+        ctx.save();
+        ctx.filter = filter;
+        ctx.drawImage(imagebitmap, 0, 0);
+        ctx.restore();
+        const bitImage = canvas.transferToImageBitmap();
+        return bitImage;
+    }
+    function imageTileScale(canvas, imagebitmap, dx, dy, w, h) {
+        resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
+        const ctx = getCanvasContext(canvas);
+        ctx.save();
+        // console.log(dx,dy,w,h);
+        ctx.drawImage(imagebitmap, dx, dy, w, h, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+        const bitImage = canvas.transferToImageBitmap();
+        return bitImage;
+    }
+    function imageOpacity(image, opacity = 1) {
+        if (!isNumber(opacity) || opacity === 1 || opacity < 0 || opacity > 1) {
+            return image;
+        }
+        const canvas = getCanvas();
+        resizeCanvas(canvas, image.width, image.height);
+        const ctx = getCanvasContext(canvas);
+        ctx.globalAlpha = opacity;
+        ctx.drawImage(image, 0, 0);
+        const bitImage = canvas.transferToImageBitmap();
+        ctx.globalAlpha = 1;
+        return bitImage;
+    }
+    function mergeTiles(tiles, debug) {
+        let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+        let tileSize = 256;
+        tiles.forEach(tile => {
+            const [x, y] = tile;
+            minx = Math.min(x, minx);
+            miny = Math.min(y, miny);
+            maxx = Math.max(x, maxx);
+            maxy = Math.max(y, maxy);
+            tileSize = tile.tileImage.width;
+        });
+        const width = (maxx - minx + 1) * tileSize;
+        const height = (maxy - miny + 1) * tileSize;
+        const canvas = getCanvas();
+        resizeCanvas(canvas, width, height);
+        const ctx = getCanvasContext(canvas);
+        if (debug) {
+            ctx.font = "bold 48px serif";
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = 'red';
+        }
+        tiles.forEach(tile => {
+            const [x, y, z] = tile;
+            const dx = (x - minx) * tileSize;
+            const dy = (y - miny) * tileSize;
+            let tileImage = tile.tileImage;
+            ctx.drawImage(tileImage, dx, dy, tileSize, tileSize);
+            if (debug) {
+                ctx.fillText([x, y, z].join('_').toString(), dx + 100, dy + 100);
+            }
+        });
+        return canvas.transferToImageBitmap();
+    }
+
+    // copy from https://github.com/maptalks/maptalks.js/blob/master/src/core/util/LRUCache.ts
+    const nullOnRemove = () => { };
+
+    class LRUCache {
+        constructor(max, onRemove) {
+            this.max = max;
+            this.onRemove = onRemove || nullOnRemove;
+            this.reset();
+        }
+
+        reset() {
+            if (this.data) {
+                const values = this.data.values();
+                for (const p of values) {
+                    this.onRemove(p);
+                }
+            }
+
+            this.data = new Map();
+            return this;
+        }
+
+        clear() {
+            this.reset();
+            delete this.onRemove;
+        }
+
+        add(key, data) {
+            if (!data) {
+                return this;
+            }
+            if (this.has(key)) {
+                this.data.delete(key);
+                this.data.set(key, data);
+                if (this.data.size > this.max) {
+                    this.shrink();
+                }
+            } else {
+                this.data.set(key, data);
+                if (this.data.size > this.max) {
+                    this.shrink();
+                }
+            }
+
+            return this;
+        }
+
+        keys() {
+            const keys = new Array(this.data.size);
+            let i = 0;
+            const iterator = this.data.keys();
+            for (const k of iterator) {
+                keys[i++] = k;
+            }
+            return keys;
+        }
+
+        shrink() {
+            const iterator = this.data.keys();
+            let item = iterator.next();
+            while (this.data.size > this.max) {
+                const removedData = this.getAndRemove(item.value);
+                if (removedData) {
+                    this.onRemove(removedData);
+                }
+                item = iterator.next();
+            }
+        }
+
+        has(key) {
+            return this.data.has(key);
+        }
+
+        getAndRemove(key) {
+            if (!this.has(key)) { return null; }
+
+            const data = this.data.get(key);
+            this.data.delete(key);
+            return data;
+        }
+
+        get(key) {
+            if (!this.has(key)) { return null; }
+
+            const data = this.data.get(key);
+            return data;
+        }
+
+        remove(key) {
+            if (!this.has(key)) { return this; }
+
+            const data = this.data.get(key);
+            this.data.delete(key);
+            this.onRemove(data);
+
+            return this;
+        }
+
+        setMaxSize(max) {
+            this.max = max;
+            if (this.data.size > this.max) {
+                this.shrink();
+            }
+            return this;
+        }
+    }
+
+    const tileCache = new LRUCache(200, (image) => {
+        if (image && image.close) {
+            image.close();
+        }
+    });
+    function formatTileUrlBySubdomains(url, subdomains) {
+        if (!subdomains || !subdomains.length) {
+            return url;
+        }
+        const len = subdomains.length;
+        let index = Math.floor(Math.random() * len);
+        index = Math.min(index, len - 1);
+        while (url.indexOf('{s}') > -1) {
+            url = url.replace('{s}', subdomains[index]);
+        }
+        return url;
+    }
+    const CONTROLCACHE = {};
+    function cacheFetch(taskId, control) {
+        CONTROLCACHE[taskId] = CONTROLCACHE[taskId] || [];
+        CONTROLCACHE[taskId].push(control);
+    }
+    function cancelFetch(taskId) {
+        const controlList = CONTROLCACHE[taskId] || [];
+        if (controlList.length) {
+            controlList.forEach(control => {
+                control.abort(FetchCancelError);
+            });
+        }
+        delete CONTROLCACHE[taskId];
+    }
+    function finishFetch(control) {
+        const deletekeys = [];
+        for (let key in CONTROLCACHE) {
+            const controlList = CONTROLCACHE[key] || [];
+            if (controlList.length) {
+                const index = controlList.indexOf(control);
+                if (index > -1) {
+                    controlList.splice(index, 1);
+                }
+            }
+            if (controlList.length === 0) {
+                deletekeys.push(key);
+            }
+        }
+        deletekeys.forEach(key => {
+            delete CONTROLCACHE[key];
+        });
+    }
+    function fetchTile(url, headers = {}, options) {
+        // console.log(abortControlCache);
+        return new Promise((resolve, reject) => {
+            const copyImageBitMap = (image) => {
+                createImageBitmap(image).then(imagebit => {
+                    resolve(imagebit);
+                }).catch(error => {
+                    reject(error);
+                });
+            };
+            const taskId = options.__taskId;
+            if (!taskId) {
+                reject(createError('taskId is null'));
+                return;
+            }
+            const image = tileCache.get(url);
+            if (image) {
+                copyImageBitMap(image);
+            }
+            else {
+                const fetchOptions = options.fetchOptions || {
+                    headers,
+                    referrer: options.referrer
+                };
+                const timeout = options.timeout || 0;
+                const control = new AbortController();
+                const signal = control.signal;
+                if (timeout && isNumber(timeout) && timeout > 0) {
+                    setTimeout(() => {
+                        control.abort(FetchTimeoutError);
+                    }, timeout);
+                }
+                fetchOptions.signal = signal;
+                delete fetchOptions.timeout;
+                cacheFetch(taskId, control);
+                fetch(url, fetchOptions).then(res => res.blob()).then(blob => createImageBitmap(blob)).then(image => {
+                    if (options.disableCache !== true) {
+                        tileCache.add(url, image);
+                    }
+                    finishFetch(control);
+                    copyImageBitMap(image);
+                }).catch(error => {
+                    finishFetch(control);
+                    reject(error);
+                });
+            }
+        });
+    }
+    function getTile(url, options) {
+        return new Promise((resolve, reject) => {
+            if (!url) {
+                reject(createError('url is null'));
+                return;
+            }
+            const urls = checkTileUrl(url);
+            const headers = Object.assign({}, HEADERS, options.headers || {});
+            const fetchTiles = urls.map(tileUrl => {
+                return fetchTile(tileUrl, headers, options);
+            });
+            const { returnBlobURL } = options;
+            Promise.all(fetchTiles).then(imagebits => {
+                const canvas = getCanvas();
+                if (!canvas) {
+                    reject(CANVAS_ERROR_MESSAGE);
+                    return;
+                }
+                const image = mergeImages(imagebits);
+                if (image instanceof Error) {
+                    reject(image);
+                    return;
+                }
+                const filter = options.filter;
+                let tileImage;
+                if (filter) {
+                    tileImage = imageFilter(canvas, image, filter);
+                }
+                else {
+                    tileImage = image;
+                }
+                const opImage = imageOpacity(tileImage, options.opacity);
+                if (!returnBlobURL) {
+                    resolve(opImage);
+                }
+                else {
+                    toBlobURL(opImage).then(blob => {
+                        const url = URL.createObjectURL(blob);
+                        resolve(url);
+                    }).catch(error => {
+                        reject(error);
+                    });
+                }
+            }).catch(error => {
+                reject(error);
+            });
+        });
+    }
+    function getTileWithMaxZoom(options) {
+        const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, returnBlobURL } = options;
+        const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
+        return new Promise((resolve, reject) => {
+            if (!maxZoomEnable) {
+                reject(createError('maxAvailableZoom is error'));
+                return;
+            }
+            if (!urlTemplate) {
+                reject(createError('urlTemplate is error'));
+                return;
+            }
+            if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
+                reject(createError('x/y/z is error'));
+                return;
+            }
+            const urlTemplates = checkTileUrl(urlTemplate);
+            for (let i = 0, len = urlTemplates.length; i < len; i++) {
+                const urlTemplate = urlTemplates[i];
+                if (urlTemplate && urlTemplate.indexOf('{s}') > -1) {
+                    if (!subdomains || subdomains.length === 0) {
+                        reject(createError('not find subdomains'));
+                        return;
+                    }
+                }
+            }
+            let dxScale, dyScale, wScale, hScale;
+            let tileX = x, tileY = y, tileZ = z;
+            const zoomOffset = z - maxAvailableZoom;
+            if (zoomOffset > 0) {
+                let px = x, py = y;
+                let zoom = z;
+                // parent tile
+                while (zoom > maxAvailableZoom) {
+                    px = Math.floor(px / 2);
+                    py = Math.floor(py / 2);
+                    zoom--;
+                }
+                const scale = Math.pow(2, zoomOffset);
+                // child tiles
+                let startX = Math.floor(px * scale);
+                let endX = startX + scale;
+                let startY = Math.floor(py * scale);
+                let endY = startY + scale;
+                if (startX > x) {
+                    startX--;
+                    endX--;
+                }
+                if (startY > y) {
+                    startY--;
+                    endY--;
+                }
+                // console.log(startCol, endCol, startRow, endRow);
+                dxScale = (x - startX) / (endX - startX);
+                dyScale = (y - startY) / (endY - startY);
+                wScale = 1 / (endX - startX);
+                hScale = 1 / (endY - startY);
+                // console.log(dxScale, dyScale, wScale, hScale);
+                tileX = px;
+                tileY = py;
+                tileZ = maxAvailableZoom;
+            }
+            const urls = urlTemplates.map(urlTemplate => {
+                let key = '{x}';
+                while (urlTemplate.indexOf(key) > -1) {
+                    urlTemplate = urlTemplate.replace(key, tileX);
+                }
+                key = '{y}';
+                while (urlTemplate.indexOf(key) > -1) {
+                    urlTemplate = urlTemplate.replace(key, tileY);
+                }
+                key = '{z}';
+                while (urlTemplate.indexOf(key) > -1) {
+                    urlTemplate = urlTemplate.replace(key, tileZ);
+                }
+                return formatTileUrlBySubdomains(urlTemplate, subdomains);
+            });
+            const headers = Object.assign({}, HEADERS, options.headers || {});
+            const fetchTiles = urls.map(url => {
+                return fetchTile(url, headers, options);
+            });
+            Promise.all(fetchTiles).then(imagebits => {
+                const canvas = getCanvas();
+                if (!canvas) {
+                    reject(CANVAS_ERROR_MESSAGE);
+                    return;
+                }
+                const mergeImage = mergeImages(imagebits);
+                if (mergeImage instanceof Error) {
+                    reject(mergeImage);
+                    return;
+                }
+                let image;
+                const filter = options.filter;
+                if (filter) {
+                    image = (imageFilter(canvas, mergeImage, filter));
+                }
+                else {
+                    image = mergeImage;
+                }
+                let opImage;
+                if (zoomOffset <= 0) {
+                    opImage = (imageOpacity(image, options.opacity));
+                }
+                else {
+                    const { width, height } = image;
+                    const dx = width * dxScale, dy = height * dyScale, w = width * wScale, h = height * hScale;
+                    const imageBitMap = imageTileScale(canvas, image, dx, dy, w, h);
+                    opImage = imageOpacity(imageBitMap, options.opacity);
+                }
+                if (!returnBlobURL) {
+                    resolve(opImage);
+                }
+                else {
+                    toBlobURL(opImage).then(blob => {
+                        const url = URL.createObjectURL(blob);
+                        resolve(url);
+                    }).catch(error => {
+                        reject(error);
+                    });
+                }
+            }).catch(error => {
+                reject(error);
+            });
+        });
+    }
+
+    const SIZE = 512;
+    function imageSlicing(options) {
+        options.disableCache = true;
+        return new Promise((resolve, reject) => {
+            const { url } = options;
+            if (!url) {
+                reject(createError('url is null'));
+                return;
+            }
+            const urls = checkTileUrl(url);
+            const headers = Object.assign({}, HEADERS, options.headers || {});
+            const fetchTiles = urls.map(tileUrl => {
+                return fetchTile(tileUrl, headers, options);
+            });
+            Promise.all(fetchTiles).then(imagebits => {
+                const canvas = getCanvas(SIZE);
+                if (!canvas) {
+                    reject(CANVAS_ERROR_MESSAGE);
+                    return;
+                }
+                const image = mergeImages(imagebits);
+                if (image instanceof Error) {
+                    reject(image);
+                    return;
+                }
+                const { width, height } = image;
+                const rows = Math.ceil(height / SIZE);
+                const cols = Math.ceil(width / SIZE);
+                const items = [];
+                for (let row = 1; row <= rows; row++) {
+                    const y1 = (row - 1) * SIZE;
+                    const y2 = row * SIZE;
+                    for (let col = 1; col <= cols; col++) {
+                        const x1 = (col - 1) * SIZE;
+                        const x2 = col * SIZE;
+                        const w = x2 - x1, h = y2 - y1;
+                        resizeCanvas(canvas, w, h);
+                        const ctx = getCanvasContext(canvas);
+                        ctx.drawImage(image, x1, y1, w, h, 0, 0, canvas.width, canvas.height);
+                        const tempImage = canvas.transferToImageBitmap();
+                        const filter = options.filter;
+                        let tileImage;
+                        if (filter) {
+                            tileImage = imageFilter(canvas, tempImage, filter);
+                        }
+                        else {
+                            tileImage = tempImage;
+                        }
+                        const opImage = imageOpacity(tileImage, options.opacity);
+                        items.push({
+                            id: uuid(),
+                            x: x1,
+                            y: y1,
+                            width: w,
+                            height: h,
+                            row,
+                            col,
+                            image: opImage
+                        });
+                    }
+                }
+                const result = {
+                    rows,
+                    cols,
+                    rowWidth: SIZE,
+                    colsHeight: SIZE,
+                    width,
+                    height,
+                    items
+                };
+                if (image && image.close) {
+                    image.close();
+                }
+                resolve(result);
+            }).catch(error => {
+                reject(error);
+            });
+        });
+    }
+    function imageToBlobURL(options) {
+        return new Promise((resolve, reject) => {
+            const debug = options.debug;
+            const items = options.items;
+            const workerId = options._workerId;
+            const temp = [];
+            const isEnd = () => {
+                return temp.length === items.length;
+            };
+            items.forEach((item, index) => {
+                const canvas = new OffscreenCanvas(item.width, item.height);
+                const ctx = getCanvasContext(canvas);
+                ctx.drawImage(item.image, 0, 0);
+                if (debug) {
+                    console.log('workerId:' + workerId + ',image to blob url :' + (index + 1) + '/' + items.length);
+                }
+                canvas.convertToBlob().then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    item.url = url;
+                    temp.push(1);
+                    delete item.image;
+                    if (isEnd()) {
+                        resolve(items);
+                    }
+                }).catch(error => {
+                    console.error(error);
+                    reject(error);
+                });
+            });
+        });
+    }
+
+    function bbox(geojson) {
+      let b = [
+        Number.POSITIVE_INFINITY,
+        Number.POSITIVE_INFINITY,
+        Number.NEGATIVE_INFINITY,
+        Number.NEGATIVE_INFINITY,
+      ];
+      switch (geojson.type) {
+        case 'FeatureCollection':
+          const len = geojson.features.length;
+          for (let i = 0; i < len; i++) {
+            feature(geojson.features[i], b);
+          }
+          break;
+        case 'Feature':
+          feature(geojson, b);
+          break;
+        default:
+          geometry(geojson, b);
+          break;
+      }
+      return b;
+    }
+
+    function feature(f, b) {
+      geometry(f.geometry, b);
+    }
+
+    function geometry(g, b) {
+      if (!g) {
+        return;
+      }
+      switch (g.type) {
+        case 'Point':
+          point(g.coordinates, b);
+          break;
+        case 'MultiPoint':
+          line(g.coordinates, b);
+          break;
+        case 'LineString':
+          line(g.coordinates, b);
+          break;
+        case 'MultiLineString':
+          multiline(g.coordinates, b);
+          break;
+        case 'Polygon':
+          polygon(g.coordinates, b);
+          break;
+        case 'MultiPolygon':
+          multipolygon(g.coordinates, b);
+          break;
+        case 'GeometryCollection':
+          const len = g.geometries.length;
+          for (let i = 0; i < len; i++) {
+            geometry(g.geometries[i], b);
+          }
+          break;
+      }
+    }
+
+    function point(p, b) {
+      b[0] = Math.min(b[0], p[0]);
+      b[1] = Math.min(b[1], p[1]);
+      b[2] = Math.max(b[2], p[0]);
+      b[3] = Math.max(b[3], p[1]);
+    }
+
+    function line(l, b) {
+      for (let i = 0, len = l.length; i < len; i++) {
+        point(l[i], b);
+      }
+    }
+
+    function multiline(ml, b) {
+      for (let i = 0, len = ml.length; i < len; i++) {
+        line(ml[i], b);
+      }
+    }
+
+    function polygon(p, b) {
+      //Just calculate the outer ring,Don't participate in the calculation of holes
+      //测试10000个鄱阳湖的数据,表现为性能可以提高25%
+      if (p.length) {
+        line(p[0], b);
+      }
+    }
+
+    function multipolygon(mp, b) {
+      for (let i = 0, len = mp.length; i < len; i++) {
+        polygon(mp[i], b);
+      }
+    }
+
+    var bbox_cjs = bbox;
+
+    var lineclip_1 = lineclip;
+
+    lineclip.polyline = lineclip;
+    lineclip.polygon = polygonclip;
+
+
+    // Cohen-Sutherland line clippign algorithm, adapted to efficiently
+    // handle polylines rather than just segments
+
+    function lineclip(points, bbox, result) {
+
+        var len = points.length,
+            codeA = bitCode(points[0], bbox),
+            part = [],
+            i, a, b, codeB, lastCode;
+
+        if (!result) result = [];
+
+        for (i = 1; i < len; i++) {
+            a = points[i - 1];
+            b = points[i];
+            codeB = lastCode = bitCode(b, bbox);
+
+            while (true) {
+
+                if (!(codeA | codeB)) { // accept
+                    part.push(a);
+
+                    if (codeB !== lastCode) { // segment went outside
+                        part.push(b);
+
+                        if (i < len - 1) { // start a new line
+                            result.push(part);
+                            part = [];
+                        }
+                    } else if (i === len - 1) {
+                        part.push(b);
+                    }
+                    break;
+
+                } else if (codeA & codeB) { // trivial reject
+                    break;
+
+                } else if (codeA) { // a outside, intersect with clip edge
+                    a = intersect(a, b, codeA, bbox);
+                    codeA = bitCode(a, bbox);
+
+                } else { // b outside
+                    b = intersect(a, b, codeB, bbox);
+                    codeB = bitCode(b, bbox);
+                }
+            }
+
+            codeA = lastCode;
+        }
+
+        if (part.length) result.push(part);
+
+        return result;
+    }
+
+    // Sutherland-Hodgeman polygon clipping algorithm
+
+    function polygonclip(points, bbox) {
+
+        var result, edge, prev, prevInside, i, p, inside;
+
+        // clip against each side of the clip rectangle
+        for (edge = 1; edge <= 8; edge *= 2) {
+            result = [];
+            prev = points[points.length - 1];
+            prevInside = !(bitCode(prev, bbox) & edge);
+
+            for (i = 0; i < points.length; i++) {
+                p = points[i];
+                inside = !(bitCode(p, bbox) & edge);
+
+                // if segment goes through the clip window, add an intersection
+                if (inside !== prevInside) result.push(intersect(prev, p, edge, bbox));
+
+                if (inside) result.push(p); // add a point if it's inside
+
+                prev = p;
+                prevInside = inside;
+            }
+
+            points = result;
+
+            if (!points.length) break;
+        }
+
+        return result;
+    }
+
+    // intersect a segment against one of the 4 lines that make up the bbox
+
+    function intersect(a, b, edge, bbox) {
+        return edge & 8 ? [a[0] + (b[0] - a[0]) * (bbox[3] - a[1]) / (b[1] - a[1]), bbox[3]] : // top
+               edge & 4 ? [a[0] + (b[0] - a[0]) * (bbox[1] - a[1]) / (b[1] - a[1]), bbox[1]] : // bottom
+               edge & 2 ? [bbox[2], a[1] + (b[1] - a[1]) * (bbox[2] - a[0]) / (b[0] - a[0])] : // right
+               edge & 1 ? [bbox[0], a[1] + (b[1] - a[1]) * (bbox[0] - a[0]) / (b[0] - a[0])] : // left
+               null;
+    }
+
+    // bit code reflects the point position relative to the bbox:
+
+    //         left  mid  right
+    //    top  1001  1000  1010
+    //    mid  0001  0000  0010
+    // bottom  0101  0100  0110
+
+    function bitCode(p, bbox) {
+        var code = 0;
+
+        if (p[0] < bbox[0]) code |= 1; // left
+        else if (p[0] > bbox[2]) code |= 2; // right
+
+        if (p[1] < bbox[1]) code |= 4; // bottom
+        else if (p[1] > bbox[3]) code |= 8; // top
+
+        return code;
+    }
+
+    function bboxIntersect(bbox1, bbox2) {
+        if (bbox1[2] < bbox2[0]) {
+            return false;
+        }
+        if (bbox1[1] > bbox2[3]) {
+            return false;
+        }
+        if (bbox1[0] > bbox2[2]) {
+            return false;
+        }
+        if (bbox1[3] < bbox2[1]) {
+            return false;
+        }
+        return true;
+    }
+    function bboxInBBOX(bbox1, bbox2) {
+        const [x1, y1, x2, y2] = bbox1;
+        return x1 >= bbox2[0] && x2 <= bbox2[2] && y1 >= bbox2[1] && y2 <= bbox2[3];
+    }
+    function toPoints(bbox) {
+        const [minx, miny, maxx, maxy] = bbox;
+        return [
+            [minx, miny],
+            [maxx, miny],
+            [maxx, maxy],
+            [minx, maxy]
+        ];
+    }
+    function toBBOX(points) {
+        let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
+        points.forEach(point => {
+            xmin = Math.min(xmin, point[0]);
+            xmax = Math.max(xmax, point[0]);
+            ymin = Math.min(ymin, point[1]);
+            ymax = Math.max(ymax, point[1]);
+        });
+        return [xmin, ymin, xmax, ymax];
+    }
+    function bboxOfBBOXList(bboxList) {
+        let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
+        bboxList.forEach(bbox => {
+            const [minx, miny, maxx, maxy] = bbox;
+            xmin = Math.min(xmin, minx);
+            xmax = Math.max(xmax, maxx);
+            ymin = Math.min(ymin, miny);
+            ymax = Math.max(ymax, maxy);
+        });
+        return [xmin, ymin, xmax, ymax];
+    }
+
+    const GeoJSONCache = {};
+    function injectMask(maskId, geojson) {
+        if (!isPolygon(geojson)) {
+            return createError('geojson.feature is not Polygon');
+        }
+        if (GeoJSONCache[maskId]) {
+            return createError('the' + maskId + ' geojson Already exists');
+        }
+        GeoJSONCache[maskId] = geojson;
+        checkGeoJSONFeatureBBOX(geojson);
+        return geojson;
+    }
+    function removeMask(maskId) {
+        delete GeoJSONCache[maskId];
+    }
+    function checkGeoJSONFeatureBBOX(feature) {
+        feature.bbox = feature.bbox || bbox_cjs(feature);
+    }
+    function transformCoordinates(projection, coordinates) {
+        if (!isEPSG3857(projection)) {
+            return coordinates;
+        }
+        else {
+            const transformRing = (coord) => {
+                const result = [];
+                for (let i = 0, len = coord.length; i < len; i++) {
+                    const c = coord[i];
+                    if (Array.isArray(c[0])) {
+                        result.push(transformRing(c));
+                    }
+                    else {
+                        result[i] = lnglat2Mercator(c);
+                    }
+                }
+                return result;
+            };
+            return transformRing(coordinates);
+        }
+    }
+    function coordinate2Pixel(tileBBOX, tileSize, coordinate) {
+        const [minx, miny, maxx, maxy] = tileBBOX;
+        const dx = (maxx - minx), dy = (maxy - miny);
+        const ax = dx / tileSize, ay = dy / tileSize;
+        const [x, y] = coordinate;
+        const px = (x - minx) / ax;
+        const py = tileSize - (y - miny) / ay;
+        return [px, py];
+    }
+    function transformPixels(projection, tileBBOX, tileSize, coordinates) {
+        const [minx, miny, maxx, maxy] = tileBBOX;
+        const transformRing = (coord, bbox) => {
+            const result = [];
+            for (let i = 0, len = coord.length; i < len; i++) {
+                const c = coord[i];
+                if (Array.isArray(c[0])) {
+                    result.push(transformRing(c, bbox));
+                }
+                else {
+                    result[i] = coordinate2Pixel(bbox, tileSize, c);
+                }
+            }
+            return result;
+        };
+        if (isEPSG3857(projection)) {
+            const [mminx, mminy] = lnglat2Mercator([minx, miny]);
+            const [mmaxx, mmaxy] = lnglat2Mercator([maxx, maxy]);
+            const mTileBBOX = [mminx, mminy, mmaxx, mmaxy];
+            return transformRing(coordinates, mTileBBOX);
+        }
+        else {
+            return transformRing(coordinates, tileBBOX);
+        }
+    }
+    function clip(options) {
+        return new Promise((resolve, reject) => {
+            const { tile, tileBBOX, projection, tileSize, maskId, returnBlobURL } = options;
+            if (!tile) {
+                reject(createError('tile is null.It should be a ImageBitmap'));
+                return;
+            }
+            if (!tileBBOX) {
+                reject(createError('tileBBOX is null'));
+                return;
+            }
+            if (!projection) {
+                reject(createError('projection is null'));
+                return;
+            }
+            if (!tileSize) {
+                reject(createError('tileSize is null'));
+                return;
+            }
+            if (!maskId) {
+                reject(createError('maskId is null'));
+                return;
+            }
+            const feature = GeoJSONCache[maskId];
+            if (!feature) {
+                reject(createError('not find mask by maskId:' + maskId));
+                return;
+            }
+            const canvas = getCanvas(tileSize);
+            if (!canvas) {
+                reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
+            const returnImage = (image) => {
+                if (!returnBlobURL) {
+                    resolve(image);
+                }
+                else {
+                    toBlobURL(image).then(blob => {
+                        const url = URL.createObjectURL(blob);
+                        resolve(url);
+                    }).catch(error => {
+                        reject(error);
+                    });
+                }
+            };
+            const bbox = feature.bbox;
+            if (!bbox) {
+                returnImage(tile);
+                return;
+            }
+            const { coordinates, type } = feature.geometry;
+            if (!coordinates.length) {
+                returnImage(tile);
+                return;
+            }
+            if (!bboxIntersect(bbox, tileBBOX)) {
+                returnImage(getBlankTile(tileSize));
+                return;
+            }
+            let polygons = coordinates;
+            if (type === 'Polygon') {
+                polygons = [polygons];
+            }
+            let newCoordinates;
+            if (bboxInBBOX(bbox, tileBBOX)) {
+                newCoordinates = transformCoordinates(projection, polygons);
+                const pixels = transformPixels(projection, tileBBOX, tileSize, newCoordinates);
+                const image = imageClip(canvas, pixels, tile);
+                returnImage(image);
+                return;
+            }
+            const validateClipRing = (result) => {
+                if (result.length > 0) {
+                    let minx = Infinity, maxx = -Infinity, miny = Infinity, maxy = -Infinity;
+                    for (let j = 0, len1 = result.length; j < len1; j++) {
+                        const [x, y] = result[j];
+                        minx = Math.min(x, minx);
+                        miny = Math.min(y, miny);
+                        maxx = Math.max(x, maxx);
+                        maxy = Math.max(y, maxy);
+                    }
+                    if (minx !== maxx && miny !== maxy) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+            const clipRings = [];
+            for (let i = 0, len = polygons.length; i < len; i++) {
+                const polygon = polygons[i];
+                for (let j = 0, len1 = polygon.length; j < len1; j++) {
+                    const ring = polygon[j];
+                    const result = lineclip_1.polygon(ring, tileBBOX);
+                    if (validateClipRing(result)) {
+                        clipRings.push([result]);
+                    }
+                }
+            }
+            if (clipRings.length === 0) {
+                returnImage(getBlankTile());
+                return;
+            }
+            newCoordinates = transformCoordinates(projection, clipRings);
+            const pixels = transformPixels(projection, tileBBOX, tileSize, newCoordinates);
+            const image = imageClip(canvas, pixels, tile);
+            returnImage(image);
+        });
+    }
+
+    const D2R = Math.PI / 180;
+    const R2D = 180 / Math.PI;
+    // 900913 properties;
+    const A = 6378137.0;
+    const MAXEXTENT = 20037508.342789244;
+    const SPHERICAL_MERCATOR_SRS = '900913'; // https://epsg.io/900913, https://epsg.io/3857
+    const WGS84 = 'WGS84'; // https://epsg.io/4326
+
+    const cache = {};
+    function isFloat(n) {
+        return Number(n) === n && n % 1 !== 0;
+    }
+    class SphericalMercator {
+        #size;
+        #expansion;
+        #Bc;
+        #Cc;
+        #zc;
+        #Ac;
+        constructor(options = {}) {
+            this.#size = options.size || 256;
+            this.#expansion = options.antimeridian ? 2 : 1;
+            if (!cache[this.#size]) {
+                let size = this.#size;
+                const c = (cache[this.#size] = {});
+                c.Bc = [];
+                c.Cc = [];
+                c.zc = [];
+                c.Ac = [];
+                for (let d = 0; d < 30; d++) {
+                    c.Bc.push(size / 360);
+                    c.Cc.push(size / (2 * Math.PI));
+                    c.zc.push(size / 2);
+                    c.Ac.push(size);
+                    size *= 2;
+                }
+            }
+            this.#Bc = cache[this.#size].Bc;
+            this.#Cc = cache[this.#size].Cc;
+            this.#zc = cache[this.#size].zc;
+            this.#Ac = cache[this.#size].Ac;
+        }
+        px(ll, zoom) {
+            if (isFloat(zoom)) {
+                const size = this.#size * Math.pow(2, zoom);
+                const d = size / 2;
+                const bc = size / 360;
+                const cc = size / (2 * Math.PI);
+                const ac = size;
+                const f = Math.min(Math.max(Math.sin(D2R * ll[1]), -0.9999), 0.9999);
+                let x = d + ll[0] * bc;
+                let y = d + 0.5 * Math.log((1 + f) / (1 - f)) * -cc;
+                x > ac * this.#expansion && (x = ac * this.#expansion);
+                y > ac && (y = ac);
+                //(x < 0) && (x = 0);
+                //(y < 0) && (y = 0);
+                return [x, y];
+            }
+            else {
+                const d = this.#zc[zoom];
+                const f = Math.min(Math.max(Math.sin(D2R * ll[1]), -0.9999), 0.9999);
+                let x = Math.round(d + ll[0] * this.#Bc[zoom]);
+                let y = Math.round(d + 0.5 * Math.log((1 + f) / (1 - f)) * -this.#Cc[zoom]);
+                x > this.#Ac[zoom] * this.#expansion &&
+                    (x = this.#Ac[zoom] * this.#expansion);
+                y > this.#Ac[zoom] && (y = this.#Ac[zoom]);
+                //(x < 0) && (x = 0);
+                //(y < 0) && (y = 0);
+                return [x, y];
+            }
+        }
+        ll(px, zoom) {
+            if (isFloat(zoom)) {
+                const size = this.#size * Math.pow(2, zoom);
+                const bc = size / 360;
+                const cc = size / (2 * Math.PI);
+                const zc = size / 2;
+                const g = (px[1] - zc) / -cc;
+                const lon = (px[0] - zc) / bc;
+                const lat = R2D * (2 * Math.atan(Math.exp(g)) - 0.5 * Math.PI);
+                return [lon, lat];
+            }
+            else {
+                const g = (px[1] - this.#zc[zoom]) / -this.#Cc[zoom];
+                const lon = (px[0] - this.#zc[zoom]) / this.#Bc[zoom];
+                const lat = R2D * (2 * Math.atan(Math.exp(g)) - 0.5 * Math.PI);
+                return [lon, lat];
+            }
+        }
+        convert(bbox, to) {
+            if (to === SPHERICAL_MERCATOR_SRS) {
+                return [
+                    ...this.forward(bbox.slice(0, 2)),
+                    ...this.forward(bbox.slice(2, 4)),
+                ];
+            }
+            else {
+                return [
+                    ...this.inverse(bbox.slice(0, 2)),
+                    ...this.inverse(bbox.slice(2, 4)),
+                ];
+            }
+        }
+        inverse(xy) {
+            return [
+                (xy[0] * R2D) / A,
+                (Math.PI * 0.5 - 2.0 * Math.atan(Math.exp(-xy[1] / A))) * R2D,
+            ];
+        }
+        forward(ll) {
+            const xy = [
+                A * ll[0] * D2R,
+                A * Math.log(Math.tan(Math.PI * 0.25 + 0.5 * ll[1] * D2R)),
+            ];
+            // if xy value is beyond maxextent (e.g. poles), return maxextent.
+            xy[0] > MAXEXTENT && (xy[0] = MAXEXTENT);
+            xy[0] < -MAXEXTENT && (xy[0] = -MAXEXTENT);
+            xy[1] > MAXEXTENT && (xy[1] = MAXEXTENT);
+            xy[1] < -MAXEXTENT && (xy[1] = -MAXEXTENT);
+            return xy;
+        }
+        bbox(x, y, zoom, tmsStyle, srs) {
+            // Convert xyz into bbox with srs WGS84
+            if (tmsStyle) {
+                y = Math.pow(2, zoom) - 1 - y;
+            }
+            // Use +y to make sure it's a number to avoid inadvertent concatenation.
+            const ll = [x * this.#size, (+y + 1) * this.#size]; // lower left
+            // Use +x to make sure it's a number to avoid inadvertent concatenation.
+            const ur = [(+x + 1) * this.#size, y * this.#size]; // upper right
+            const bbox = [...this.ll(ll, zoom), ...this.ll(ur, zoom)];
+            // If web mercator requested reproject to 900913.
+            if (srs === SPHERICAL_MERCATOR_SRS)
+                return this.convert(bbox, SPHERICAL_MERCATOR_SRS);
+            return bbox;
+        }
+        xyz(bbox, zoom, tmsStyle, srs) {
+            // If web mercator provided reproject to WGS84.
+            const box = srs === SPHERICAL_MERCATOR_SRS ? this.convert(bbox, WGS84) : bbox;
+            const ll = [box[0], box[1]]; // lower left
+            const ur = [box[2], box[3]]; // upper right
+            const px_ll = this.px(ll, zoom);
+            const px_ur = this.px(ur, zoom);
+            // Y = 0 for XYZ is the top hence minY uses px_ur[1].
+            const x = [
+                Math.floor(px_ll[0] / this.#size),
+                Math.floor((px_ur[0] - 1) / this.#size),
+            ];
+            const y = [
+                Math.floor(px_ur[1] / this.#size),
+                Math.floor((px_ll[1] - 1) / this.#size),
+            ];
+            const bounds = {
+                minX: Math.min.apply(Math, x) < 0 ? 0 : Math.min.apply(Math, x),
+                minY: Math.min.apply(Math, y) < 0 ? 0 : Math.min.apply(Math, y),
+                maxX: Math.max.apply(Math, x),
+                maxY: Math.max.apply(Math, y),
+            };
+            if (tmsStyle) {
+                const tms = {
+                    minY: Math.pow(2, zoom) - 1 - bounds.maxY,
+                    maxY: Math.pow(2, zoom) - 1 - bounds.minY,
+                };
+                bounds.minY = tms.minY;
+                bounds.maxY = tms.maxY;
+            }
+            return bounds;
+        }
+    }
+
+    const FirstRes = 1.40625, mFirstRes = 156543.03392804097;
+    const TILESIZE = 256;
+    const ORIGIN = [-180, 90];
+    const MORIGIN = [-20037508.342787, 20037508.342787];
+    const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
+    const merc = new SphericalMercator({
+        size: TILESIZE,
+        // antimeridian: true
+    });
+    function get4326Res(zoom) {
+        return FirstRes / Math.pow(2, zoom);
+    }
+    function get3857Res(zoom) {
+        return mFirstRes / Math.pow(2, zoom);
+    }
+    function tile4326BBOX(x, y, z) {
+        const [orginX, orginY] = ORIGIN;
+        const res = get4326Res(z) * TILESIZE;
+        let mincol = x;
+        let minrow = y;
+        mincol = Math.floor(mincol);
+        minrow = Math.floor(minrow);
+        const xmin = orginX + (mincol) * res;
+        const xmax = orginX + (mincol + 1) * res;
+        const ymin = -orginY + (minrow) * res;
+        const ymax = -orginY + (minrow + 1) * res;
+        return [xmin, ymin, xmax, ymax];
+    }
+    function cal4326Tiles(x, y, z, zoomOffset = 0) {
+        zoomOffset = zoomOffset || 0;
+        const [orginX, orginY] = ORIGIN;
+        const res = get4326Res(z) * TILESIZE;
+        const tileBBOX = merc.bbox(x, y, z);
+        // console.log(tileBBOX);
+        const [minx, miny, maxx, maxy] = tileBBOX;
+        let mincol = (minx - orginX) / res, maxcol = (maxx - orginX) / res;
+        // const MAXROW = Math.floor(orginY * 2 / res);
+        // let minrow = MAXROW - (orginY - miny) / res, maxrow = MAXROW - (orginY - maxy) / res;
+        let minrow = (orginY - maxy) / res, maxrow = (orginY - miny) / res;
+        mincol = Math.floor(mincol);
+        maxcol = Math.floor(maxcol);
+        minrow = Math.floor(minrow);
+        maxrow = Math.floor(maxrow);
+        // console.log(minrow, maxrow, MAXROW);
+        if (maxcol < mincol || maxrow < minrow) {
+            return;
+        }
+        const tiles = [];
+        for (let row = minrow; row <= maxrow; row++) {
+            for (let col = mincol; col <= maxcol; col++) {
+                tiles.push([col - 1, row, z + zoomOffset]);
+            }
+        }
+        const xmin = orginX + (mincol - 1) * res;
+        const xmax = orginX + (maxcol) * res;
+        const ymin = orginY - (maxrow + 1) * res;
+        const ymax = orginY - (minrow) * res;
+        // console.log(xmin, xmax, ymin, ymax);
+        const coordinates = toPoints(tileBBOX).map(c => {
+            return lnglat2Mercator(c);
+        });
+        return {
+            tiles,
+            tilesbbox: [xmin, ymin, xmax, ymax],
+            bbox: tileBBOX,
+            mbbox: toBBOX(coordinates),
+            x,
+            y,
+            z
+        };
+    }
+    function cal3857Tiles(x, y, z, zoomOffset = 0) {
+        zoomOffset = zoomOffset || 0;
+        const [orginX, orginY] = MORIGIN;
+        const res = get3857Res(z) * TILESIZE;
+        const tileBBOX = tile4326BBOX(x, y, z);
+        // console.log(tileBBOX);
+        const mbbox = toBBOX(toPoints(tileBBOX).map(c => {
+            const result = merc.forward(c);
+            return result;
+        }));
+        const [minx, miny, maxx, maxy] = mbbox;
+        let mincol = (minx - orginX) / res, maxcol = (maxx - orginX) / res;
+        let minrow = (orginY - maxy) / res, maxrow = (orginY - miny) / res;
+        mincol = Math.floor(mincol);
+        maxcol = Math.floor(maxcol);
+        minrow = Math.floor(minrow);
+        maxrow = Math.floor(maxrow);
+        if (maxcol < mincol || maxrow < minrow) {
+            return;
+        }
+        const tiles = [];
+        for (let row = minrow; row <= maxrow; row++) {
+            for (let col = mincol; col <= maxcol; col++) {
+                tiles.push([col, row, z + zoomOffset]);
+            }
+        }
+        const bboxList = tiles.map(tile => {
+            const [x, y, z] = tile;
+            return merc.bbox(x, y, z, false, '900913');
+        });
+        const [xmin, ymin, xmax, ymax] = bboxOfBBOXList(bboxList);
+        return {
+            tiles,
+            tilesbbox: [xmin, ymin, xmax, ymax],
+            bbox: tileBBOX,
+            mbbox,
+            x,
+            y,
+            z
+        };
+    }
+    function tilesImageData(image, tilesbbox, tilebbox, projection) {
+        const { width, height } = image;
+        const [minx, miny, maxx, maxy] = tilesbbox;
+        const ax = (maxx - minx) / width, ay = (maxy - miny) / height;
+        let [tminx, tminy, tmaxx, tmaxy] = tilebbox;
+        // console.log(tilesbbox, tilebbox);
+        //buffer one pixel
+        tminx -= ax;
+        tmaxx += ax;
+        tminy -= ay;
+        tmaxy += ay;
+        let x1 = (tminx - minx) / ax;
+        let y1 = (maxy - tmaxy) / ay;
+        let x2 = (tmaxx - minx) / ax;
+        let y2 = (maxy - tminy) / ay;
+        x1 = Math.floor(x1);
+        y1 = Math.floor(y1);
+        x2 = Math.ceil(x2);
+        y2 = Math.ceil(y2);
+        // console.log(x1, x2, y1, y2);
+        const w = x2 - x1, h = y2 - y1;
+        const tileCanvas = getCanvas();
+        resizeCanvas(tileCanvas, w, h);
+        const ctx = getCanvasContext(tileCanvas);
+        ctx.drawImage(image, x1, y1, w, h, 0, 0, w, h);
+        const imageData = ctx.getImageData(0, 0, w, h).data;
+        const pixels = [];
+        let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
+        let index = -1;
+        const method = projection === 'EPSG:4326' ? merc.forward : merc.inverse;
+        for (let row = 1; row <= h; row++) {
+            const y = tmaxy - (row - 1) * ay;
+            const y1 = y - ay;
+            for (let col = 1; col <= w; col++) {
+                const idx = (row - 1) * w * 4 + (col - 1) * 4;
+                const r = imageData[idx], g = imageData[idx + 1], b = imageData[idx + 2], a = imageData[idx + 3];
+                const x = tminx + (col - 1) * ax;
+                const coordinates = [x, y];
+                const point = method(coordinates);
+                xmin = Math.min(xmin, point[0]);
+                xmax = Math.max(xmax, point[0]);
+                ymin = Math.min(ymin, point[1]);
+                ymax = Math.max(ymax, point[1]);
+                const coordinates1 = [x, y1];
+                pixels[++index] = {
+                    point,
+                    point1: method(coordinates1),
+                    r,
+                    g,
+                    b,
+                    a
+                };
+            }
+        }
+        return {
+            pixels,
+            bbox: [xmin, ymin, xmax, ymax],
+            width: w,
+            height: h,
+            image: tileCanvas.transferToImageBitmap()
+            // canvas: tileCanvas
+        };
+    }
+    function transformTiles(pixelsresult, mbbox, debug) {
+        const [xmin, ymin, xmax, ymax] = mbbox;
+        const ax = (xmax - xmin) / TILESIZE, ay = (ymax - ymin) / TILESIZE;
+        const { pixels, bbox } = pixelsresult;
+        const [minx, miny, maxx, maxy] = bbox;
+        let width = (maxx - minx) / ax, height = (maxy - miny) / ay;
+        width = Math.round(width);
+        height = Math.round(height);
+        if (isNaN(width) || isNaN(height) || Math.min(width, height) === 0 || Math.abs(width) === Infinity || Math.abs(height) === Infinity) {
+            // console.log(width, height, result);
+            return;
+        }
+        const canvas = getCanvas();
+        resizeCanvas(canvas, width, height);
+        const ctx = getCanvasContext(canvas);
+        function transformPixel(x, y) {
+            let col = Math.round((x - minx) / ax + 1);
+            col = Math.min(col, width);
+            let row = Math.round((maxy - y) / ay + 1);
+            row = Math.min(row, height);
+            return [col, row];
+        }
+        const imageData = ctx.createImageData(width, height);
+        const data = imageData.data;
+        for (let i = 0, len = pixels.length; i < len; i++) {
+            const { point, point1, r, g, b, a } = pixels[i];
+            const [x1, y1] = point;
+            const [x2, y2] = point1;
+            const [col1, row1] = transformPixel(x1, y1);
+            // eslint-disable-next-line no-unused-vars
+            const [col2, row2] = transformPixel(x2, y2);
+            for (let j = row1; j <= row2; j++) {
+                const idx = (j - 1) * width * 4 + (col1 - 1) * 4;
+                data[idx] = r;
+                data[idx + 1] = g;
+                data[idx + 2] = b;
+                data[idx + 3] = a;
+            }
+        }
+        ctx.putImageData(imageData, 0, 0);
+        const image = canvas.transferToImageBitmap();
+        const px = Math.round((xmin - minx) / ax);
+        const py = Math.round((maxy - ymax) / ay);
+        const canvas1 = getCanvas();
+        resizeCanvas(canvas1, TILESIZE, TILESIZE);
+        const ctx1 = getCanvasContext(canvas);
+        ctx1.drawImage(image, px - 1, py, TILESIZE, TILESIZE, 0, 0, TILESIZE, TILESIZE);
+        checkBoundaryBlank(ctx1);
+        if (debug) {
+            ctx1.lineWidth = 0.4;
+            ctx1.strokeStyle = 'red';
+            ctx1.rect(0, 0, TILESIZE, TILESIZE);
+            ctx1.stroke();
+        }
+        return canvas1.transferToImageBitmap();
+    }
+    function checkBoundaryBlank(ctx) {
+        const canvas = ctx.canvas;
+        const { width, height } = canvas;
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        const leftIsBlank = () => {
+            for (let row = 1; row <= height; row++) {
+                const idx = (width * 4) * (row - 1) + 0;
+                const a = data[idx + 3];
+                if (a > 0) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        // const topIsBlank = () => {
+        //     for (let col = 1; col <= width; col++) {
+        //         const idx = (col - 1) * 4;
+        //         const a = data[idx + 3];
+        //         if (a > 0) {
+        //             return false;
+        //         }
+        //     }
+        //     return true;
+        // }
+        const bottomIsBlank = () => {
+            for (let col = 1; col <= width; col++) {
+                const idx = (col - 1) * 4 + (height - 1) * width * 4;
+                const a = data[idx + 3];
+                if (a > 0) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        if (leftIsBlank()) {
+            for (let row = 1; row <= height; row++) {
+                const idx1 = (width * 4) * (row - 1) + 0;
+                const idx2 = idx1 + 4;
+                const r = data[idx2];
+                const g = data[idx2 + 1];
+                const b = data[idx2 + 2];
+                const a = data[idx2 + 3];
+                data[idx1] = r;
+                data[idx1 + 1] = g;
+                data[idx1 + 2] = b;
+                data[idx1 + 3] = a;
+            }
+        }
+        if (bottomIsBlank()) {
+            for (let col = 1; col <= width; col++) {
+                const idx1 = (col - 1) * 4 + (height - 1) * width * 4;
+                const idx2 = (col - 1) * 4 + (height - 2) * width * 4;
+                const r = data[idx2];
+                const g = data[idx2 + 1];
+                const b = data[idx2 + 2];
+                const a = data[idx2 + 3];
+                data[idx1] = r;
+                data[idx1 + 1] = g;
+                data[idx1 + 2] = b;
+                data[idx1 + 3] = a;
+            }
+        }
+        // if (topIsBlank()) {
+        //     console.log(true);
+        //     for (let col = 1; col <= width; col++) {
+        //         const idx1 = (col - 1) * 4;
+        //         const idx2 = (col - 1) * 4 + width * 4;
+        //         const r = data[idx2];
+        //         const g = data[idx2 + 1];
+        //         const b = data[idx2 + 2];
+        //         const a = data[idx2 + 3];
+        //         data[idx1] = r;
+        //         data[idx1 + 1] = g;
+        //         data[idx1 + 2] = b;
+        //         data[idx1 + 3] = a;
+        //     }
+        // }
+        ctx.putImageData(imageData, 0, 0);
+    }
+    function tileTransform(options) {
+        return new Promise((resolve, reject) => {
+            const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog, debug, returnBlobURL } = options;
+            const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
+            if (!projection) {
+                reject(createError('not find projection'));
+                return;
+            }
+            if (SUPPORTPROJECTION.indexOf(projection) === -1) {
+                reject(createError('not support projection:' + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
+                return;
+            }
+            if (!maxZoomEnable) {
+                reject(createError('maxAvailableZoom is error'));
+                return;
+            }
+            if (!urlTemplate) {
+                reject(createError('urlTemplate is error'));
+                return;
+            }
+            if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
+                reject(createError('x/y/z is error'));
+                return;
+            }
+            // if (x < 0 || y < 0) {
+            //     resolve(getBlankTile());
+            //     return;
+            // }
+            const returnImage = (opImage) => {
+                if (!returnBlobURL) {
+                    resolve(opImage);
+                }
+                else {
+                    toBlobURL(opImage).then(blob => {
+                        const url = URL.createObjectURL(blob);
+                        resolve(url);
+                    }).catch(error => {
+                        reject(error);
+                    });
+                }
+            };
+            const loadTiles = () => {
+                let result;
+                if (projection === 'EPSG:4326') {
+                    result = cal4326Tiles(x, y, z, zoomOffset || 0);
+                }
+                else if (projection === 'EPSG:3857') {
+                    result = cal3857Tiles(x, y, z, zoomOffset || 0);
+                }
+                // console.log(result);
+                const { tiles } = result || {};
+                if (!tiles || tiles.length === 0) {
+                    returnImage(getBlankTile());
+                    return;
+                }
+                result.loadCount = 0;
+                const loadTile = () => {
+                    if (result.loadCount >= tiles.length) {
+                        const image = mergeTiles(tiles, debug);
+                        let image1;
+                        if (projection === 'EPSG:4326') {
+                            const imageData = tilesImageData(image, result.tilesbbox, result.bbox, projection);
+                            image1 = transformTiles(imageData, result.mbbox, debug);
+                            returnImage(image1 || getBlankTile());
+                        }
+                        else {
+                            const imageData = tilesImageData(image, result.tilesbbox, result.mbbox, projection);
+                            image1 = transformTiles(imageData, result.bbox, debug);
+                            returnImage(image1 || getBlankTile());
+                        }
+                    }
+                    else {
+                        const tile = tiles[result.loadCount];
+                        const [x, y, z] = tile;
+                        getTileWithMaxZoom(Object.assign({}, options, { x, y, z, returnBlobURL: false })).then(image => {
+                            tile.tileImage = image;
+                            result.loadCount++;
+                            loadTile();
+                        }).catch(error => {
+                            if (errorLog) {
+                                console.error(error);
+                            }
+                            tile.tileImage = getBlankTile();
+                            result.loadCount++;
+                            loadTile();
+                        });
+                    }
+                };
+                loadTile();
+            };
+            loadTiles();
+        });
+    }
+
+    const initialize = function () {
+    };
+    function checkBuffers(image) {
+        const buffers = [];
+        if (image && image instanceof ImageBitmap) {
+            buffers.push(image);
+        }
+        return buffers;
+    }
+    const onmessage = function (message, postResponse) {
+        const data = message.data || {};
+        const type = data._type;
+        if (type === 'getTile') {
+            const { url } = data;
+            getTile(url, data).then(image => {
+                postResponse(null, image, checkBuffers(image));
+            }).catch(error => {
+                postResponse(error);
+            });
+            return;
+        }
+        if (type === 'getTileWithMaxZoom') {
+            getTileWithMaxZoom(data).then(image => {
+                postResponse(null, image, checkBuffers(image));
+            }).catch(error => {
+                postResponse(error);
+            });
+            return;
+        }
+        if (type === 'clipTile') {
+            clip(data).then(image => {
+                postResponse(null, image, checkBuffers(image));
+            }).catch(error => {
+                postResponse(error);
+            });
+            return;
+        }
+        if (type === 'transformTile') {
+            tileTransform(data).then(image => {
+                postResponse(null, image, checkBuffers(image));
+            }).catch(error => {
+                postResponse(error);
+            });
+            return;
+        }
+        if (type === 'injectMask') {
+            const geojson = injectMask(data.maskId, data.geojsonFeature);
+            if (geojson instanceof Error) {
+                postResponse(geojson);
+                return;
+            }
+            postResponse();
+            return;
+        }
+        if (type === 'removeMask') {
+            removeMask(data.maskId);
+            postResponse();
+            return;
+        }
+        if (type === 'cancelFetch') {
+            const taskId = data.taskId || data.__taskId;
+            if (!taskId) {
+                postResponse(createError('cancelFetch need taskId'));
+                return;
+            }
+            cancelFetch(taskId);
+            postResponse();
+            return;
+        }
+        if (type === 'imageSlicing') {
+            imageSlicing(data).then((result) => {
+                const buffers = [];
+                const items = result.items || [];
+                items.forEach(item => {
+                    if (item.image && item.image instanceof ImageBitmap) {
+                        buffers.push(item.image);
+                    }
+                });
+                postResponse(null, result, buffers);
+            }).catch(error => {
+                postResponse(error);
+            });
+            return;
+        }
+        if (type === 'imageToBlobURL') {
+            imageToBlobURL(data).then((result) => {
+                postResponse(null, result, []);
+            }).catch(error => {
+                postResponse(error);
+            });
+            return;
+        }
+        console.error('not support message type:', type);
+    };
+
+    exports.initialize = initialize;
+    exports.onmessage = onmessage;
+
+    Object.defineProperty(exports, '__esModule', { value: true });
+
+})`

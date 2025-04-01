@@ -1,3 +1,4 @@
+import { imageSlicing, imageToBlobURL } from './imageslice';
 import { clip, injectMask, removeMask } from './tileclip';
 import { cancelFetch, getTile, getTileWithMaxZoom } from './tileget';
 import { tileTransform } from './tiletranasform';
@@ -72,6 +73,29 @@ export const onmessage = function (message, postResponse) {
         }
         cancelFetch(taskId);
         postResponse();
+        return;
+    }
+    if (type === 'imageSlicing') {
+        imageSlicing(data).then((result: any) => {
+            const buffers = [];
+            const items = result.items || [];
+            items.forEach(item => {
+                if (item.image && item.image instanceof ImageBitmap) {
+                    buffers.push(item.image);
+                }
+            });
+            postResponse(null, result, buffers);
+        }).catch(error => {
+            postResponse(error);
+        });
+        return;
+    }
+    if (type === 'imageToBlobURL') {
+        imageToBlobURL(data).then((result: any) => {
+            postResponse(null, result, []);
+        }).catch(error => {
+            postResponse(error);
+        });
         return;
     }
     console.error('not support message type:', type);

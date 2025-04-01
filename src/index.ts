@@ -3,7 +3,7 @@ import { registerWorkerAdapter, worker } from 'maptalks';
 import WORKERCODE from './worker/worker.bundle.js';
 import { isPolygon } from './util';
 import { BBOXtype } from './bbox';
-import { createError, FetchCancelError, isNumber } from './util.js';
+import { createError, FetchCancelError, isNumber, uuid } from './util.js';
 
 const WORKERNAME = '__maptalks.tileclip';
 
@@ -223,6 +223,76 @@ class TileActor extends worker.Actor {
         }
         return !!maskMap[maskId];
     }
+
+    imageSlicing(options: getTileOptions) {
+        options = checkOptions(options, 'imageSlicing');
+        const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
+            this.send(options, [], (error, result) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    const returnBlobURL = options.returnBlobURL;
+                    if (!returnBlobURL) {
+                        resolve(result);
+                    } else {
+                        const items = result.items || [];
+                        const workerIds = [];
+                        while (1) {
+                            const workerId = getWorkerId();
+                            if (workerIds.indexOf(workerId) === -1) {
+                                workerIds.push(workerId);
+                            } else {
+                                break;
+                            }
+                        }
+                        const pageSize = Math.ceil(items.length / workerIds.length);
+                        let temp = [];
+                        const isEnd = () => {
+                            return temp.length === items.length;
+                        }
+                        const mergeResult = () => {
+                            temp.forEach(d => {
+                                for (let i = 0, len = items.length; i < len; i++) {
+                                    const item = items[i];
+                                    if (item.id === d.id) {
+                                        item.image = d.url;
+                                        break;
+                                    }
+                                }
+                            });
+                            resolve(result);
+                        }
+                        for (let i = 0, len = workerIds.length; i < len; i++) {
+                            const workerId = workerIds[i];
+                            const start = i * pageSize;
+                            const end = start + pageSize;
+                            const subItems = items.slice(start, end);
+                            const opts = Object.assign({}, options);
+                            (opts as any)._type = 'imageToBlobURL';
+                            (opts as any).items = subItems;
+                            (opts as any)._workerId = workerId;
+                            const buffers = subItems.map(item => item.image as ArrayBuffer);
+                            this.send(opts, buffers, (error, resultItems) => {
+                                if (error) {
+                                    reject(error);
+                                    return;
+                                } else {
+                                    temp = temp.concat(resultItems);
+                                    if (isEnd()) {
+                                        mergeResult();
+                                    }
+                                }
+                            }, workerId);
+                        }
+
+
+                    }
+                }
+            });
+        });
+        wrapPromise(promise, options);
+        return promise;
+    }
 }
 
 let actor: TileActor;
@@ -241,12 +311,6 @@ function getWorkerId() {
     const id = globalWorkerId % workers.length;
     globalWorkerId++;
     return id;
-}
-
-let globalId = 0;
-function uuid() {
-    globalId++;
-    return globalId;
 }
 
 function wrapPromise(promise: Promise<any>, options) {

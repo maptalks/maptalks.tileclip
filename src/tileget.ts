@@ -1,12 +1,8 @@
 import { getTileOptions, getTileWithMaxZoomOptions } from './index';
 import { getCanvas, imageFilter, imageOpacity, imageTileScale, mergeImages, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
-import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE, FetchCancelError, FetchTimeoutError, createError } from './util';
+import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE, FetchCancelError, FetchTimeoutError, createError, HEADERS } from './util';
 
-const HEADERS = {
-    'accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.26'
-};
 
 const tileCache = new LRUCache(200, (image) => {
     if (image && image.close) {
@@ -64,7 +60,7 @@ function finishFetch(control: AbortController) {
 
 }
 
-function fetchTile(url: string, headers = {}, options) {
+export function fetchTile(url: string, headers = {}, options) {
     // console.log(abortControlCache);
     return new Promise((resolve: (image: ImageBitmap) => void, reject) => {
         const copyImageBitMap = (image: ImageBitmap) => {
@@ -99,7 +95,9 @@ function fetchTile(url: string, headers = {}, options) {
             delete fetchOptions.timeout;
             cacheFetch(taskId, control);
             fetch(url, fetchOptions).then(res => res.blob()).then(blob => createImageBitmap(blob)).then(image => {
-                tileCache.add(url, image);
+                if (options.disableCache !== true) {
+                    tileCache.add(url, image);
+                }
                 finishFetch(control);
                 copyImageBitMap(image);
             }).catch(error => {
