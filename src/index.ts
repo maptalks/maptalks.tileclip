@@ -226,10 +226,11 @@ class TileActor extends worker.Actor {
 
     imageSlicing(options: getTileOptions) {
         options = checkOptions(options, 'imageSlicing');
+        const workerId = (options as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
             this.send(options, [], (error, result) => {
-                if (error) {
-                    reject(error);
+                if (error || (promise as any).canceled) {
+                    reject(error || FetchCancelError);
                 } else {
                     const returnBlobURL = options.returnBlobURL;
                     if (!returnBlobURL) {
@@ -268,6 +269,9 @@ class TileActor extends worker.Actor {
                             const end = start + pageSize;
                             const subItems = items.slice(start, end);
                             if (subItems.length === 0) {
+                                if (isEnd()) {
+                                    mergeResult();
+                                }
                                 continue;
                             }
                             const opts = Object.assign({}, options);
@@ -289,7 +293,7 @@ class TileActor extends worker.Actor {
                         }
                     }
                 }
-            });
+            }, workerId);
         });
         wrapPromise(promise, options);
         return promise;
