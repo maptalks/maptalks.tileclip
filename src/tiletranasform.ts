@@ -2,7 +2,7 @@ import { getTileWithMaxZoom } from "./tileget";
 //@ts-ignore
 import { SphericalMercator } from '@mapbox/sphericalmercator';
 // import tileCover from '@mapbox/tile-cover';
-import { createError, isNumber, lnglat2Mercator } from "./util";
+import { createError, disposeImage, isNumber, lnglat2Mercator } from "./util";
 import { getBlankTile, getCanvas, getCanvasContext, mergeTiles, resizeCanvas, toBlobURL } from "./canvas";
 import { bboxOfBBOXList, BBOXtype, toBBOX, toPoints } from "./bbox";
 
@@ -166,6 +166,7 @@ function tilesImageData(image, tilesbbox, tilebbox, projection) {
 
     const ctx = getCanvasContext(tileCanvas);
     ctx.drawImage(image, x1, y1, w, h, 0, 0, w, h);
+    disposeImage(image);
 
     const imageData = ctx.getImageData(0, 0, w, h).data;
     const pixels = [];

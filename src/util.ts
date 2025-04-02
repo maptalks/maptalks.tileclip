@@ -54,3 +54,14 @@ export function uuid() {
     globalId++;
     return globalId;
 }
+
+export function disposeImage(images: ImageBitmap | ImageBitmap[]) {
+    if (!Array.isArray(images)) {
+        images = [images];
+    }
+    images.forEach(image => {
+        if (image && image.close) {
+            image.close();
+        }
+    });
+}

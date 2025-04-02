@@ -1,13 +1,11 @@
 import { getTileOptions, getTileWithMaxZoomOptions } from './index';
 import { getCanvas, imageFilter, imageOpacity, imageTileScale, mergeImages, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
-import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE, FetchCancelError, FetchTimeoutError, createError, HEADERS } from './util';
+import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage } from './util';
 
 
 const tileCache = new LRUCache(200, (image) => {
-    if (image && image.close) {
-        image.close();
-    }
+    disposeImage(image);
 });
 
 function formatTileUrlBySubdomains(url, subdomains) {

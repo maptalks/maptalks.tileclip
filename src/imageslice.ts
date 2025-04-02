@@ -1,7 +1,7 @@
 import { clearCanvas, getCanvas, getCanvasContext, imageFilter, imageOpacity, mergeImages, resizeCanvas } from "./canvas";
 import { getTileOptions } from "./index";
 import { fetchTile } from "./tileget";
-import { checkTileUrl, createError, HEADERS, CANVAS_ERROR_MESSAGE, uuid } from "./util";
+import { checkTileUrl, createError, HEADERS, CANVAS_ERROR_MESSAGE, uuid, disposeImage } from "./util";
 
 const SIZE = 512;
 
@@ -73,9 +73,7 @@ export function imageSlicing(options: getTileOptions) {
                 height,
                 items
             }
-            if (image && image.close) {
-                image.close();
-            }
+            disposeImage(image);
             resolve(result);
         }).catch(error => {
             reject(error);
@@ -103,6 +101,7 @@ export function imageToBlobURL(options) {
                 const url = URL.createObjectURL(blob);
                 item.url = url;
                 temp.push(1);
+                disposeImage(item.image);
                 delete item.image;
                 if (isEnd()) {
                     resolve(items);

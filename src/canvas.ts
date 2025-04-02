@@ -1,4 +1,4 @@
-import { createError, isNumber } from "./util";
+import { createError, disposeImage, isNumber } from "./util";
 
 let globalCanvas: OffscreenCanvas;
 
@@ -61,6 +61,7 @@ export function mergeImages(images: Array<ImageBitmap>) {
     images.forEach(image => {
         ctx.drawImage(image, 0, 0, tileSize, tileSize);
     });
+    disposeImage(images);
     return canvas.transferToImageBitmap();
 }
 
@@ -97,6 +98,7 @@ export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap)
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
     const bitImage = canvas.transferToImageBitmap();
     ctx.restore();
+    disposeImage(image);
     return bitImage;
 }
 
@@ -105,6 +107,7 @@ export function toBlobURL(imagebitmap: ImageBitmap) {
     resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
     const ctx = getCanvasContext(canvas);
     ctx.drawImage(imagebitmap, 0, 0);
+    disposeImage(imagebitmap);
     return canvas.convertToBlob();
 }
 
@@ -119,6 +122,7 @@ export function imageFilter(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, f
     ctx.drawImage(imagebitmap, 0, 0);
     ctx.restore();
     const bitImage = canvas.transferToImageBitmap();
+    disposeImage(imagebitmap);
     return bitImage;
 }
 
@@ -131,6 +135,7 @@ export function imageTileScale(canvas: OffscreenCanvas, imagebitmap: ImageBitmap
     ctx.drawImage(imagebitmap, dx, dy, w, h, 0, 0, canvas.width, canvas.height);
     ctx.restore();
     const bitImage = canvas.transferToImageBitmap();
+    disposeImage(imagebitmap);
     return bitImage;
 }
 
@@ -145,6 +150,7 @@ export function imageOpacity(image: ImageBitmap, opacity = 1) {
     ctx.drawImage(image, 0, 0);
     const bitImage = canvas.transferToImageBitmap();
     ctx.globalAlpha = 1;
+    disposeImage(image);
     return bitImage;
 }
 
@@ -182,5 +188,8 @@ export function mergeTiles(tiles, debug: boolean) {
         }
 
     });
+    disposeImage(tiles.map(tile => {
+        return tile.tileImage;
+    }))
     return canvas.transferToImageBitmap();
 }
