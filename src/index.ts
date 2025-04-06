@@ -1,7 +1,7 @@
 import { registerWorkerAdapter, worker } from 'maptalks';
 //@ts-ignore
 import WORKERCODE from './worker/worker.bundle.js';
-import { isPolygon } from './util';
+import { isImageBitmap, isPolygon } from './util';
 import { BBOXtype } from './bbox';
 import { createError, FetchCancelError, isNumber, uuid } from './util.js';
 
@@ -148,7 +148,7 @@ class TileActor extends worker.Actor {
         delete (options as unknown as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
             const buffers: ArrayBuffer[] = [];
-            if (options.tile && options.tile instanceof ImageBitmap) {
+            if (isImageBitmap(options.tile)) {
                 buffers.push(options.tile as unknown as ArrayBuffer);
             }
             this.send(options, buffers, (error, image) => {

@@ -55,6 +55,10 @@ export function uuid() {
     return globalId;
 }
 
+export function isImageBitmap(image: any) {
+    return image && image instanceof ImageBitmap;
+}
+
 export function disposeImage(images: ImageBitmap | ImageBitmap[]) {
     if (!Array.isArray(images)) {
         images = [images];

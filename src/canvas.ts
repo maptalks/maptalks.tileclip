@@ -1,4 +1,4 @@
-import { createError, disposeImage, isNumber } from "./util";
+import { createError, disposeImage, isImageBitmap, isNumber } from "./util";
 
 let globalCanvas: OffscreenCanvas;
 
@@ -51,7 +51,7 @@ export function mergeImages(images: Array<ImageBitmap>) {
     }
     for (let i = 0, len = images.length; i < len; i++) {
         const image = images[i];
-        if (!(image instanceof ImageBitmap)) {
+        if (!isImageBitmap(image)) {
             return createError('merge tiles error,images not imagebitmap');
         }
     }

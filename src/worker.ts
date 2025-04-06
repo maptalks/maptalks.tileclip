@@ -2,14 +2,14 @@ import { imageSlicing, imageToBlobURL } from './imageslice';
 import { clip, injectMask, removeMask } from './tileclip';
 import { cancelFetch, getTile, getTileWithMaxZoom } from './tileget';
 import { tileTransform } from './tiletranasform';
-import { createError } from './util';
+import { createError, isImageBitmap } from './util';
 
 export const initialize = function () {
 };
 
 function checkBuffers(image) {
     const buffers = [];
-    if (image && image instanceof ImageBitmap) {
+    if (isImageBitmap(image)) {
         buffers.push(image);
     }
     return buffers;
@@ -80,7 +80,7 @@ export const onmessage = function (message, postResponse) {
             const buffers = [];
             const items = result.items || [];
             items.forEach(item => {
-                if (item.image && item.image instanceof ImageBitmap) {
+                if (isImageBitmap(item.image)) {
                     buffers.push(item.image);
                 }
             });
