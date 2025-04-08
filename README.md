@@ -29,6 +29,8 @@
 * [update mask](https://maptalks.github.io/maptalks.tileclip/demo/update-mask.html)
 * [mask remove or add](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-remve.html)
 * [water mark](https://maptalks.github.io/maptalks.tileclip/demo/watermark.html)
+* [gaussian Blur](https://maptalks.github.io/maptalks.tileclip/demo/gaussianBlurRadius.html)
+* [big image slice](https://maptalks.github.io/maptalks.tileclip/demo/imageslicing.html)
 
 ### Custom Prj
 
@@ -45,7 +47,6 @@
 ## Others
 
 * [underground by clip tile](https://maptalks.github.io/maptalks.tileclip/demo/underground.html)
-* [big image slice](https://maptalks.github.io/maptalks.tileclip/demo/imageslicing.html)
 * [leaflet clip demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet.html)
 * [leaflet gettile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-simple.html)
 * [leaflet transform tile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-transform.html)
@@ -105,6 +106,7 @@ all methods return Promise with `cancel()` method
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
   + `options?.timeout`: fetch timeout
   + `options?.opacity`: tile opacity if need
+  + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -154,6 +156,7 @@ promise.then((imagebitmap) => {
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
   + `options?.timeout`: fetch timeout
   + `options?.opacity`: tile opacity if need
+  + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -207,7 +210,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,           `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,            `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -217,6 +220,7 @@ promise.then((imagebitmap) => {
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
   + `options?.timeout`: fetch timeout
   + `options?.opacity`: tile opacity if need
+  + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -381,6 +385,7 @@ tileActor.injectMask(maskId, polygon).then(data => {
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
   + `options?.timeout`: fetch timeout
   + `options?.opacity`: tile opacity if need
+  + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
