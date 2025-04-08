@@ -1,5 +1,5 @@
 import { getTileOptions, getTileWithMaxZoomOptions } from './index';
-import { getCanvas, imageFilter, imageOpacity, imageTileScale, mergeImages, toBlobURL } from './canvas';
+import { getCanvas, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeImages, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
 import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage } from './util';
 
@@ -129,15 +129,11 @@ export function getTile(url, options: getTileOptions) {
                 reject(image);
                 return;
             }
-            const filter = options.filter;
-            let tileImage;
-            if (filter) {
-                tileImage = imageFilter(canvas, image, filter);
-            } else {
-                tileImage = image;
-            }
+            // const filter = options.filter;
+            const filterImage = imageFilter(canvas, image, options.filter);
+            const blurImage = imageGaussianBlur(canvas, filterImage, options.gaussianBlurRadius);
 
-            const opImage = imageOpacity(tileImage, options.opacity);
+            const opImage = imageOpacity(blurImage, options.opacity);
             if (!returnBlobURL) {
                 resolve(opImage);
             } else {
@@ -244,25 +240,22 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
                 return;
             }
 
-            const mergeImage = mergeImages(imagebits);
-            if (mergeImage instanceof Error) {
-                reject(mergeImage);
+            const image = mergeImages(imagebits);
+            if (image instanceof Error) {
+                reject(image);
                 return;
             }
-            let image;
-            const filter = options.filter;
-            if (filter) {
-                image = (imageFilter(canvas, mergeImage, filter));
-            } else {
-                image = mergeImage;
-            }
+            const filterImage = imageFilter(canvas, image, options.filter);
+            const blurImage = imageGaussianBlur(canvas, filterImage, options.gaussianBlurRadius);
+
+
             let opImage;
             if (zoomOffset <= 0) {
-                opImage = (imageOpacity(image, options.opacity));
+                opImage = (imageOpacity(blurImage, options.opacity));
             } else {
-                const { width, height } = image;
+                const { width, height } = blurImage;
                 const dx = width * dxScale, dy = height * dyScale, w = width * wScale, h = height * hScale;
-                const imageBitMap = imageTileScale(canvas, image, dx, dy, w, h);
+                const imageBitMap = imageTileScale(canvas, blurImage, dx, dy, w, h);
                 opImage = imageOpacity(imageBitMap, options.opacity);
             }
             if (!returnBlobURL) {

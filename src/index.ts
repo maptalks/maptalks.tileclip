@@ -20,6 +20,7 @@ export type getTileOptions = {
     timeout?: number;
     opacity?: number;
     returnBlobURL?: boolean;
+    gaussianBlurRadius?: number;
 }
 
 export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {

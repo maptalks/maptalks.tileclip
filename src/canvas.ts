@@ -1,4 +1,5 @@
 import { createError, disposeImage, isImageBitmap, isNumber } from "./util";
+import glur from 'glur';
 
 let globalCanvas: OffscreenCanvas;
 
@@ -121,6 +122,22 @@ export function imageFilter(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, f
     ctx.filter = filter;
     ctx.drawImage(imagebitmap, 0, 0);
     ctx.restore();
+    const bitImage = canvas.transferToImageBitmap();
+    disposeImage(imagebitmap);
+    return bitImage;
+}
+
+
+export function imageGaussianBlur(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, radius: number) {
+    if (!isNumber(radius) || radius <= 0) {
+        return imagebitmap;
+    }
+    resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
+    const ctx = getCanvasContext(canvas);
+    ctx.drawImage(imagebitmap, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    glur(imageData.data, canvas.width, canvas.height, radius);
+    ctx.putImageData(imageData, 0, 0);
     const bitImage = canvas.transferToImageBitmap();
     disposeImage(imagebitmap);
     return bitImage;

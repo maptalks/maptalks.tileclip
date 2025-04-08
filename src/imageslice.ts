@@ -1,4 +1,4 @@
-import { clearCanvas, getCanvas, getCanvasContext, imageFilter, imageOpacity, mergeImages, resizeCanvas } from "./canvas";
+import { clearCanvas, getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, mergeImages, resizeCanvas } from "./canvas";
 import { getTileOptions } from "./index";
 import { fetchTile } from "./tileget";
 import { checkTileUrl, createError, HEADERS, CANVAS_ERROR_MESSAGE, uuid, disposeImage } from "./util";
@@ -44,14 +44,10 @@ export function imageSlicing(options: getTileOptions) {
                     const ctx = getCanvasContext(canvas);
                     ctx.drawImage(image, x1, y1, w, h, 0, 0, canvas.width, canvas.height);
                     const tempImage = canvas.transferToImageBitmap();
-                    const filter = options.filter;
-                    let tileImage;
-                    if (filter) {
-                        tileImage = imageFilter(canvas, tempImage, filter);
-                    } else {
-                        tileImage = tempImage;
-                    }
-                    const opImage = imageOpacity(tileImage, options.opacity);
+                    const filterImage = imageFilter(canvas, tempImage, options.filter);
+                    const blurImage = imageGaussianBlur(canvas, filterImage, options.gaussianBlurRadius);
+
+                    const opImage = imageOpacity(blurImage, options.opacity);
                     items.push({
                         id: uuid(),
                         x: x1,
