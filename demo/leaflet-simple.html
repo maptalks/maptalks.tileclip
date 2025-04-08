@@ -82,6 +82,7 @@
             tileActor.getTile({
                 returnBlobURL: true,
                 filter: 'sepia(100%) invert(90%)',
+                gaussianBlurRadius: 4,
                 url: maptalks.Util.getAbsoluteURL(url)
             }).then(url => {
                 tile.src = url;
