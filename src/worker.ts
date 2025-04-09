@@ -98,5 +98,7 @@ export const onmessage = function (message, postResponse) {
         });
         return;
     }
-    console.error('not support message type:', type);
+    const errorMessage = 'not support message type:' + type;
+    console.error(errorMessage);
+    postResponse(createError(errorMessage));
 };
