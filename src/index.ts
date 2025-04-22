@@ -38,6 +38,7 @@ export type clipTileOptions = {
     projection: string;
     tileSize: number;
     maskId: string;
+    reverse?: boolean;
     returnBlobURL?: boolean;
 }
 

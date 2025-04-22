@@ -86,7 +86,7 @@ function transformPixels(projection: string, tileBBOX: BBOXtype, tileSize: numbe
 
 export function clip(options: clipTileOptions) {
     return new Promise((resolve, reject) => {
-        const { tile, tileBBOX, projection, tileSize, maskId, returnBlobURL } = options;
+        const { tile, tileBBOX, projection, tileSize, maskId, returnBlobURL, reverse } = options;
         if (!tile) {
             reject(createError('tile is null.It should be a ImageBitmap'));
             return;
@@ -140,8 +140,16 @@ export function clip(options: clipTileOptions) {
             returnImage(tile);
             return;
         }
+
+        const judgeReverse = () => {
+            if (!reverse) {
+                returnImage(getBlankTile(tileSize));
+            } else {
+                returnImage(tile);
+            }
+        }
         if (!bboxIntersect(bbox, tileBBOX)) {
-            returnImage(getBlankTile(tileSize));
+            judgeReverse();
             return;
         }
         let polygons = coordinates;
@@ -153,7 +161,7 @@ export function clip(options: clipTileOptions) {
         if (bboxInBBOX(bbox, tileBBOX)) {
             newCoordinates = transformCoordinates(projection, polygons);
             const pixels = transformPixels(projection, tileBBOX, tileSize, newCoordinates);
-            const image = imageClip(canvas, pixels, tile);
+            const image = imageClip(canvas, pixels, tile, reverse);
             returnImage(image);
             return;
         }
@@ -187,13 +195,13 @@ export function clip(options: clipTileOptions) {
             }
         }
         if (clipRings.length === 0) {
-            returnImage(getBlankTile());
+            judgeReverse();
             return;
         }
 
         newCoordinates = transformCoordinates(projection, clipRings);
         const pixels = transformPixels(projection, tileBBOX, tileSize, newCoordinates);
-        const image = imageClip(canvas, pixels, tile);
+        const image = imageClip(canvas, pixels, tile, reverse);
         returnImage(image);
     });
 

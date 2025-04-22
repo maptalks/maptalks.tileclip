@@ -68,7 +68,7 @@ export function mergeImages(images: Array<ImageBitmap>) {
 
 
 
-export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap) {
+export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap, reverse: boolean) {
     const ctx = getCanvasContext(canvas);
     ctx.save();
 
@@ -92,6 +92,9 @@ export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap)
         }
     };
     ctx.beginPath();
+    if (reverse) {
+        ctx.rect(0, 0, canvas.width, canvas.height);
+    }
     polygons.forEach(polygon => {
         drawPolygon(polygon);
     });
