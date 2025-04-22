@@ -314,6 +314,7 @@ const result = tileActor.maskHasInjected(maskId);
   + `options.projection`: Projection code, such as : EPSG:3857
   + `options.tileSize`:tile size 
   + `options.maskId`:mask key
+  + `options.reverse`:whether or not clip reverse
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
