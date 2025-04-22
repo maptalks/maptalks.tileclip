@@ -79,7 +79,7 @@
             lineColor: 'red'
         }
 
-        fetch('./青浦区-holes.geojson').then(res => res.json()).then(geojson => {
+        fetch('./青浦区.json').then(res => res.json()).then(geojson => {
             const polygons = maptalks.GeoJSON.toGeometry(geojson, (geo => {
                 geo.setSymbol(symbol);
             }));
