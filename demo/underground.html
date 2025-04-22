@@ -150,6 +150,7 @@
                         projection: baseLayer.getProjection().code,
                         tileSize: baseLayer.getTileSize().width,
                         maskId,
+                        reverse: true,
                     }).then(image => {
                         callback(image);
                     }).catch(error => {
@@ -170,7 +171,7 @@
         }
 
         function addTileLayer() {
-            fetch('./underground.geojson').then(res => res.json()).then(geojson => {
+            fetch('./underground1.geojson').then(res => res.json()).then(geojson => {
                 // const polygons = maptalks.GeoJSON.toGeometry(geojson, (geo => {
                 //     geo.setSymbol(symbol);
                 // }));
