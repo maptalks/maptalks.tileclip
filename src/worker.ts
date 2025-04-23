@@ -1,6 +1,6 @@
 import { imageSlicing, imageToBlobURL } from './imageslice';
 import { clip, injectMask, removeMask } from './tileclip';
-import { cancelFetch, getTile, getTileWithMaxZoom } from './tileget';
+import { cancelFetch, encodeTerrainTile, getTile, getTileWithMaxZoom } from './tileget';
 import { tileTransform } from './tiletranasform';
 import { createError, isImageBitmap } from './util';
 
@@ -93,6 +93,15 @@ export const onmessage = function (message, postResponse) {
     if (type === 'imageToBlobURL') {
         imageToBlobURL(data).then((result: any) => {
             postResponse(null, result, []);
+        }).catch(error => {
+            postResponse(error);
+        });
+        return;
+    }
+    if (type === 'encodeTerrainTile') {
+        const { url } = data;
+        encodeTerrainTile(url, data).then(image => {
+            postResponse(null, image, checkBuffers(image));
         }).catch(error => {
             postResponse(error);
         });

@@ -24,6 +24,16 @@ export type getTileOptions = {
     globalCompositeOperation?: GlobalCompositeOperation;
 }
 
+export type encodeTerrainTileOptions = {
+    url: string | Array<string>;
+    referrer?: string;
+    headers?: Record<string, string>;
+    fetchOptions?: Record<string, any>;
+    timeout?: number;
+    returnBlobURL?: boolean;
+    terrainType: 'mapzen' | 'tianditu' | 'cesium'
+}
+
 export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {
     urlTemplate: string | Array<string>;
     maxAvailableZoom: number;
@@ -295,6 +305,22 @@ class TileActor extends worker.Actor {
                             }, workerId);
                         }
                     }
+                }
+            }, workerId);
+        });
+        wrapPromise(promise, options);
+        return promise;
+    }
+
+    encodeTerrainTile(options: encodeTerrainTileOptions) {
+        options = checkOptions(options, 'encodeTerrainTile');
+        const workerId = (options as privateOptions).__workerId;
+        const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+            this.send(Object.assign(options), [], (error, image) => {
+                if (error || (promise as any).canceled) {
+                    reject(error || FetchCancelError);
+                } else {
+                    resolve(image);
                 }
             }, workerId);
         });

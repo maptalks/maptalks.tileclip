@@ -1,7 +1,7 @@
-import { getTileOptions, getTileWithMaxZoomOptions } from './index';
-import { getCanvas, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeImages, toBlobURL } from './canvas';
+import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions } from './index';
+import { getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeImages, resizeCanvas, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
-import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage } from './util';
+import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage, transformMapZen } from './util';
 
 
 const tileCache = new LRUCache(200, (image) => {
@@ -273,4 +273,58 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
         })
     });
 
+}
+
+
+export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
+    return new Promise((resolve, reject) => {
+        if (!url) {
+            reject(createError('url is null'));
+            return;
+        }
+        const { terrainType } = options;
+        if (!terrainType) {
+            reject(createError('terrainType is null'));
+            return;
+        }
+        const urls = checkTileUrl(url);
+        const headers = Object.assign({}, HEADERS, options.headers || {});
+        const fetchTiles = urls.map(tileUrl => {
+            return fetchTile(tileUrl, headers, options)
+        });
+        const { returnBlobURL } = options;
+        Promise.all(fetchTiles).then(imagebits => {
+            const canvas = getCanvas();
+            if (!canvas) {
+                reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
+            const image = mergeImages(imagebits);
+            if (image instanceof Error) {
+                reject(image);
+                return;
+            }
+            resizeCanvas(canvas, image.width, image.height);
+            const ctx = getCanvasContext(canvas);
+            ctx.drawImage(image, 0, 0);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            transformMapZen(imageData);
+            ctx.putImageData(imageData, 0, 0);
+            const terrainImage = canvas.transferToImageBitmap();
+
+
+            if (!returnBlobURL) {
+                resolve(terrainImage);
+            } else {
+                toBlobURL(terrainImage).then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    resolve(url);
+                }).catch(error => {
+                    reject(error);
+                });
+            }
+        }).catch(error => {
+            reject(error);
+        })
+    });
 }

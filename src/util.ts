@@ -69,3 +69,39 @@ export function disposeImage(images: ImageBitmap | ImageBitmap[]) {
         }
     });
 }
+
+export function encodeMapBox(height: number, out?: [number, number, number]) {
+    const value = Math.floor((height + 10000) * 10);
+    const r = value >> 16;
+    const g = value >> 8 & 0x0000FF;
+    const b = value & 0x0000FF;
+    if (out) {
+        out[0] = r;
+        out[1] = g;
+        out[2] = b;
+        return out;
+    } else {
+        return [r, g, b];
+    }
+
+}
+
+export function transformMapZen(imageData: ImageData) {
+    const data = imageData.data;
+    const out: [number, number, number] = [0, 0, 0];
+    for (let i = 0, len = data.length; i < len; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+        if (a === 0) {
+            continue;
+        }
+        const height = (r * 256 + g + b / 256) - 32768;
+        const [r1, g1, b1] = encodeMapBox(height, out);
+        data[i] = r1;
+        data[i + 1] = g1;
+        data[i + 2] = b1;
+    }
+    return imageData;
+}
