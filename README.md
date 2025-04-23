@@ -21,6 +21,7 @@
 * [clip by multipolygon](https://maptalks.github.io/maptalks.tileclip/demo/multipolygon-clip.html)
 * [clip by multipolygon with holes](https://maptalks.github.io/maptalks.tileclip/demo/multipolygon-hole-clip.html)
 * [clip reverse](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-reverse.html)
+* [tiles  globalCompositeOperation](https://maptalks.github.io/maptalks.tileclip/demo/tiles-globalCompositeOperation.html)
 
 * [maxAvailableZoom](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom.html)
 * [maxAvailableZoom tiles](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-array.html)
