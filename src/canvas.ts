@@ -43,7 +43,7 @@ export function getBlankTile(tileSize?: number) {
     return canvas.transferToImageBitmap();
 }
 
-export function mergeImages(images: Array<ImageBitmap>) {
+export function mergeImages(images: Array<ImageBitmap>, globalCompositeOperation?: GlobalCompositeOperation) {
     if (images.length === 1) {
         return images[0];
     }
@@ -59,9 +59,16 @@ export function mergeImages(images: Array<ImageBitmap>) {
     const tileSize = images[0].width;
     const canvas = getCanvas(tileSize);
     const ctx = getCanvasContext(canvas);
+    if (globalCompositeOperation) {
+        ctx.save();
+        ctx.globalCompositeOperation = globalCompositeOperation;
+    }
     images.forEach(image => {
         ctx.drawImage(image, 0, 0, tileSize, tileSize);
     });
+    if (globalCompositeOperation) {
+        ctx.restore();
+    }
     disposeImage(images);
     return canvas.transferToImageBitmap();
 }

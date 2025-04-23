@@ -21,6 +21,7 @@ export type getTileOptions = {
     opacity?: number;
     returnBlobURL?: boolean;
     gaussianBlurRadius?: number;
+    globalCompositeOperation?: GlobalCompositeOperation;
 }
 
 export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {

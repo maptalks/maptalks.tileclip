@@ -117,14 +117,14 @@ export function getTile(url, options: getTileOptions) {
         const fetchTiles = urls.map(tileUrl => {
             return fetchTile(tileUrl, headers, options)
         });
-        const { returnBlobURL } = options;
+        const { returnBlobURL, globalCompositeOperation } = options;
         Promise.all(fetchTiles).then(imagebits => {
             const canvas = getCanvas();
             if (!canvas) {
                 reject(CANVAS_ERROR_MESSAGE);
                 return;
             }
-            const image = mergeImages(imagebits);
+            const image = mergeImages(imagebits, globalCompositeOperation);
             if (image instanceof Error) {
                 reject(image);
                 return;
@@ -151,7 +151,7 @@ export function getTile(url, options: getTileOptions) {
 }
 
 export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
-    const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, returnBlobURL } = options;
+    const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, returnBlobURL, globalCompositeOperation } = options;
     const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
     return new Promise((resolve, reject) => {
         if (!maxZoomEnable) {
@@ -240,7 +240,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
                 return;
             }
 
-            const image = mergeImages(imagebits);
+            const image = mergeImages(imagebits, globalCompositeOperation);
             if (image instanceof Error) {
                 reject(image);
                 return;
