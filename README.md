@@ -108,6 +108,7 @@ all methods return Promise with `cancel()` method
   + `options?.timeout`: fetch timeout
   + `options?.opacity`: tile opacity if need
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
+  + `options?.globalCompositeOperation`: CanvasRenderingContext2D.globalCompositeOperation
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -158,6 +159,7 @@ promise.then((imagebitmap) => {
   + `options?.timeout`: fetch timeout
   + `options?.opacity`: tile opacity if need
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
+  + `options?.globalCompositeOperation`: CanvasRenderingContext2D.globalCompositeOperation
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -222,6 +224,7 @@ promise.then((imagebitmap) => {
   + `options?.timeout`: fetch timeout
   + `options?.opacity`: tile opacity if need
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
+  + `options?.globalCompositeOperation`: CanvasRenderingContext2D.globalCompositeOperation
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
