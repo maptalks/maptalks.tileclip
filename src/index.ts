@@ -1,9 +1,10 @@
 import { registerWorkerAdapter, worker } from 'maptalks';
 //@ts-ignore
 import WORKERCODE from './worker/worker.bundle.js';
-import { isImageBitmap, isPolygon } from './util';
+import { CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon } from './util';
 import { BBOXtype } from './bbox';
 import { createError, FetchCancelError, isNumber, uuid } from './util.js';
+import { getCanvas } from './canvas';
 export { getBlankTile, get404Tile } from './canvas';
 
 const WORKERNAME = '__maptalks.tileclip';
@@ -114,6 +115,10 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'getTile');
         const workerId = (options as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+            if (!getCanvas()) {
+                reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
             this.send(options, [], (error, image) => {
                 if (error || (promise as any).canceled) {
                     reject(error || FetchCancelError);
@@ -130,6 +135,10 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'getTileWithMaxZoom');
         const workerId = (options as unknown as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+            if (!getCanvas()) {
+                reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
             this.send(options, [], (error, image) => {
                 if (error || (promise as any).canceled) {
                     reject(error || FetchCancelError);
@@ -146,6 +155,10 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'transformTile');
         const workerId = (options as unknown as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+            if (!getCanvas()) {
+                reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
             this.send(options, [], (error, image) => {
                 if (error || (promise as any).canceled) {
                     reject(error || FetchCancelError);
@@ -163,6 +176,10 @@ class TileActor extends worker.Actor {
         delete (options as unknown as privateOptions).__taskId;
         delete (options as unknown as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
+            if (!getCanvas()) {
+                reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
             const buffers: ArrayBuffer[] = [];
             if (isImageBitmap(options.tile)) {
                 buffers.push(options.tile as unknown as ArrayBuffer);
@@ -244,6 +261,10 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'imageSlicing');
         const workerId = (options as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
+            if (!getCanvas()) {
+                reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
             this.send(options, [], (error, result) => {
                 if (error || (promise as any).canceled) {
                     reject(error || FetchCancelError);
@@ -319,6 +340,10 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'encodeTerrainTile');
         const workerId = (options as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+            if (!getCanvas()) {
+                reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
             this.send(Object.assign({ terrainWidth: 65, tileSize: 256 }, options), [], (error, image) => {
                 if (error || (promise as any).canceled) {
                     reject(error || FetchCancelError);

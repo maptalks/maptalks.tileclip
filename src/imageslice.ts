@@ -20,10 +20,6 @@ export function imageSlicing(options: getTileOptions) {
         });
         Promise.all(fetchTiles).then(imagebits => {
             const canvas = getCanvas(SIZE);
-            if (!canvas) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
             const image = mergeImages(imagebits);
             if (image instanceof Error) {
                 reject(image);

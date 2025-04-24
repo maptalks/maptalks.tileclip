@@ -168,10 +168,6 @@ export function getTile(url, options: getTileOptions) {
         const { returnBlobURL, globalCompositeOperation } = options;
         Promise.all(fetchTiles).then(imagebits => {
             const canvas = getCanvas();
-            if (!canvas) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
             const image = mergeImages(imagebits, globalCompositeOperation);
             if (image instanceof Error) {
                 reject(image);
@@ -283,11 +279,6 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
 
         Promise.all(fetchTiles).then(imagebits => {
             const canvas = getCanvas();
-            if (!canvas) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
-
             const image = mergeImages(imagebits, globalCompositeOperation);
             if (image instanceof Error) {
                 reject(image);
@@ -355,10 +346,6 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
             });
             Promise.all(fetchTiles).then(imagebits => {
                 const canvas = getCanvas();
-                if (!canvas) {
-                    reject(CANVAS_ERROR_MESSAGE);
-                    return;
-                }
                 const image = mergeImages(imagebits);
                 if (image instanceof Error) {
                     reject(image);
@@ -380,11 +367,6 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
                 return fetchTileBuffer(tileUrl, headers, options)
             });
             Promise.all(fetchTiles).then(buffers => {
-                const canvas = getCanvas();
-                if (!canvas) {
-                    reject(CANVAS_ERROR_MESSAGE);
-                    return;
-                }
                 if (!buffers || buffers.length === 0) {
                     reject(createError('buffers is null'));
                     return;

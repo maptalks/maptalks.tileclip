@@ -113,11 +113,6 @@ export function clip(options: clipTileOptions) {
             return;
         }
         const canvas = getCanvas(tileSize);
-        if (!canvas) {
-            reject(CANVAS_ERROR_MESSAGE);
-            return;
-        }
-
         const returnImage = (image) => {
             if (!returnBlobURL) {
                 resolve(image);
