@@ -46,6 +46,10 @@
 * [transform EPSG4326 to EPSG3857](https://maptalks.github.io/maptalks.tileclip/demo/4326-transform-3857.html)
 * [transform EPSG3857 to EPSG4326](https://maptalks.github.io/maptalks.tileclip/demo/3857-transform-4326.html)
 
+### Terrain
+
+* [mapzen terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-mapzen.html)
+
 ## Others
 
 * [underground by clip tile](https://maptalks.github.io/maptalks.tileclip/demo/underground.html)
@@ -214,7 +218,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,            `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,              `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -382,6 +386,39 @@ tileActor.injectMask(maskId, polygon).then(data => {
 }).catch(error => {
     console.error(error);
 })
+```
+
+* `encodeTerrainTile(options)` transform other terrain tile to mapbox terrain rgb tile  by fetch in worker, return `Promise`
+  + `options.url`:tile url
+  + `options.terrainType`:'mapzen' | 'tianditu' | 'cesium'; 
+  + `options?.terrainWidth` default is 65
+  + `options?.tileSize` default value is 256
+  + `options?.headers`:fetch headers params. if need
+  + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
+  + `options?.timeout`: fetch timeout
+  + `options?.returnBlobURL`: to return 
+  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+
+```js
+  baseLayer.on('renderercreate', function(e) {
+      //load tile image
+      //   img(Image): an Image object
+      //   url(String): the url of the tile
+      e.renderer.loadTileBitmap = function(url, tile, callback) {
+        //transform mapzen terrain tile to mapbox terrain rgb tile
+          tileActor.encodeTerrainTile({
+              url: maptalks.Util.getAbsoluteURL(url),
+              terrainType: 'mapzen',
+              // timeout: 5000
+          }).then(imagebitmap => {
+              callback(imagebitmap)
+
+          }).catch(error => {
+              //do some things
+              console.error(error);
+          })
+      };
+  });
 ```
 
 * `imageSlicing(options)` slice big image  in worker, return `Promise`
