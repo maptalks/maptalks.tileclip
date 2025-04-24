@@ -103,6 +103,19 @@ const tileActor = getTileActor();
 
 #### methods
 
+
+| method                                  | describe                                                            |
+| --------------------------------------- | ------------------------------------------------------------------- |
+| getTile(options)                        | Request tile support for batch and some processing                  |
+| getTileWithMaxZoom(options)             | Cutting tiles, automatically cutting beyond the maximum level limit |
+| transformTile(options)                  | Tile reprojection                                                   |
+| injectMask(maskId,Polygon/MultiPolygon) | Inject geojson data for tile clipping service                       |
+| removeMask(maskId)                      | remove Inject geojson data                                          |
+| maskHasInjected(maskId)                 | Has the geojson data been injected                                  |
+| clipTile(options)                       | Crop tiles using injected geojson data                              |
+| encodeTerrainTile(options)              | Encode other terrain tiles into mapbox terrain service format       |
+| imageSlicing(options)                   | Cut a large image into multiple small images                        |
+
 all methods return Promise with `cancel()` method
 
 * `getTile(options)` get tile [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap) by fetch in worker, return `Promise`
