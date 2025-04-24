@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Interactions - Draw tool to draw geometries</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+</style>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.css' />
+<script type='text/javascript' src='http://localhost/d/maptalks.js/packages/maptalks/dist/maptalks.js'></script>
+<script type='text/javascript' src='http://localhost/d/maptalks.js/packages/gl/dist/maptalksgl.js'></script>
+<script type='text/javascript' src='../dist/maptalks.tileclip.js'></script>
+
+<body>
+    <div id="map" class="container"></div>
+    <script>
+
+        const tileActor = maptalks.getTileActor();
+
+        const map = new maptalks.Map("map", {
+            // "center": [119.09557457, 30.14442343, 339.73126220703125], "zoom": 11.856275713521464, "pitch": 61.80000000000011, "bearing": -64.07337236948052,
+            "center": [108.95986733, 34.21997952, 430.3062438964844], "zoom": 12.698416480987284, "pitch": 0, "bearing": 1.8437368186266667,
+            // cameraInfiniteFar: true,
+            // heightFactor: 4.2,
+            zoomControl: true,
+            spatialReference: {
+                projection: 'EPSG:4326',
+            }
+        });
+
+
+        const sceneConfig = {
+            postProcess: {
+                enable: true,
+                antialias: {
+                    enable: true,
+                },
+            },
+        };
+
+        const colors4 = [
+            [0, '#267300'],
+            [200, '#428501'],
+            [400, '#6CA102'],
+            [650, '#9FC100'],
+            [880, '#ACCC00'],
+            [1100, '#E0ED04'],
+            [1300, '#FBE100'],
+            [1450, '#FCB600'],
+            [1600, '#FF8D03'],
+            [2000, '#FE2200']
+        ];
+
+
+
+
+        const terrain = {
+            type: 'cesium',
+            //强制指定tileSize
+            // tileSize: 256,
+            maxAvailableZoom: 14,
+
+            requireSkuToken: false,
+            accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxMzBjZjBiYi02NmM2LTQzOTctYmZiMy02MTFmMzZkZTJhNjYiLCJpZCI6NDY1NDksImFzc2V0SWQiOjEsImFzc2V0cyI6eyIxIjp7InR5cGUiOiJURVJSQUlOIiwicHJlZml4IjoiQ2VzaXVtV29ybGRUZXJyYWluL3YxLjIiLCJleHRlbnNpb25zIjpbdHJ1ZSx0cnVlLHRydWVdfX0sInNyYyI6ImE5YzZlODAwLTlhMmUtNDQ0Ni05ZTliLWM1NzMwZjM1NGU2MCIsImlhdCI6MTc0NTQ3MzQ0NiwiZXhwIjoxNzQ1NDc3MDQ2fQ.9qfVcsD1gfzhYsYDa2xSdj5_h1aZlUr5ucUIpmRb5yU',
+            urlTemplate: 'https://assets.ion.cesium.com/asset_depot/1/CesiumWorldTerrain/v1.2/{z}/{x}/{y}.terrain',
+            subdomains: ['1', '2', '3', '4', '5'],
+            colors: colors4,
+            exaggeration: 4,
+        };
+        const group = new maptalks.GroupGLLayer('group', [], {
+            terrain
+        });
+        group.addTo(map);
+
+        map.setView({
+            "center": [106.63906041, 29.46901528, 430.3062438964844], "zoom": 12.336833621741476, "pitch": 66.35000000000008, "bearing": 92.20705084326664
+        })
+
+        const terrainLayer = group.getTerrainLayer();
+        console.log(terrainLayer);
+
+        terrainLayer.getRenderer().loadTileBitmap = function (url, tile, callback, options) {
+            tileActor.encodeTerrainTile({
+                url: maptalks.Util.getAbsoluteURL(url),
+                terrainType: terrain.type,
+                headers: {
+                    Authorization: 'Bearer ' + terrain.accessToken,
+                    'Accept': 'application/vnd.quantized-mesh,application/octet-stream;q=0.9,*/*;q=0.01'
+                }
+                // timeout: 5000
+            }).then(imagebitmap => {
+                callback(null, imagebitmap)
+            }).catch(error => {
+                //do some things
+                console.error(error);
+
+                callback(null, maptalks.getBlankTile());
+            })
+        };
+
+
+
+
+
+
+
+
+
+    </script>
+</body>
+
+</html>

@@ -28,8 +28,13 @@
         const maskId = '1';
         const baseLayer = new maptalks.TileLayer('base', {
             // debug: true,
-            urlTemplate: "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
-            subdomains: ["a", "b", "c", "d"],
+            accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxMzBjZjBiYi02NmM2LTQzOTctYmZiMy02MTFmMzZkZTJhNjYiLCJpZCI6NDY1NDksImFzc2V0SWQiOjEsImFzc2V0cyI6eyIxIjp7InR5cGUiOiJURVJSQUlOIiwicHJlZml4IjoiQ2VzaXVtV29ybGRUZXJyYWluL3YxLjIiLCJleHRlbnNpb25zIjpbdHJ1ZSx0cnVlLHRydWVdfX0sInNyYyI6ImE5YzZlODAwLTlhMmUtNDQ0Ni05ZTliLWM1NzMwZjM1NGU2MCIsImlhdCI6MTc0NTQ3MzQ0NiwiZXhwIjoxNzQ1NDc3MDQ2fQ.9qfVcsD1gfzhYsYDa2xSdj5_h1aZlUr5ucUIpmRb5yU',
+            // urlTemplate: './cesiumlab-terrain/{z}/{x}/{y}.terrain',
+            urlTemplate: 'https://assets.ion.cesium.com/asset_depot/1/CesiumWorldTerrain/v1.2/{z}/{x}/{y}.terrain',
+            subdomains: ['1', '2', '3', '4', '5'],
+            tileSystem: [1, -1, -180, 90],
+            zIndex: -1,
+            // zoomOffset: 1
             // bufferPixel: 1
         })
 
@@ -40,8 +45,12 @@
             e.renderer.loadTileBitmap = function (url, tile, callback) {
                 tileActor.encodeTerrainTile({
                     url: maptalks.Util.getAbsoluteURL(url),
-                    terrainType: 'mapzen',
-                    timeout: 5000
+                    terrainType: 'cesium',
+                    headers: {
+                        Authorization: 'Bearer ' + baseLayer.options.accessToken,
+                        'Accept': 'application/vnd.quantized-mesh,application/octet-stream;q=0.9,*/*;q=0.01'
+                    }
+                    // timeout: 5000
                 }).then(imagebitmap => {
                     callback(imagebitmap)
 
@@ -55,6 +64,12 @@
 
         var map = new maptalks.Map('map', {
             "center": [121.65586045, 31.12453538], "zoom": 9.064897200334302, "pitch": 0, "bearing": 0,
+            spatialReference: {
+                projection: 'EPSG:4326',
+                // projection: 'EPSG:3857',
+                // cameraInfiniteFar: true,
+                // heightFactor: 4.2,
+            }
         });
 
         const layer = new maptalks.VectorLayer('layer').addTo(map);
