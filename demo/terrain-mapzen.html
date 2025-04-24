@@ -18,7 +18,7 @@
 </style>
 <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.css' />
 <script type='text/javascript' src='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js'></script>
-<script type='text/javascript' src='../dist/maptalks.tileclip.js'></script>
+<script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
 
 <body>
     <div id="map" class="container"></div>
@@ -55,7 +55,7 @@
         });
 
         var map = new maptalks.Map('map', {
-            "center": [121.65586045, 31.12453538], "zoom": 9.064897200334302, "pitch": 0, "bearing": 0,
+            "center":[111.63998627,35.99066409],"zoom":5.0991484153139055,"pitch":0,"bearing":0
         });
 
         const layer = new maptalks.VectorLayer('layer').addTo(map);
