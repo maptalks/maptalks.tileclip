@@ -318,9 +318,6 @@ export default ` (function (exports) { 'use strict';
     function getBlankTile(tileSize) {
         const canvas = getCanvas(tileSize);
         getCanvasContext(canvas);
-        // ctx.fillText('404', 100, 100);
-        // ctx.rect(0, 0, canvas.width, canvas.height);
-        // ctx.stroke();
         return canvas.transferToImageBitmap();
     }
     function mergeImages(images, globalCompositeOperation) {
@@ -595,8 +592,684 @@ export default ` (function (exports) { 'use strict';
         }
     }
 
-    const tileCache = new LRUCache(200, (image) => {
+    /** @license zlib.js 2012 - imaya [ https://github.com/imaya/zlib.js ] The MIT License */(function() {function m(d){throw d;}var w=void 0,z=!0,aa=this;function A(d,a){var c=d.split("."),e=aa;!(c[0]in e)&&e.execScript&&e.execScript("var "+c[0]);for(var b;c.length&&(b=c.shift());)!c.length&&a!==w?e[b]=a:e=e[b]?e[b]:e[b]={};}var G="undefined"!==typeof Uint8Array&&"undefined"!==typeof Uint16Array&&"undefined"!==typeof Uint32Array&&"undefined"!==typeof DataView;function I(d,a){this.index="number"===typeof a?a:0;this.i=0;this.buffer=d instanceof(G?Uint8Array:Array)?d:new (G?Uint8Array:Array)(32768);2*this.buffer.length<=this.index&&m(Error("invalid index"));this.buffer.length<=this.index&&this.f();}I.prototype.f=function(){var d=this.buffer,a,c=d.length,e=new (G?Uint8Array:Array)(c<<1);if(G)e.set(d);else for(a=0;a<c;++a)e[a]=d[a];return this.buffer=e};
+        I.prototype.d=function(d,a,c){var e=this.buffer,b=this.index,f=this.i,g=e[b],h;c&&1<a&&(d=8<a?(Q[d&255]<<24|Q[d>>>8&255]<<16|Q[d>>>16&255]<<8|Q[d>>>24&255])>>32-a:Q[d]>>8-a);if(8>a+f)g=g<<a|d,f+=a;else for(h=0;h<a;++h)g=g<<1|d>>a-h-1&1,8===++f&&(f=0,e[b++]=Q[g],g=0,b===e.length&&(e=this.f()));e[b]=g;this.buffer=e;this.i=f;this.index=b;};I.prototype.finish=function(){var d=this.buffer,a=this.index,c;0<this.i&&(d[a]<<=8-this.i,d[a]=Q[d[a]],a++);G?c=d.subarray(0,a):(d.length=a,c=d);return c};
+        var ba=new (G?Uint8Array:Array)(256),ca;for(ca=0;256>ca;++ca){for(var R=ca,ha=R,ia=7,R=R>>>1;R;R>>>=1)ha<<=1,ha|=R&1,--ia;ba[ca]=(ha<<ia&255)>>>0;}var Q=ba;function ja(d){this.buffer=new (G?Uint16Array:Array)(2*d);this.length=0;}ja.prototype.getParent=function(d){return 2*((d-2)/4|0)};ja.prototype.push=function(d,a){var c,e,b=this.buffer,f;c=this.length;b[this.length++]=a;for(b[this.length++]=d;0<c;)if(e=this.getParent(c),b[c]>b[e])f=b[c],b[c]=b[e],b[e]=f,f=b[c+1],b[c+1]=b[e+1],b[e+1]=f,c=e;else break;return this.length};
+        ja.prototype.pop=function(){var d,a,c=this.buffer,e,b,f;a=c[0];d=c[1];this.length-=2;c[0]=c[this.length];c[1]=c[this.length+1];for(f=0;;){b=2*f+2;if(b>=this.length)break;b+2<this.length&&c[b+2]>c[b]&&(b+=2);if(c[b]>c[f])e=c[f],c[f]=c[b],c[b]=e,e=c[f+1],c[f+1]=c[b+1],c[b+1]=e;else break;f=b;}return {index:d,value:a,length:this.length}};function S(d){var a=d.length,c=0,e=Number.POSITIVE_INFINITY,b,f,g,h,k,p,q,r,n,l;for(r=0;r<a;++r)d[r]>c&&(c=d[r]),d[r]<e&&(e=d[r]);b=1<<c;f=new (G?Uint32Array:Array)(b);g=1;h=0;for(k=2;g<=c;){for(r=0;r<a;++r)if(d[r]===g){p=0;q=h;for(n=0;n<g;++n)p=p<<1|q&1,q>>=1;l=g<<16|r;for(n=p;n<b;n+=k)f[n]=l;++h;}++g;h<<=1;k<<=1;}return [f,c,e]}function ka(d,a){this.h=na;this.w=0;this.input=G&&d instanceof Array?new Uint8Array(d):d;this.b=0;a&&(a.lazy&&(this.w=a.lazy),"number"===typeof a.compressionType&&(this.h=a.compressionType),a.outputBuffer&&(this.a=G&&a.outputBuffer instanceof Array?new Uint8Array(a.outputBuffer):a.outputBuffer),"number"===typeof a.outputIndex&&(this.b=a.outputIndex));this.a||(this.a=new (G?Uint8Array:Array)(32768));}var na=2,oa={NONE:0,r:1,k:na,N:3},pa=[],T;
+        for(T=0;288>T;T++)switch(z){case 143>=T:pa.push([T+48,8]);break;case 255>=T:pa.push([T-144+400,9]);break;case 279>=T:pa.push([T-256+0,7]);break;case 287>=T:pa.push([T-280+192,8]);break;default:m("invalid literal: "+T);}
+        ka.prototype.j=function(){var d,a,c,e,b=this.input;switch(this.h){case 0:c=0;for(e=b.length;c<e;){a=G?b.subarray(c,c+65535):b.slice(c,c+65535);c+=a.length;var f=a,g=c===e,h=w,k=w,p=w,q=w,r=w,n=this.a,l=this.b;if(G){for(n=new Uint8Array(this.a.buffer);n.length<=l+f.length+5;)n=new Uint8Array(n.length<<1);n.set(this.a);}h=g?1:0;n[l++]=h|0;k=f.length;p=~k+65536&65535;n[l++]=k&255;n[l++]=k>>>8&255;n[l++]=p&255;n[l++]=p>>>8&255;if(G)n.set(f,l),l+=f.length,n=n.subarray(0,l);else {q=0;for(r=f.length;q<r;++q)n[l++]=
+            f[q];n.length=l;}this.b=l;this.a=n;}break;case 1:var s=new I(G?new Uint8Array(this.a.buffer):this.a,this.b);s.d(1,1,z);s.d(1,2,z);var t=qa(this,b),x,E,B;x=0;for(E=t.length;x<E;x++)if(B=t[x],I.prototype.d.apply(s,pa[B]),256<B)s.d(t[++x],t[++x],z),s.d(t[++x],5),s.d(t[++x],t[++x],z);else if(256===B)break;this.a=s.finish();this.b=this.a.length;break;case na:var C=new I(G?new Uint8Array(this.a.buffer):this.a,this.b),L,v,M,Y,Z,gb=[16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15],da,Fa,ea,Ga,la,sa=Array(19),
+            Ha,$,ma,D,Ia;L=na;C.d(1,1,z);C.d(L,2,z);v=qa(this,b);da=ra(this.L,15);Fa=ta(da);ea=ra(this.K,7);Ga=ta(ea);for(M=286;257<M&&0===da[M-1];M--);for(Y=30;1<Y&&0===ea[Y-1];Y--);var Ja=M,Ka=Y,K=new (G?Uint32Array:Array)(Ja+Ka),u,N,y,fa,J=new (G?Uint32Array:Array)(316),H,F,O=new (G?Uint8Array:Array)(19);for(u=N=0;u<Ja;u++)K[N++]=da[u];for(u=0;u<Ka;u++)K[N++]=ea[u];if(!G){u=0;for(fa=O.length;u<fa;++u)O[u]=0;}u=H=0;for(fa=K.length;u<fa;u+=N){for(N=1;u+N<fa&&K[u+N]===K[u];++N);y=N;if(0===K[u])if(3>y)for(;0<y--;)J[H++]=
+            0,O[0]++;else for(;0<y;)F=138>y?y:138,F>y-3&&F<y&&(F=y-3),10>=F?(J[H++]=17,J[H++]=F-3,O[17]++):(J[H++]=18,J[H++]=F-11,O[18]++),y-=F;else if(J[H++]=K[u],O[K[u]]++,y--,3>y)for(;0<y--;)J[H++]=K[u],O[K[u]]++;else for(;0<y;)F=6>y?y:6,F>y-3&&F<y&&(F=y-3),J[H++]=16,J[H++]=F-3,O[16]++,y-=F;}d=G?J.subarray(0,H):J.slice(0,H);la=ra(O,7);for(D=0;19>D;D++)sa[D]=la[gb[D]];for(Z=19;4<Z&&0===sa[Z-1];Z--);Ha=ta(la);C.d(M-257,5,z);C.d(Y-1,5,z);C.d(Z-4,4,z);for(D=0;D<Z;D++)C.d(sa[D],3,z);D=0;for(Ia=d.length;D<Ia;D++)if($=
+            d[D],C.d(Ha[$],la[$],z),16<=$){D++;switch($){case 16:ma=2;break;case 17:ma=3;break;case 18:ma=7;break;default:m("invalid code: "+$);}C.d(d[D],ma,z);}var La=[Fa,da],Ma=[Ga,ea],P,Na,ga,va,Oa,Pa,Qa,Ra;Oa=La[0];Pa=La[1];Qa=Ma[0];Ra=Ma[1];P=0;for(Na=v.length;P<Na;++P)if(ga=v[P],C.d(Oa[ga],Pa[ga],z),256<ga)C.d(v[++P],v[++P],z),va=v[++P],C.d(Qa[va],Ra[va],z),C.d(v[++P],v[++P],z);else if(256===ga)break;this.a=C.finish();this.b=this.a.length;break;default:m("invalid compression type");}return this.a};
+        function ua(d,a){this.length=d;this.G=a;}
+        var wa=function(){function d(b){switch(z){case 3===b:return [257,b-3,0];case 4===b:return [258,b-4,0];case 5===b:return [259,b-5,0];case 6===b:return [260,b-6,0];case 7===b:return [261,b-7,0];case 8===b:return [262,b-8,0];case 9===b:return [263,b-9,0];case 10===b:return [264,b-10,0];case 12>=b:return [265,b-11,1];case 14>=b:return [266,b-13,1];case 16>=b:return [267,b-15,1];case 18>=b:return [268,b-17,1];case 22>=b:return [269,b-19,2];case 26>=b:return [270,b-23,2];case 30>=b:return [271,b-27,2];case 34>=b:return [272,
+            b-31,2];case 42>=b:return [273,b-35,3];case 50>=b:return [274,b-43,3];case 58>=b:return [275,b-51,3];case 66>=b:return [276,b-59,3];case 82>=b:return [277,b-67,4];case 98>=b:return [278,b-83,4];case 114>=b:return [279,b-99,4];case 130>=b:return [280,b-115,4];case 162>=b:return [281,b-131,5];case 194>=b:return [282,b-163,5];case 226>=b:return [283,b-195,5];case 257>=b:return [284,b-227,5];case 258===b:return [285,b-258,0];default:m("invalid length: "+b);}}var a=[],c,e;for(c=3;258>=c;c++)e=d(c),a[c]=e[2]<<24|e[1]<<
+            16|e[0];return a}(),xa=G?new Uint32Array(wa):wa;
+        function qa(d,a){function c(b,c){var a=b.G,d=[],e=0,f;f=xa[b.length];d[e++]=f&65535;d[e++]=f>>16&255;d[e++]=f>>24;var g;switch(z){case 1===a:g=[0,a-1,0];break;case 2===a:g=[1,a-2,0];break;case 3===a:g=[2,a-3,0];break;case 4===a:g=[3,a-4,0];break;case 6>=a:g=[4,a-5,1];break;case 8>=a:g=[5,a-7,1];break;case 12>=a:g=[6,a-9,2];break;case 16>=a:g=[7,a-13,2];break;case 24>=a:g=[8,a-17,3];break;case 32>=a:g=[9,a-25,3];break;case 48>=a:g=[10,a-33,4];break;case 64>=a:g=[11,a-49,4];break;case 96>=a:g=[12,a-
+        65,5];break;case 128>=a:g=[13,a-97,5];break;case 192>=a:g=[14,a-129,6];break;case 256>=a:g=[15,a-193,6];break;case 384>=a:g=[16,a-257,7];break;case 512>=a:g=[17,a-385,7];break;case 768>=a:g=[18,a-513,8];break;case 1024>=a:g=[19,a-769,8];break;case 1536>=a:g=[20,a-1025,9];break;case 2048>=a:g=[21,a-1537,9];break;case 3072>=a:g=[22,a-2049,10];break;case 4096>=a:g=[23,a-3073,10];break;case 6144>=a:g=[24,a-4097,11];break;case 8192>=a:g=[25,a-6145,11];break;case 12288>=a:g=[26,a-8193,12];break;case 16384>=
+        a:g=[27,a-12289,12];break;case 24576>=a:g=[28,a-16385,13];break;case 32768>=a:g=[29,a-24577,13];break;default:m("invalid distance");}f=g;d[e++]=f[0];d[e++]=f[1];d[e++]=f[2];var h,k;h=0;for(k=d.length;h<k;++h)n[l++]=d[h];t[d[0]]++;x[d[3]]++;s=b.length+c-1;r=null;}var e,b,f,g,h,k={},p,q,r,n=G?new Uint16Array(2*a.length):[],l=0,s=0,t=new (G?Uint32Array:Array)(286),x=new (G?Uint32Array:Array)(30),E=d.w,B;if(!G){for(f=0;285>=f;)t[f++]=0;for(f=0;29>=f;)x[f++]=0;}t[256]=1;e=0;for(b=a.length;e<b;++e){f=h=0;
+            for(g=3;f<g&&e+f!==b;++f)h=h<<8|a[e+f];k[h]===w&&(k[h]=[]);p=k[h];if(!(0<s--)){for(;0<p.length&&32768<e-p[0];)p.shift();if(e+3>=b){r&&c(r,-1);f=0;for(g=b-e;f<g;++f)B=a[e+f],n[l++]=B,++t[B];break}0<p.length?(q=ya(a,e,p),r?r.length<q.length?(B=a[e-1],n[l++]=B,++t[B],c(q,0)):c(r,-1):q.length<E?r=q:c(q,0)):r?c(r,-1):(B=a[e],n[l++]=B,++t[B]);}p.push(e);}n[l++]=256;t[256]++;d.L=t;d.K=x;return G?n.subarray(0,l):n}
+        function ya(d,a,c){var e,b,f=0,g,h,k,p,q=d.length;h=0;p=c.length;a:for(;h<p;h++){e=c[p-h-1];g=3;if(3<f){for(k=f;3<k;k--)if(d[e+k-1]!==d[a+k-1])continue a;g=f;}for(;258>g&&a+g<q&&d[e+g]===d[a+g];)++g;g>f&&(b=e,f=g);if(258===g)break}return new ua(f,a-b)}
+        function ra(d,a){var c=d.length,e=new ja(572),b=new (G?Uint8Array:Array)(c),f,g,h,k,p;if(!G)for(k=0;k<c;k++)b[k]=0;for(k=0;k<c;++k)0<d[k]&&e.push(k,d[k]);f=Array(e.length/2);g=new (G?Uint32Array:Array)(e.length/2);if(1===f.length)return b[e.pop().index]=1,b;k=0;for(p=e.length/2;k<p;++k)f[k]=e.pop(),g[k]=f[k].value;h=za(g,g.length,a);k=0;for(p=f.length;k<p;++k)b[f[k].index]=h[k];return b}
+        function za(d,a,c){function e(b){var c=k[b][p[b]];c===a?(e(b+1),e(b+1)):--g[c];++p[b];}var b=new (G?Uint16Array:Array)(c),f=new (G?Uint8Array:Array)(c),g=new (G?Uint8Array:Array)(a),h=Array(c),k=Array(c),p=Array(c),q=(1<<c)-a,r=1<<c-1,n,l,s,t,x;b[c-1]=a;for(l=0;l<c;++l)q<r?f[l]=0:(f[l]=1,q-=r),q<<=1,b[c-2-l]=(b[c-1-l]/2|0)+a;b[0]=f[0];h[0]=Array(b[0]);k[0]=Array(b[0]);for(l=1;l<c;++l)b[l]>2*b[l-1]+f[l]&&(b[l]=2*b[l-1]+f[l]),h[l]=Array(b[l]),k[l]=Array(b[l]);for(n=0;n<a;++n)g[n]=c;for(s=0;s<b[c-1];++s)h[c-
+        1][s]=d[s],k[c-1][s]=s;for(n=0;n<c;++n)p[n]=0;1===f[c-1]&&(--g[0],++p[c-1]);for(l=c-2;0<=l;--l){t=n=0;x=p[l+1];for(s=0;s<b[l];s++)t=h[l+1][x]+h[l+1][x+1],t>d[n]?(h[l][s]=t,k[l][s]=a,x+=2):(h[l][s]=d[n],k[l][s]=n,++n);p[l]=0;1===f[l]&&e(l);}return g}
+        function ta(d){var a=new (G?Uint16Array:Array)(d.length),c=[],e=[],b=0,f,g,h,k;f=0;for(g=d.length;f<g;f++)c[d[f]]=(c[d[f]]|0)+1;f=1;for(g=16;f<=g;f++)e[f]=b,b+=c[f]|0,b<<=1;f=0;for(g=d.length;f<g;f++){b=e[d[f]];e[d[f]]+=1;h=a[f]=0;for(k=d[f];h<k;h++)a[f]=a[f]<<1|b&1,b>>>=1;}return a}function U(d,a){this.l=[];this.m=32768;this.e=this.g=this.c=this.q=0;this.input=G?new Uint8Array(d):d;this.s=!1;this.n=Aa;this.B=!1;if(a||!(a={}))a.index&&(this.c=a.index),a.bufferSize&&(this.m=a.bufferSize),a.bufferType&&(this.n=a.bufferType),a.resize&&(this.B=a.resize);switch(this.n){case Ba:this.b=32768;this.a=new (G?Uint8Array:Array)(32768+this.m+258);break;case Aa:this.b=0;this.a=new (G?Uint8Array:Array)(this.m);this.f=this.J;this.t=this.H;this.o=this.I;break;default:m(Error("invalid inflate mode"));}}
+        var Ba=0,Aa=1,Ca={D:Ba,C:Aa};
+        U.prototype.p=function(){for(;!this.s;){var d=V(this,3);d&1&&(this.s=z);d>>>=1;switch(d){case 0:var a=this.input,c=this.c,e=this.a,b=this.b,f=a.length,g=w,h=w,k=e.length,p=w;this.e=this.g=0;c+1>=f&&m(Error("invalid uncompressed block header: LEN"));g=a[c++]|a[c++]<<8;c+1>=f&&m(Error("invalid uncompressed block header: NLEN"));h=a[c++]|a[c++]<<8;g===~h&&m(Error("invalid uncompressed block header: length verify"));c+g>a.length&&m(Error("input buffer is broken"));switch(this.n){case Ba:for(;b+g>e.length;){p=
+            k-b;g-=p;if(G)e.set(a.subarray(c,c+p),b),b+=p,c+=p;else for(;p--;)e[b++]=a[c++];this.b=b;e=this.f();b=this.b;}break;case Aa:for(;b+g>e.length;)e=this.f({v:2});break;default:m(Error("invalid inflate mode"));}if(G)e.set(a.subarray(c,c+g),b),b+=g,c+=g;else for(;g--;)e[b++]=a[c++];this.c=c;this.b=b;this.a=e;break;case 1:this.o(Da,Ea);break;case 2:for(var q=V(this,5)+257,r=V(this,5)+1,n=V(this,4)+4,l=new (G?Uint8Array:Array)(Sa.length),s=w,t=w,x=w,E=w,B=w,C=w,L=w,v=w,M=w,v=0;v<n;++v)l[Sa[v]]=V(this,3);if(!G){v=
+            n;for(n=l.length;v<n;++v)l[Sa[v]]=0;}s=S(l);E=new (G?Uint8Array:Array)(q+r);v=0;for(M=q+r;v<M;)switch(B=Ta(this,s),B){case 16:for(L=3+V(this,2);L--;)E[v++]=C;break;case 17:for(L=3+V(this,3);L--;)E[v++]=0;C=0;break;case 18:for(L=11+V(this,7);L--;)E[v++]=0;C=0;break;default:C=E[v++]=B;}t=G?S(E.subarray(0,q)):S(E.slice(0,q));x=G?S(E.subarray(q)):S(E.slice(q));this.o(t,x);break;default:m(Error("unknown BTYPE: "+d));}}return this.t()};
+        var Ua=[16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15],Sa=G?new Uint16Array(Ua):Ua,Va=[3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258,258,258],Wa=G?new Uint16Array(Va):Va,Xa=[0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,0,0],Ya=G?new Uint8Array(Xa):Xa,Za=[1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577],$a=G?new Uint16Array(Za):Za,ab=[0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,
+            10,11,11,12,12,13,13],bb=G?new Uint8Array(ab):ab,cb=new (G?Uint8Array:Array)(288),W,db;W=0;for(db=cb.length;W<db;++W)cb[W]=143>=W?8:255>=W?9:279>=W?7:8;var Da=S(cb),eb=new (G?Uint8Array:Array)(30),fb,hb;fb=0;for(hb=eb.length;fb<hb;++fb)eb[fb]=5;var Ea=S(eb);function V(d,a){for(var c=d.g,e=d.e,b=d.input,f=d.c,g=b.length,h;e<a;)f>=g&&m(Error("input buffer is broken")),c|=b[f++]<<e,e+=8;h=c&(1<<a)-1;d.g=c>>>a;d.e=e-a;d.c=f;return h}
+        function Ta(d,a){for(var c=d.g,e=d.e,b=d.input,f=d.c,g=b.length,h=a[0],k=a[1],p,q;e<k&&!(f>=g);)c|=b[f++]<<e,e+=8;p=h[c&(1<<k)-1];q=p>>>16;q>e&&m(Error("invalid code length: "+q));d.g=c>>q;d.e=e-q;d.c=f;return p&65535}
+        U.prototype.o=function(d,a){var c=this.a,e=this.b;this.u=d;for(var b=c.length-258,f,g,h,k;256!==(f=Ta(this,d));)if(256>f)e>=b&&(this.b=e,c=this.f(),e=this.b),c[e++]=f;else {g=f-257;k=Wa[g];0<Ya[g]&&(k+=V(this,Ya[g]));f=Ta(this,a);h=$a[f];0<bb[f]&&(h+=V(this,bb[f]));e>=b&&(this.b=e,c=this.f(),e=this.b);for(;k--;)c[e]=c[e++-h];}for(;8<=this.e;)this.e-=8,this.c--;this.b=e;};
+        U.prototype.I=function(d,a){var c=this.a,e=this.b;this.u=d;for(var b=c.length,f,g,h,k;256!==(f=Ta(this,d));)if(256>f)e>=b&&(c=this.f(),b=c.length),c[e++]=f;else {g=f-257;k=Wa[g];0<Ya[g]&&(k+=V(this,Ya[g]));f=Ta(this,a);h=$a[f];0<bb[f]&&(h+=V(this,bb[f]));e+k>b&&(c=this.f(),b=c.length);for(;k--;)c[e]=c[e++-h];}for(;8<=this.e;)this.e-=8,this.c--;this.b=e;};
+        U.prototype.f=function(){var d=new (G?Uint8Array:Array)(this.b-32768),a=this.b-32768,c,e,b=this.a;if(G)d.set(b.subarray(32768,d.length));else {c=0;for(e=d.length;c<e;++c)d[c]=b[c+32768];}this.l.push(d);this.q+=d.length;if(G)b.set(b.subarray(a,a+32768));else for(c=0;32768>c;++c)b[c]=b[a+c];this.b=32768;return b};
+        U.prototype.J=function(d){var a,c=this.input.length/this.c+1|0,e,b,f,g=this.input,h=this.a;d&&("number"===typeof d.v&&(c=d.v),"number"===typeof d.F&&(c+=d.F));2>c?(e=(g.length-this.c)/this.u[2],f=258*(e/2)|0,b=f<h.length?h.length+f:h.length<<1):b=h.length*c;G?(a=new Uint8Array(b),a.set(h)):a=h;return this.a=a};
+        U.prototype.t=function(){var d=0,a=this.a,c=this.l,e,b=new (G?Uint8Array:Array)(this.q+(this.b-32768)),f,g,h,k;if(0===c.length)return G?this.a.subarray(32768,this.b):this.a.slice(32768,this.b);f=0;for(g=c.length;f<g;++f){e=c[f];h=0;for(k=e.length;h<k;++h)b[d++]=e[h];}f=32768;for(g=this.b;f<g;++f)b[d++]=a[f];this.l=[];return this.buffer=b};
+        U.prototype.H=function(){var d,a=this.b;G?this.B?(d=new Uint8Array(a),d.set(this.a.subarray(0,a))):d=this.a.subarray(0,a):(this.a.length>a&&(this.a.length=a),d=this.a);return this.buffer=d};function ib(d){if("string"===typeof d){var a=d.split(""),c,e;c=0;for(e=a.length;c<e;c++)a[c]=(a[c].charCodeAt(0)&255)>>>0;d=a;}for(var b=1,f=0,g=d.length,h,k=0;0<g;){h=1024<g?1024:g;g-=h;do b+=d[k++],f+=b;while(--h);b%=65521;f%=65521;}return (f<<16|b)>>>0}function jb(d,a){var c,e;this.input=d;this.c=0;if(a||!(a={}))a.index&&(this.c=a.index),a.verify&&(this.M=a.verify);c=d[this.c++];e=d[this.c++];switch(c&15){case kb:this.method=kb;break;default:m(Error("unsupported compression method"));}0!==((c<<8)+e)%31&&m(Error("invalid fcheck flag:"+((c<<8)+e)%31));e&32&&m(Error("fdict flag is not supported"));this.A=new U(d,{index:this.c,bufferSize:a.bufferSize,bufferType:a.bufferType,resize:a.resize});}
+        jb.prototype.p=function(){var d=this.input,a,c;a=this.A.p();this.c=this.A.c;this.M&&(c=(d[this.c++]<<24|d[this.c++]<<16|d[this.c++]<<8|d[this.c++])>>>0,c!==ib(a)&&m(Error("invalid adler-32 checksum")));return a};var kb=8;function lb(d,a){this.input=d;this.a=new (G?Uint8Array:Array)(32768);this.h=X.k;var c={},e;if((a||!(a={}))&&"number"===typeof a.compressionType)this.h=a.compressionType;for(e in a)c[e]=a[e];c.outputBuffer=this.a;this.z=new ka(this.input,c);}var X=oa;
+        lb.prototype.j=function(){var d,a,c,e,b,f,g,h=0;g=this.a;d=kb;switch(d){case kb:a=Math.LOG2E*Math.log(32768)-8;break;default:m(Error("invalid compression method"));}c=a<<4|d;g[h++]=c;switch(d){case kb:switch(this.h){case X.NONE:b=0;break;case X.r:b=1;break;case X.k:b=2;break;default:m(Error("unsupported compression type"));}break;default:m(Error("invalid compression method"));}e=b<<6|0;g[h++]=e|31-(256*c+e)%31;f=ib(this.input);this.z.b=h;g=this.z.j();h=g.length;G&&(g=new Uint8Array(g.buffer),g.length<=
+        h+4&&(this.a=new Uint8Array(g.length+4),this.a.set(g),g=this.a),g=g.subarray(0,h+4));g[h++]=f>>24&255;g[h++]=f>>16&255;g[h++]=f>>8&255;g[h++]=f&255;return g};function mb(d,a){var c,e,b,f;if(Object.keys)c=Object.keys(a);else for(e in c=[],b=0,a)c[b++]=e;b=0;for(f=c.length;b<f;++b)e=c[b],A(d+"."+e,a[e]);}A("Zlib.Inflate",jb);A("Zlib.Inflate.prototype.decompress",jb.prototype.p);mb("Zlib.Inflate.BufferType",{ADAPTIVE:Ca.C,BLOCK:Ca.D});A("Zlib.Deflate",lb);A("Zlib.Deflate.compress",function(d,a){return (new lb(d,a)).j()});A("Zlib.Deflate.prototype.compress",lb.prototype.j);mb("Zlib.Deflate.CompressionType",{NONE:X.NONE,FIXED:X.r,DYNAMIC:X.k});}).call(self);
+
+    /**
+     * Common utilities
+     * @module glMatrix
+     */
+    var ARRAY_TYPE = typeof Float32Array !== 'undefined' ? Float32Array : Array;
+    if (!Math.hypot) Math.hypot = function () {
+      var y = 0,
+          i = arguments.length;
+
+      while (i--) {
+        y += arguments[i] * arguments[i];
+      }
+
+      return Math.sqrt(y);
+    };
+
+    /**
+     * 3 Dimensional Vector
+     * @module vec3
+     */
+
+    /**
+     * Creates a new, empty vec3
+     *
+     * @returns {vec3} a new 3D vector
+     */
+
+    function create$1() {
+      var out = new ARRAY_TYPE(3);
+
+      if (ARRAY_TYPE != Float32Array) {
+        out[0] = 0;
+        out[1] = 0;
+        out[2] = 0;
+      }
+
+      return out;
+    }
+    /**
+     * Subtracts vector b from vector a
+     *
+     * @param {vec3} out the receiving vector
+     * @param {ReadonlyVec3} a the first operand
+     * @param {ReadonlyVec3} b the second operand
+     * @returns {vec3} out
+     */
+
+    function subtract(out, a, b) {
+      out[0] = a[0] - b[0];
+      out[1] = a[1] - b[1];
+      out[2] = a[2] - b[2];
+      return out;
+    }
+    /**
+     * Normalize a vec3
+     *
+     * @param {vec3} out the receiving vector
+     * @param {ReadonlyVec3} a vector to normalize
+     * @returns {vec3} out
+     */
+
+    function normalize(out, a) {
+      var x = a[0];
+      var y = a[1];
+      var z = a[2];
+      var len = x * x + y * y + z * z;
+
+      if (len > 0) {
+        //TODO: evaluate use of glm_invsqrt here?
+        len = 1 / Math.sqrt(len);
+      }
+
+      out[0] = a[0] * len;
+      out[1] = a[1] * len;
+      out[2] = a[2] * len;
+      return out;
+    }
+    /**
+     * Computes the cross product of two vec3's
+     *
+     * @param {vec3} out the receiving vector
+     * @param {ReadonlyVec3} a the first operand
+     * @param {ReadonlyVec3} b the second operand
+     * @returns {vec3} out
+     */
+
+    function cross(out, a, b) {
+      var ax = a[0],
+          ay = a[1],
+          az = a[2];
+      var bx = b[0],
+          by = b[1],
+          bz = b[2];
+      out[0] = ay * bz - az * by;
+      out[1] = az * bx - ax * bz;
+      out[2] = ax * by - ay * bx;
+      return out;
+    }
+    /**
+     * Alias for {@link vec3.subtract}
+     * @function
+     */
+
+    var sub = subtract;
+    /**
+     * Perform some operation over an array of vec3s.
+     *
+     * @param {Array} a the array of vectors to iterate over
+     * @param {Number} stride Number of elements between the start of each vec3. If 0 assumes tightly packed
+     * @param {Number} offset Number of elements to skip at the beginning of the array
+     * @param {Number} count Number of vec3s to iterate over. If 0 iterates over entire array
+     * @param {Function} fn Function to call for each vector in the array
+     * @param {Object} [arg] additional argument to pass to fn
+     * @returns {Array} a
+     * @function
+     */
+
+    (function () {
+      var vec = create$1();
+      return function (a, stride, offset, count, fn, arg) {
+        var i, l;
+
+        if (!stride) {
+          stride = 3;
+        }
+
+        if (!offset) {
+          offset = 0;
+        }
+
+        if (count) {
+          l = Math.min(count * stride + offset, a.length);
+        } else {
+          l = a.length;
+        }
+
+        for (i = offset; i < l; i += stride) {
+          vec[0] = a[i];
+          vec[1] = a[i + 1];
+          vec[2] = a[i + 2];
+          fn(vec, vec, arg);
+          a[i] = vec[0];
+          a[i + 1] = vec[1];
+          a[i + 2] = vec[2];
+        }
+
+        return a;
+      };
+    })();
+
+    /**
+     * 2 Dimensional Vector
+     * @module vec2
+     */
+
+    /**
+     * Creates a new, empty vec2
+     *
+     * @returns {vec2} a new 2D vector
+     */
+
+    function create() {
+      var out = new ARRAY_TYPE(2);
+
+      if (ARRAY_TYPE != Float32Array) {
+        out[0] = 0;
+        out[1] = 0;
+      }
+
+      return out;
+    }
+    /**
+     * Set the components of a vec2 to the given values
+     *
+     * @param {vec2} out the receiving vector
+     * @param {Number} x X component
+     * @param {Number} y Y component
+     * @returns {vec2} out
+     */
+
+    function set(out, x, y) {
+      out[0] = x;
+      out[1] = y;
+      return out;
+    }
+    /**
+     * Perform some operation over an array of vec2s.
+     *
+     * @param {Array} a the array of vectors to iterate over
+     * @param {Number} stride Number of elements between the start of each vec2. If 0 assumes tightly packed
+     * @param {Number} offset Number of elements to skip at the beginning of the array
+     * @param {Number} count Number of vec2s to iterate over. If 0 iterates over entire array
+     * @param {Function} fn Function to call for each vector in the array
+     * @param {Object} [arg] additional argument to pass to fn
+     * @returns {Array} a
+     * @function
+     */
+
+    (function () {
+      var vec = create();
+      return function (a, stride, offset, count, fn, arg) {
+        var i, l;
+
+        if (!stride) {
+          stride = 2;
+        }
+
+        if (!offset) {
+          offset = 0;
+        }
+
+        if (count) {
+          l = Math.min(count * stride + offset, a.length);
+        } else {
+          l = a.length;
+        }
+
+        for (i = offset; i < l; i += stride) {
+          vec[0] = a[i];
+          vec[1] = a[i + 1];
+          fn(vec, vec, arg);
+          a[i] = vec[0];
+          a[i + 1] = vec[1];
+        }
+
+        return a;
+      };
+    })();
+
+    const P0P1 = [];
+    const P1P2 = [];
+    const A$1 = [];
+    const B = [];
+    const C = [];
+    const POSITIONS = [];
+    const maxShort = 32767;
+
+    const terrainStructure = {
+        width: 64,
+        height: 64,
+        elementsPerHeight: 3,
+        heightOffset: -1000,
+        exaggeration: 1.0,
+        heightScale: 0.001,
+        elementMultiplier: 256,
+        stride: 4,
+        skirtHeight: 0.002,
+        skirtOffset: 0.01 // 用于减少地形瓦片之间的缝隙
+    };
+
+    function lerp(p, q, time) {
+        return (1.0 - time) * p + time * q;
+    }
+
+    const textDecoder = new TextDecoder('utf-8');
+    function uint8ArrayToString(fileData) {
+        return textDecoder.decode(fileData);
+    }
+
+    function decZlibBuffer(zBuffer) {
+        if (zBuffer.length < 1000) {
+            return null;
+        }
+        // @ts-ignore
+        const inflate = new self.Zlib.Inflate(zBuffer);
+
+        if (inflate) {
+            return inflate.decompress();
+        }
+        return null;
+    }
+
+    function transformBuffer(zlibData) {
+        const DataSize = 2;
+        const dZlib = zlibData;
+
+        const myW = terrainStructure.width;
+        const myH = terrainStructure.height;
+        const myBuffer = new Uint8Array(myW * myH * terrainStructure.stride);
+
+        let i_height;
+        let NN, NN_R;
+        let jj_n, ii_n;
+        for (let jj = 0; jj < myH; jj++) {
+            for (let ii = 0; ii < myW; ii++) {
+                // @ts-ignore
+                jj_n = parseInt((149 * jj) / (myH - 1));
+                // @ts-ignore
+                ii_n = parseInt((149 * ii) / (myW - 1));
+                // @ts-ignore
+                {
+                    NN = DataSize * (jj_n * 150 + ii_n);
+                    i_height = dZlib[NN] + (dZlib[NN + 1] * 256);
+                }
+                if (i_height > 10000 || i_height < -2000) { // 低于海平面2000，高于地面10000
+                    i_height = 0;
+                }
+                NN_R = (jj * myW + ii) * 4;
+                const i_height_new = (i_height + 1000) / terrainStructure.heightScale;
+                const elementMultiplier = terrainStructure.elementMultiplier;
+                myBuffer[NN_R] = i_height_new / (elementMultiplier * elementMultiplier);
+                myBuffer[NN_R + 1] = (i_height_new - myBuffer[NN_R] * elementMultiplier * elementMultiplier) / elementMultiplier;
+                myBuffer[NN_R + 2] = i_height_new - myBuffer[NN_R] * elementMultiplier * elementMultiplier - myBuffer[NN_R + 1] * elementMultiplier;
+                myBuffer[NN_R + 3] = 255;
+            }
+        }
+        return myBuffer;
+    }
+
+    function zigZagDecode(value) {
+        return (value >> 1) ^ -(value & 1);
+    }
+
+    function zigZagDeltaDecode(uBuffer, vBuffer, heightBuffer) {
+        const count = uBuffer.length;
+
+        let u = 0;
+        let v = 0;
+        let height = 0;
+
+        for (let i = 0; i < count; ++i) {
+            u += zigZagDecode(uBuffer[i]);
+            v += zigZagDecode(vBuffer[i]);
+
+            uBuffer[i] = u;
+            vBuffer[i] = v;
+
+            if (heightBuffer) {
+                height += zigZagDecode(heightBuffer[i]);
+                heightBuffer[i] = height;
+            }
+        }
+    }
+
+    function createHeightMap(heightmap, terrainWidth/*, exag */) {
+        const width = terrainWidth, height = terrainWidth;
+        const endRow = width + 1, endColum = height + 1;
+        const elementsPerHeight = terrainStructure.elementsPerHeight;
+        const heightOffset = terrainStructure.heightOffset;
+        const exaggeration = 1;// terrainStructure.exaggeration || exag;
+        const heightScale = terrainStructure.heightScale;
+        const elementMultiplier = terrainStructure.elementMultiplier;
+        const stride = 4;
+        const skirtHeight = terrainStructure.skirtHeight;
+        const heights = new Float32Array(endRow * endColum);
+        let index = 0;
+        let min = Infinity;
+        let max = -Infinity;
+        for (let i = 0; i < endRow; i++) {
+            const row = i >= height ? height - 1 : i;
+            for (let j = 0; j < endColum; j++) {
+                const colum = j >= width ? width - 1 : j;
+                let heightSample = 0;
+                const terrainOffset = row * (width * stride) + colum * stride;
+                for (let elementOffset = 0; elementOffset < elementsPerHeight; elementOffset++) {
+                    heightSample = (heightSample * elementMultiplier) + heightmap[terrainOffset + elementOffset];
+                }
+                heightSample = (heightSample * heightScale + heightOffset) * exaggeration;
+                heightSample -= skirtHeight;
+                heights[index] = heightSample;
+                if (heightSample < min) {
+                    min = heightSample;
+                }
+                if (heightSample > max) {
+                    max = heightSample;
+                }
+                index++;
+            }
+        }
+        return { data: heights, min, max, width: 0, height: 0, tileSize: 0, image: null };
+    }
+
+    function generateTiandituTerrain(buffer, terrainWidth, tileSize) {
+        const zBuffer = new Uint8Array(buffer);
+
+        const dZlib = decZlibBuffer(zBuffer);
+        if (!dZlib) {
+            throw new Error(uint8ArrayToString(new Uint8Array(buffer)));
+        }
+        const heightBuffer = transformBuffer(dZlib);
+        const result = createHeightMap(heightBuffer, terrainWidth - 1);
+        result.width = result.height = terrainWidth;
+        result.tileSize = tileSize;
+        createTerrainImage(result);
+        return result;
+    }
+
+    class Triangle {
+        constructor(positions, a, b, c, radius) {
+            this.p0 = [];
+            this.p1 = [];
+            this.p2 = [];
+            this.normal = [];
+            this.min = [];
+            this.max = [];
+            this.set(positions, a, b, c, radius);
+        }
+
+        set(positions, a, b, c, radius) {
+            this.radius = radius;
+            let x = a * 3;
+            let y = a * 3 + 1;
+            let z = a * 3 + 2;
+            this.p0[0] = positions[x] * radius;
+            this.p0[1] = positions[y] * radius;
+            this.p0[2] = positions[z];
+            x = b * 3;
+            y = b * 3 + 1;
+            z = b * 3 + 2;
+            this.p1[0] = positions[x] * radius;
+            this.p1[1] = positions[y] * radius;
+            this.p1[2] = positions[z];
+            x = c * 3;
+            y = c * 3 + 1;
+            z = c * 3 + 2;
+            this.p2[0] = positions[x] * radius;
+            this.p2[1] = positions[y] * radius;
+            this.p2[2] = positions[z];
+
+            this.min[0] = Math.min(this.p0[0], this.p1[0], this.p2[0]);
+            this.min[1] = Math.min(this.p0[1], this.p1[1], this.p2[1]);
+
+            this.max[0] = Math.max(this.p0[0], this.p1[0], this.p2[0]);
+            this.max[1] = Math.max(this.p0[1], this.p1[1], this.p2[1]);
+
+            const p0p1 = sub(P0P1, this.p1, this.p0);
+            const p1p2 = sub(P1P2, this.p2, this.p1);
+            this.normal = normalize(this.normal, cross(this.normal, p0p1, p1p2));
+        }
+
+        contains(x, y) {
+            if (x < this.min[0] || x > this.max[0] || y < this.min[1] || y > this.max[1]) {
+                return false;
+            }
+            set(A$1, this.p0[0], this.p0[1]);
+            set(B, this.p1[0], this.p1[1]);
+            set(C, this.p2[0], this.p2[1]);
+            const SABC = calTriangleArae(A$1[0], A$1[1], B[0], B[1], C[0], C[1]);
+            const SPAC = calTriangleArae(x, y, A$1[0], A$1[1], C[0], C[1]);
+            const SPAB = calTriangleArae(x, y, A$1[0], A$1[1], B[0], B[1]);
+            const SPBC = calTriangleArae(x, y, B[0], B[1], C[0], C[1]);
+            return SPAC + SPAB + SPBC - SABC <= 0.0001;
+        }
+
+        getHeight(x, y) {
+            // https://stackoverflow.com/questions/18755251/linear-interpolation-of-three-3d-points-in-3d-space
+            // z1 - ((x4-x1)*N.x + (y4-y1)*N.y)/ N.z
+            const N = this.normal;
+            return this.p0[2] - ((x - this.p0[0]) * N[0] + (y - this.p0[1]) * N[1]) / N[2];
+        }
+    }
+
+    function calTriangleArae(x1, y1, x2, y2, x3, y3) {
+        return Math.abs(x1 * y2 + x2 * y3 + x3 * y1 - x1 * y3 - x2 * y1 - x3 * y2) * 0.5;
+    }
+
+    // 当前像素命中某三角形后，下一个像素也很可能会在该三角形中，可以节省一些循环
+    let preTriangle = null;
+    function findInTriangle(triangles, x, y) {
+        if (preTriangle && preTriangle.contains(x, y)) {
+            return preTriangle.getHeight(x, y);
+        }
+        for (let i = 0; i < triangles.length; i++) {
+            if (triangles[i].contains(x, y)) {
+                preTriangle = triangles[i];
+                return triangles[i].getHeight(x, y);
+            }
+        }
+        return 0;
+    }
+
+    const TRIANGLES = [];
+
+    function cesiumTerrainToHeights(buffer, terrainWidth, tileSize) {
+        const terrainData = generateCesiumTerrain(buffer);
+        const { positions, min, max, indices, radius } = terrainData;
+        const triangles = [];
+        let index = 0;
+        for (let i = 0; i < indices.length; i += 3) {
+            let triangle = TRIANGLES[index];
+            if (triangle) {
+                triangle.set(positions, indices[i], indices[i + 1], indices[i + 2], radius * 2);
+            } else {
+                triangle = TRIANGLES[index] = new Triangle(positions, indices[i], indices[i + 1], indices[i + 2], radius * 2);
+            }
+            index++;
+            triangles.push(triangle);
+        }
+        const heights = new Float32Array(terrainWidth * terrainWidth);
+        index = 0;
+        for (let i = 0; i < terrainWidth; i++) {
+            for (let j = 0; j < terrainWidth; j++) {
+                heights[index++] = findInTriangle(triangles, j / terrainWidth * radius * 2, i / terrainWidth * radius * 2);
+            }
+        }
+
+        const result = { data: heights, min, max, width: terrainWidth, height: terrainWidth, tileSize };
+        createTerrainImage(result);
+        console.log(result);
+        return result;
+    }
+
+    function generateCesiumTerrain(buffer) {
+        // cesium 格式说明：
+        // https://www.cnblogs.com/oloroso/p/11080222.html
+        let pos = 0;
+        const cartesian3Elements = 3;
+        // const boundingSphereElements = cartesian3Elements + 1;
+        const cartesian3Length = Float64Array.BYTES_PER_ELEMENT * cartesian3Elements;
+        // const boundingSphereLength =
+        // Float64Array.BYTES_PER_ELEMENT * boundingSphereElements;
+        const encodedVertexElements = 3;
+        const encodedVertexLength =
+            Uint16Array.BYTES_PER_ELEMENT * encodedVertexElements;
+        const triangleElements = 3;
+        let bytesPerIndex = Uint16Array.BYTES_PER_ELEMENT;
+
+        const view = new DataView(buffer);
+        pos += cartesian3Length;
+
+        const minimumHeight = view.getFloat32(pos, true);
+        pos += Float32Array.BYTES_PER_ELEMENT;
+        const maximumHeight = view.getFloat32(pos, true);
+        pos += Float32Array.BYTES_PER_ELEMENT;
+        pos += cartesian3Length;
+        const radius = view.getFloat64(pos, true);
+        pos += Float64Array.BYTES_PER_ELEMENT;
+        pos += cartesian3Length;
+
+        const vertexCount = view.getUint32(pos, true);
+        pos += Uint32Array.BYTES_PER_ELEMENT;
+        const encodedVertexBuffer = new Uint16Array(buffer, pos, vertexCount * 3);
+        pos += vertexCount * encodedVertexLength;
+
+        if (vertexCount > 64 * 1024) {
+            bytesPerIndex = Uint32Array.BYTES_PER_ELEMENT;
+        }
+
+        const uBuffer = encodedVertexBuffer.subarray(0, vertexCount);
+        const vBuffer = encodedVertexBuffer.subarray(vertexCount, 2 * vertexCount);
+        const heightBuffer = encodedVertexBuffer.subarray(
+            vertexCount * 2,
+            3 * vertexCount
+        );
+
+        zigZagDeltaDecode(uBuffer, vBuffer, heightBuffer);
+
+        if (pos % bytesPerIndex !== 0) {
+            pos += bytesPerIndex - (pos % bytesPerIndex);
+        }
+
+        const triangleCount = view.getUint32(pos, true);
+        pos += Uint32Array.BYTES_PER_ELEMENT;
+        const indices = vertexCount > 65536 ? new Uint32Array(buffer, pos, triangleCount * triangleElements) : new Uint16Array(buffer, pos, triangleCount * triangleElements);
+
+        let highest = 0;
+        const length = indices.length;
+        for (let i = 0; i < length; ++i) {
+            const code = indices[i];
+            indices[i] = highest - code;
+            if (code === 0) {
+                ++highest;
+            }
+        }
+        const terrain = {
+            minimumHeight: minimumHeight,
+            maximumHeight: maximumHeight,
+            quantizedVertices: encodedVertexBuffer,
+            indices: indices
+        };
+
+        const quantizedVertices = terrain.quantizedVertices;
+        const quantizedVertexCount = quantizedVertices.length / 3;
+        const uBuffer_1 = quantizedVertices.subarray(0, quantizedVertexCount);
+        const vBuffer_1 = quantizedVertices.subarray(
+            quantizedVertexCount,
+            2 * quantizedVertexCount
+        );
+        const heightBuffer_1 = quantizedVertices.subarray(
+            quantizedVertexCount * 2,
+            3 * quantizedVertexCount
+        );
+        const positions = POSITIONS;
+        for (let i = 0; i < quantizedVertexCount; ++i) {
+            const rawU = uBuffer_1[i];
+            const rawV = vBuffer_1[i];
+
+            const u = rawU / maxShort;
+            const v = rawV / maxShort;
+            const height = lerp(
+                minimumHeight,
+                maximumHeight,
+                heightBuffer_1[i] / maxShort
+            );
+            positions[i * 3] = u;
+            positions[i * 3 + 1] = (1 - v);
+            positions[i * 3 + 2] = height;
+        }
+        return { positions, radius, min: minimumHeight, max: maximumHeight, indices };
+    }
+
+    function createTerrainImage(terrainData) {
+        const canvas = getCanvas();
+        const { width, height, data, tileSize } = terrainData;
+        if (!width || !height || !data) {
+            return;
+        }
+        try {
+            resizeCanvas(canvas, width, height);
+            let ctx = getCanvasContext(canvas);
+            const imageData = ctx.createImageData(width, height);
+            const out = [0, 0, 0];
+            for (let i = 0, len = data.length; i < len; i++) {
+                const height = data[i];
+                const [r, g, b] = encodeMapBox(height, out);
+                const idx = 4 * i;
+                imageData.data[idx] = r;
+                imageData.data[idx + 1] = g;
+                imageData.data[idx + 2] = b;
+                imageData.data[idx + 3] = 255;
+            }
+            ctx.putImageData(imageData, 0, 0);
+            const image = canvas.transferToImageBitmap();
+            resizeCanvas(canvas, tileSize, tileSize);
+            ctx = getCanvasContext(canvas);
+            ctx.drawImage(image, 0, 0, width, height, 0, 0, tileSize, tileSize);
+            terrainData.image = canvas.transferToImageBitmap();
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const tileImageCache = new LRUCache(200, (image) => {
         disposeImage(image);
+    });
+    const tileBufferCache = new LRUCache(200, (buffer) => {
+        // disposeImage(image);
     });
     function formatTileUrlBySubdomains(url, subdomains) {
         if (!subdomains || !subdomains.length) {
@@ -657,7 +1330,7 @@ export default ` (function (exports) { 'use strict';
                 reject(createError('taskId is null'));
                 return;
             }
-            const image = tileCache.get(url);
+            const image = tileImageCache.get(url);
             if (image) {
                 copyImageBitMap(image);
             }
@@ -679,10 +1352,53 @@ export default ` (function (exports) { 'use strict';
                 cacheFetch(taskId, control);
                 fetch(url, fetchOptions).then(res => res.blob()).then(blob => createImageBitmap(blob)).then(image => {
                     if (options.disableCache !== true) {
-                        tileCache.add(url, image);
+                        tileImageCache.add(url, image);
                     }
                     finishFetch(control);
                     copyImageBitMap(image);
+                }).catch(error => {
+                    finishFetch(control);
+                    reject(error);
+                });
+            }
+        });
+    }
+    function fetchTileBuffer(url, headers = {}, options) {
+        return new Promise((resolve, reject) => {
+            const copyBuffer = (buffer) => {
+                resolve(buffer);
+            };
+            const taskId = options.__taskId;
+            if (!taskId) {
+                reject(createError('taskId is null'));
+                return;
+            }
+            const buffer = tileBufferCache.get(url);
+            if (buffer) {
+                copyBuffer(buffer);
+            }
+            else {
+                const fetchOptions = options.fetchOptions || {
+                    headers,
+                    referrer: options.referrer
+                };
+                const timeout = options.timeout || 0;
+                const control = new AbortController();
+                const signal = control.signal;
+                if (timeout && isNumber(timeout) && timeout > 0) {
+                    setTimeout(() => {
+                        control.abort(FetchTimeoutError);
+                    }, timeout);
+                }
+                fetchOptions.signal = signal;
+                delete fetchOptions.timeout;
+                cacheFetch(taskId, control);
+                fetch(url, fetchOptions).then(res => res.arrayBuffer()).then(buffer => {
+                    if (options.disableCache !== true) {
+                        tileBufferCache.add(url, buffer);
+                    }
+                    finishFetch(control);
+                    copyBuffer(buffer);
                 }).catch(error => {
                     finishFetch(control);
                     reject(error);
@@ -866,28 +1582,8 @@ export default ` (function (exports) { 'use strict';
             }
             const urls = checkTileUrl(url);
             const headers = Object.assign({}, HEADERS, options.headers || {});
-            const fetchTiles = urls.map(tileUrl => {
-                return fetchTile(tileUrl, headers, options);
-            });
-            const { returnBlobURL } = options;
-            Promise.all(fetchTiles).then(imagebits => {
-                const canvas = getCanvas();
-                if (!canvas) {
-                    reject(CANVAS_ERROR_MESSAGE);
-                    return;
-                }
-                const image = mergeImages(imagebits);
-                if (image instanceof Error) {
-                    reject(image);
-                    return;
-                }
-                resizeCanvas(canvas, image.width, image.height);
-                const ctx = getCanvasContext(canvas);
-                ctx.drawImage(image, 0, 0);
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                transformMapZen(imageData);
-                ctx.putImageData(imageData, 0, 0);
-                const terrainImage = canvas.transferToImageBitmap();
+            const { returnBlobURL, terrainWidth, tileSize } = options;
+            const returnImage = (terrainImage) => {
                 if (!returnBlobURL) {
                     resolve(terrainImage);
                 }
@@ -899,9 +1595,72 @@ export default ` (function (exports) { 'use strict';
                         reject(error);
                     });
                 }
-            }).catch(error => {
-                reject(error);
-            });
+            };
+            if (terrainType === 'mapzen') {
+                const fetchTiles = urls.map(tileUrl => {
+                    return fetchTile(tileUrl, headers, options);
+                });
+                Promise.all(fetchTiles).then(imagebits => {
+                    const canvas = getCanvas();
+                    if (!canvas) {
+                        reject(CANVAS_ERROR_MESSAGE);
+                        return;
+                    }
+                    const image = mergeImages(imagebits);
+                    if (image instanceof Error) {
+                        reject(image);
+                        return;
+                    }
+                    resizeCanvas(canvas, image.width, image.height);
+                    const ctx = getCanvasContext(canvas);
+                    ctx.drawImage(image, 0, 0);
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    transformMapZen(imageData);
+                    ctx.putImageData(imageData, 0, 0);
+                    const terrainImage = canvas.transferToImageBitmap();
+                    returnImage(terrainImage);
+                }).catch(error => {
+                    reject(error);
+                });
+            }
+            else if (terrainType === 'tianditu' || terrainType === 'cesium') {
+                const fetchTiles = urls.map(tileUrl => {
+                    return fetchTileBuffer(tileUrl, headers, options);
+                });
+                Promise.all(fetchTiles).then(buffers => {
+                    const canvas = getCanvas();
+                    if (!canvas) {
+                        reject(CANVAS_ERROR_MESSAGE);
+                        return;
+                    }
+                    if (!buffers || buffers.length === 0) {
+                        reject(createError('buffers is null'));
+                        return;
+                    }
+                    const buffer = buffers[0];
+                    if (buffer.byteLength === 0) {
+                        reject(createError('buffer is empty'));
+                        return;
+                    }
+                    let result;
+                    if (terrainType === 'tianditu') {
+                        result = generateTiandituTerrain(buffer, terrainWidth, tileSize);
+                    }
+                    else {
+                        result = cesiumTerrainToHeights(buffer, terrainWidth, tileSize);
+                    }
+                    if (!result.image) {
+                        reject(createError('generate terrain data error,not find image data'));
+                        return;
+                    }
+                    resolve(result.image);
+                }).catch(error => {
+                    reject(error);
+                });
+            }
+            else {
+                reject(createError('not support terrainType:' + terrainType));
+            }
         });
     }
 

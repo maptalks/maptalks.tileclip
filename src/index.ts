@@ -4,6 +4,7 @@ import WORKERCODE from './worker/worker.bundle.js';
 import { isImageBitmap, isPolygon } from './util';
 import { BBOXtype } from './bbox';
 import { createError, FetchCancelError, isNumber, uuid } from './util.js';
+export { getBlankTile, get404Tile } from './canvas';
 
 const WORKERNAME = '__maptalks.tileclip';
 
@@ -26,12 +27,14 @@ export type getTileOptions = {
 
 export type encodeTerrainTileOptions = {
     url: string | Array<string>;
+    terrainType: 'mapzen' | 'tianditu' | 'cesium';
+    terrainWidth?: number;
+    tileSize?: number;
     referrer?: string;
     headers?: Record<string, string>;
     fetchOptions?: Record<string, any>;
     timeout?: number;
     returnBlobURL?: boolean;
-    terrainType: 'mapzen' | 'tianditu' | 'cesium'
 }
 
 export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {
@@ -111,7 +114,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'getTile');
         const workerId = (options as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
-            this.send(Object.assign(options), [], (error, image) => {
+            this.send(options, [], (error, image) => {
                 if (error || (promise as any).canceled) {
                     reject(error || FetchCancelError);
                 } else {
@@ -316,7 +319,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'encodeTerrainTile');
         const workerId = (options as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
-            this.send(Object.assign(options), [], (error, image) => {
+            this.send(Object.assign({ terrainWidth: 65, tileSize: 256 }, options), [], (error, image) => {
                 if (error || (promise as any).canceled) {
                     reject(error || FetchCancelError);
                 } else {

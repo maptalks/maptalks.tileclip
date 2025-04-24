@@ -37,9 +37,17 @@ export function getCanvasContext(canvas: OffscreenCanvas) {
 export function getBlankTile(tileSize?: number) {
     const canvas = getCanvas(tileSize);
     const ctx = getCanvasContext(canvas);
-    // ctx.fillText('404', 100, 100);
-    // ctx.rect(0, 0, canvas.width, canvas.height);
-    // ctx.stroke();
+    return canvas.transferToImageBitmap();
+}
+
+export function get404Tile(tileSize?: number) {
+    const canvas = getCanvas(tileSize);
+    const ctx = getCanvasContext(canvas);
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillStyle='gray';
+    ctx.font = "bold 24px serif";
+    ctx.fillText('404', canvas.width / 2, canvas.height / 2)
     return canvas.transferToImageBitmap();
 }
 

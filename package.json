@@ -29,6 +29,7 @@
   "dependencies": {
     "@mapbox/sphericalmercator": "^2.0.1",
     "@maptalks/geojson-bbox": "^1.0.5",
+    "gl-matrix": "^3.4.3",
     "glur": "^1.1.2",
     "lineclip": "^1.1.5"
   },

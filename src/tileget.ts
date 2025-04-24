@@ -2,10 +2,14 @@ import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions } f
 import { getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeImages, resizeCanvas, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
 import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage, transformMapZen } from './util';
+import { cesiumTerrainToHeights, generateTiandituTerrain } from './terrain';
 
 
-const tileCache = new LRUCache(200, (image) => {
+const tileImageCache = new LRUCache(200, (image) => {
     disposeImage(image);
+});
+const tileBufferCache = new LRUCache(200, (buffer) => {
+    // disposeImage(image);
 });
 
 function formatTileUrlBySubdomains(url, subdomains) {
@@ -73,7 +77,7 @@ export function fetchTile(url: string, headers = {}, options) {
             reject(createError('taskId is null'));
             return;
         }
-        const image = tileCache.get(url);
+        const image = tileImageCache.get(url);
         if (image) {
             copyImageBitMap(image);
         } else {
@@ -94,7 +98,7 @@ export function fetchTile(url: string, headers = {}, options) {
             cacheFetch(taskId, control);
             fetch(url, fetchOptions).then(res => res.blob()).then(blob => createImageBitmap(blob)).then(image => {
                 if (options.disableCache !== true) {
-                    tileCache.add(url, image);
+                    tileImageCache.add(url, image);
                 }
                 finishFetch(control);
                 copyImageBitMap(image);
@@ -104,6 +108,50 @@ export function fetchTile(url: string, headers = {}, options) {
             });
         }
     });
+}
+
+export function fetchTileBuffer(url: string, headers = {}, options) {
+    return new Promise((resolve: (buffer: ArrayBuffer) => void, reject) => {
+        const copyBuffer = (buffer: ArrayBuffer) => {
+            resolve(buffer);
+        };
+        const taskId = options.__taskId;
+        if (!taskId) {
+            reject(createError('taskId is null'));
+            return;
+        }
+        const buffer = tileBufferCache.get(url);
+        if (buffer) {
+            copyBuffer(buffer);
+        } else {
+            const fetchOptions = options.fetchOptions || {
+                headers,
+                referrer: options.referrer
+            };
+            const timeout = options.timeout || 0;
+            const control = new AbortController();
+            const signal = control.signal;
+            if (timeout && isNumber(timeout) && timeout > 0) {
+                setTimeout(() => {
+                    control.abort(FetchTimeoutError);
+                }, timeout);
+            }
+            fetchOptions.signal = signal;
+            delete fetchOptions.timeout;
+            cacheFetch(taskId, control);
+            fetch(url, fetchOptions).then(res => res.arrayBuffer()).then(buffer => {
+                if (options.disableCache !== true) {
+                    tileBufferCache.add(url, buffer);
+                }
+                finishFetch(control);
+                copyBuffer(buffer);
+            }).catch(error => {
+                finishFetch(control);
+                reject(error);
+            });
+        }
+    });
+
 }
 
 export function getTile(url, options: getTileOptions) {
@@ -275,7 +323,6 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
 
 }
 
-
 export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
     return new Promise((resolve, reject) => {
         if (!url) {
@@ -289,30 +336,8 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
         }
         const urls = checkTileUrl(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
-        const fetchTiles = urls.map(tileUrl => {
-            return fetchTile(tileUrl, headers, options)
-        });
-        const { returnBlobURL } = options;
-        Promise.all(fetchTiles).then(imagebits => {
-            const canvas = getCanvas();
-            if (!canvas) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
-            const image = mergeImages(imagebits);
-            if (image instanceof Error) {
-                reject(image);
-                return;
-            }
-            resizeCanvas(canvas, image.width, image.height);
-            const ctx = getCanvasContext(canvas);
-            ctx.drawImage(image, 0, 0);
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            transformMapZen(imageData);
-            ctx.putImageData(imageData, 0, 0);
-            const terrainImage = canvas.transferToImageBitmap();
-
-
+        const { returnBlobURL, terrainWidth, tileSize } = options;
+        const returnImage = (terrainImage: ImageBitmap) => {
             if (!returnBlobURL) {
                 resolve(terrainImage);
             } else {
@@ -323,8 +348,69 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
                     reject(error);
                 });
             }
-        }).catch(error => {
-            reject(error);
-        })
+        };
+        if (terrainType === 'mapzen') {
+            const fetchTiles = urls.map(tileUrl => {
+                return fetchTile(tileUrl, headers, options)
+            });
+            Promise.all(fetchTiles).then(imagebits => {
+                const canvas = getCanvas();
+                if (!canvas) {
+                    reject(CANVAS_ERROR_MESSAGE);
+                    return;
+                }
+                const image = mergeImages(imagebits);
+                if (image instanceof Error) {
+                    reject(image);
+                    return;
+                }
+                resizeCanvas(canvas, image.width, image.height);
+                const ctx = getCanvasContext(canvas);
+                ctx.drawImage(image, 0, 0);
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                transformMapZen(imageData);
+                ctx.putImageData(imageData, 0, 0);
+                const terrainImage = canvas.transferToImageBitmap();
+                returnImage(terrainImage);
+            }).catch(error => {
+                reject(error);
+            })
+        } else if (terrainType === 'tianditu' || terrainType === 'cesium') {
+            const fetchTiles = urls.map(tileUrl => {
+                return fetchTileBuffer(tileUrl, headers, options)
+            });
+            Promise.all(fetchTiles).then(buffers => {
+                const canvas = getCanvas();
+                if (!canvas) {
+                    reject(CANVAS_ERROR_MESSAGE);
+                    return;
+                }
+                if (!buffers || buffers.length === 0) {
+                    reject(createError('buffers is null'));
+                    return;
+                }
+                const buffer = buffers[0];
+                if (buffer.byteLength === 0) {
+                    reject(createError('buffer is empty'));
+                    return;
+                }
+                let result;
+                if (terrainType === 'tianditu') {
+                    result = generateTiandituTerrain(buffer, terrainWidth, tileSize);
+                } else {
+                    result = cesiumTerrainToHeights(buffer, terrainWidth, tileSize);
+                }
+                if (!result.image) {
+                    reject(createError('generate terrain data error,not find image data'));
+                    return;
+                }
+                resolve(result.image);
+            }).catch(error => {
+                reject(error);
+            })
+        } else {
+            reject(createError('not support terrainType:' + terrainType));
+        }
+
     });
 }
