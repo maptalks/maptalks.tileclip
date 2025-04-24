@@ -1,6 +1,6 @@
 {
   "name": "maptalks.tileclip",
-  "version": "0.31.0",
+  "version": "0.32.0",
   "description": "",
   "main": "./dist/maptalks.tileclip.js",
   "module": "./dist/index.js",
