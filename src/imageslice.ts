@@ -8,11 +8,7 @@ const SIZE = 512;
 export function imageSlicing(options: getTileOptions) {
     (options as any).disableCache = true;
     return new Promise((resolve, reject) => {
-        const { url } = options;
-        if (!url) {
-            reject(createError('url is null'));
-            return;
-        }
+        const url = options.url;
         const urls = checkTileUrl(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
         const fetchTiles = urls.map(tileUrl => {

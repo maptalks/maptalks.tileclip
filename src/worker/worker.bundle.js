@@ -12,7 +12,6 @@ export default ` (function (exports) { 'use strict';
         }
         return [url];
     }
-    const CANVAS_ERROR_MESSAGE = createError('not find canvas.The current environment does not support OffscreenCanvas');
     function lnglat2Mercator(coordinates) {
         const [lng, lat] = coordinates;
         const earthRad = 6378137.0;
@@ -1408,10 +1407,6 @@ export default ` (function (exports) { 'use strict';
     }
     function getTile(url, options) {
         return new Promise((resolve, reject) => {
-            if (!url) {
-                reject(createError('url is null'));
-                return;
-            }
             const urls = checkTileUrl(url);
             const headers = Object.assign({}, HEADERS, options.headers || {});
             const fetchTiles = urls.map(tileUrl => {
@@ -1420,10 +1415,6 @@ export default ` (function (exports) { 'use strict';
             const { returnBlobURL, globalCompositeOperation } = options;
             Promise.all(fetchTiles).then(imagebits => {
                 const canvas = getCanvas();
-                if (!canvas) {
-                    reject(CANVAS_ERROR_MESSAGE);
-                    return;
-                }
                 const image = mergeImages(imagebits, globalCompositeOperation);
                 if (image instanceof Error) {
                     reject(image);
@@ -1451,20 +1442,7 @@ export default ` (function (exports) { 'use strict';
     }
     function getTileWithMaxZoom(options) {
         const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, returnBlobURL, globalCompositeOperation } = options;
-        const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
         return new Promise((resolve, reject) => {
-            if (!maxZoomEnable) {
-                reject(createError('maxAvailableZoom is error'));
-                return;
-            }
-            if (!urlTemplate) {
-                reject(createError('urlTemplate is error'));
-                return;
-            }
-            if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
-                reject(createError('x/y/z is error'));
-                return;
-            }
             const urlTemplates = checkTileUrl(urlTemplate);
             for (let i = 0, len = urlTemplates.length; i < len; i++) {
                 const urlTemplate = urlTemplates[i];
@@ -1532,10 +1510,6 @@ export default ` (function (exports) { 'use strict';
             });
             Promise.all(fetchTiles).then(imagebits => {
                 const canvas = getCanvas();
-                if (!canvas) {
-                    reject(CANVAS_ERROR_MESSAGE);
-                    return;
-                }
                 const image = mergeImages(imagebits, globalCompositeOperation);
                 if (image instanceof Error) {
                     reject(image);
@@ -1571,18 +1545,9 @@ export default ` (function (exports) { 'use strict';
     }
     function encodeTerrainTile(url, options) {
         return new Promise((resolve, reject) => {
-            if (!url) {
-                reject(createError('url is null'));
-                return;
-            }
-            const { terrainType } = options;
-            if (!terrainType) {
-                reject(createError('terrainType is null'));
-                return;
-            }
             const urls = checkTileUrl(url);
             const headers = Object.assign({}, HEADERS, options.headers || {});
-            const { returnBlobURL, terrainWidth, tileSize } = options;
+            const { returnBlobURL, terrainWidth, tileSize, terrainType } = options;
             const returnImage = (terrainImage) => {
                 if (!returnBlobURL) {
                     resolve(terrainImage);
@@ -1602,10 +1567,6 @@ export default ` (function (exports) { 'use strict';
                 });
                 Promise.all(fetchTiles).then(imagebits => {
                     const canvas = getCanvas();
-                    if (!canvas) {
-                        reject(CANVAS_ERROR_MESSAGE);
-                        return;
-                    }
                     const image = mergeImages(imagebits);
                     if (image instanceof Error) {
                         reject(image);
@@ -1628,11 +1589,6 @@ export default ` (function (exports) { 'use strict';
                     return fetchTileBuffer(tileUrl, headers, options);
                 });
                 Promise.all(fetchTiles).then(buffers => {
-                    const canvas = getCanvas();
-                    if (!canvas) {
-                        reject(CANVAS_ERROR_MESSAGE);
-                        return;
-                    }
                     if (!buffers || buffers.length === 0) {
                         reject(createError('buffers is null'));
                         return;
@@ -1668,11 +1624,7 @@ export default ` (function (exports) { 'use strict';
     function imageSlicing(options) {
         options.disableCache = true;
         return new Promise((resolve, reject) => {
-            const { url } = options;
-            if (!url) {
-                reject(createError('url is null'));
-                return;
-            }
+            const url = options.url;
             const urls = checkTileUrl(url);
             const headers = Object.assign({}, HEADERS, options.headers || {});
             const fetchTiles = urls.map(tileUrl => {
@@ -1680,10 +1632,6 @@ export default ` (function (exports) { 'use strict';
             });
             Promise.all(fetchTiles).then(imagebits => {
                 const canvas = getCanvas(SIZE);
-                if (!canvas) {
-                    reject(CANVAS_ERROR_MESSAGE);
-                    return;
-                }
                 const image = mergeImages(imagebits);
                 if (image instanceof Error) {
                     reject(image);
@@ -2112,36 +2060,12 @@ export default ` (function (exports) { 'use strict';
     function clip(options) {
         return new Promise((resolve, reject) => {
             const { tile, tileBBOX, projection, tileSize, maskId, returnBlobURL, reverse } = options;
-            if (!tile) {
-                reject(createError('tile is null.It should be a ImageBitmap'));
-                return;
-            }
-            if (!tileBBOX) {
-                reject(createError('tileBBOX is null'));
-                return;
-            }
-            if (!projection) {
-                reject(createError('projection is null'));
-                return;
-            }
-            if (!tileSize) {
-                reject(createError('tileSize is null'));
-                return;
-            }
-            if (!maskId) {
-                reject(createError('maskId is null'));
-                return;
-            }
             const feature = GeoJSONCache[maskId];
             if (!feature) {
                 reject(createError('not find mask by maskId:' + maskId));
                 return;
             }
             const canvas = getCanvas(tileSize);
-            if (!canvas) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
             const returnImage = (image) => {
                 if (!returnBlobURL) {
                     resolve(image);
@@ -2401,7 +2325,6 @@ export default ` (function (exports) { 'use strict';
     const TILESIZE = 256;
     const ORIGIN = [-180, 90];
     const MORIGIN = [-20037508.342787, 20037508.342787];
-    const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
     const merc = new SphericalMercator({
         size: TILESIZE,
         // antimeridian: true
@@ -2711,32 +2634,7 @@ export default ` (function (exports) { 'use strict';
     }
     function tileTransform(options) {
         return new Promise((resolve, reject) => {
-            const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog, debug, returnBlobURL } = options;
-            const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
-            if (!projection) {
-                reject(createError('not find projection'));
-                return;
-            }
-            if (SUPPORTPROJECTION.indexOf(projection) === -1) {
-                reject(createError('not support projection:' + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
-                return;
-            }
-            if (!maxZoomEnable) {
-                reject(createError('maxAvailableZoom is error'));
-                return;
-            }
-            if (!urlTemplate) {
-                reject(createError('urlTemplate is error'));
-                return;
-            }
-            if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
-                reject(createError('x/y/z is error'));
-                return;
-            }
-            // if (x < 0 || y < 0) {
-            //     resolve(getBlankTile());
-            //     return;
-            // }
+            const { x, y, z, projection, zoomOffset, errorLog, debug, returnBlobURL } = options;
             const returnImage = (opImage) => {
                 if (!returnBlobURL) {
                     resolve(opImage);

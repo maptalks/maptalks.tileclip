@@ -87,26 +87,6 @@ function transformPixels(projection: string, tileBBOX: BBOXtype, tileSize: numbe
 export function clip(options: clipTileOptions) {
     return new Promise((resolve, reject) => {
         const { tile, tileBBOX, projection, tileSize, maskId, returnBlobURL, reverse } = options;
-        if (!tile) {
-            reject(createError('tile is null.It should be a ImageBitmap'));
-            return;
-        }
-        if (!tileBBOX) {
-            reject(createError('tileBBOX is null'));
-            return;
-        }
-        if (!projection) {
-            reject(createError('projection is null'));
-            return;
-        }
-        if (!tileSize) {
-            reject(createError('tileSize is null'));
-            return;
-        }
-        if (!maskId) {
-            reject(createError('maskId is null'));
-            return;
-        }
         const feature = GeoJSONCache[maskId];
         if (!feature) {
             reject(createError('not find mask by maskId:' + maskId));

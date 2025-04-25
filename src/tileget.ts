@@ -156,10 +156,6 @@ export function fetchTileBuffer(url: string, headers = {}, options) {
 
 export function getTile(url, options: getTileOptions) {
     return new Promise((resolve, reject) => {
-        if (!url) {
-            reject(createError('url is null'));
-            return;
-        }
         const urls = checkTileUrl(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
         const fetchTiles = urls.map(tileUrl => {
@@ -196,20 +192,7 @@ export function getTile(url, options: getTileOptions) {
 
 export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
     const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, returnBlobURL, globalCompositeOperation } = options;
-    const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
     return new Promise((resolve, reject) => {
-        if (!maxZoomEnable) {
-            reject(createError('maxAvailableZoom is error'));
-            return;
-        }
-        if (!urlTemplate) {
-            reject(createError('urlTemplate is error'));
-            return;
-        }
-        if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
-            reject(createError('x/y/z is error'));
-            return;
-        }
         const urlTemplates = checkTileUrl(urlTemplate);
         for (let i = 0, len = urlTemplates.length; i < len; i++) {
             const urlTemplate = urlTemplates[i];
@@ -316,18 +299,10 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
 
 export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
     return new Promise((resolve, reject) => {
-        if (!url) {
-            reject(createError('url is null'));
-            return;
-        }
-        const { terrainType } = options;
-        if (!terrainType) {
-            reject(createError('terrainType is null'));
-            return;
-        }
+
         const urls = checkTileUrl(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
-        const { returnBlobURL, terrainWidth, tileSize } = options;
+        const { returnBlobURL, terrainWidth, tileSize, terrainType } = options;
         const returnImage = (terrainImage: ImageBitmap) => {
             if (!returnBlobURL) {
                 resolve(terrainImage);

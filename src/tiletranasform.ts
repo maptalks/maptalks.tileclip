@@ -10,7 +10,6 @@ const FirstRes = 1.40625, mFirstRes = 156543.03392804097;
 const TILESIZE = 256;
 const ORIGIN = [-180, 90];
 const MORIGIN = [-20037508.342787, 20037508.342787];
-const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
 
 const merc = new SphericalMercator({
     size: TILESIZE,
@@ -358,33 +357,7 @@ function checkBoundaryBlank(ctx: OffscreenCanvasRenderingContext2D) {
 
 export function tileTransform(options) {
     return new Promise((resolve, reject) => {
-        const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog, debug, returnBlobURL } = options;
-        const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
-        if (!projection) {
-            reject(createError('not find projection'));
-            return;
-        }
-        if (SUPPORTPROJECTION.indexOf(projection) === -1) {
-            reject(createError('not support projection:' + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
-            return;
-        }
-        if (!maxZoomEnable) {
-            reject(createError('maxAvailableZoom is error'));
-            return;
-        }
-        if (!urlTemplate) {
-            reject(createError('urlTemplate is error'));
-            return;
-        }
-        if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
-            reject(createError('x/y/z is error'));
-            return;
-        }
-        // if (x < 0 || y < 0) {
-        //     resolve(getBlankTile());
-        //     return;
-        // }
-
+        const { x, y, z, projection, zoomOffset, errorLog, debug, returnBlobURL } = options;
         const returnImage = (opImage) => {
             if (!returnBlobURL) {
                 resolve(opImage);

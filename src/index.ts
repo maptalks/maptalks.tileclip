@@ -12,6 +12,7 @@ const WORKERNAME = '__maptalks.tileclip';
 registerWorkerAdapter(WORKERNAME, WORKERCODE as unknown as string);
 
 const maskMap = {};
+const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
 
 export type getTileOptions = {
     url: string | Array<string>;
@@ -51,15 +52,17 @@ export type clipTileOptions = {
     tile: ImageBitmap;
     tileBBOX: BBOXtype;
     projection: string;
-    tileSize: number;
     maskId: string;
+    tileSize?: number;
     reverse?: boolean;
     returnBlobURL?: boolean;
 }
 
 export type transformTileOptions = getTileWithMaxZoomOptions & {
     projection: 'EPSG:4326' | 'EPSG:3857';
-    errorLog?: boolean
+    errorLog?: boolean;
+    zoomOffset?: number;
+    debug?: boolean;
 }
 
 type privateOptions = getTileOptions & {
@@ -88,7 +91,7 @@ export type GeoJSONMultiPolygon = {
 }
 
 function checkOptions(options, type: string) {
-    return Object.assign({ referrer: document.location.href }, options, { _type: type, __taskId: uuid(), __workerId: getWorkerId() });
+    return Object.assign({ referrer: document.location.href, tileSize: 256 }, options, { _type: type, __taskId: uuid(), __workerId: getWorkerId() });
 }
 
 
@@ -119,6 +122,11 @@ class TileActor extends worker.Actor {
                 reject(CANVAS_ERROR_MESSAGE);
                 return;
             }
+            const { url } = options;
+            if (!url) {
+                reject(createError('getTile error:url is null'));
+                return;
+            }
             this.send(options, [], (error, image) => {
                 if (error || (promise as any).canceled) {
                     reject(error || FetchCancelError);
@@ -139,6 +147,20 @@ class TileActor extends worker.Actor {
                 reject(CANVAS_ERROR_MESSAGE);
                 return;
             }
+            const { urlTemplate, maxAvailableZoom, x, y, z } = options;
+            const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
+            if (!maxZoomEnable) {
+                reject(createError('getTileWithMaxZoom error:maxAvailableZoom is error'));
+                return;
+            }
+            if (!urlTemplate) {
+                reject(createError('getTileWithMaxZoom error:urlTemplate is error'));
+                return;
+            }
+            if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
+                reject(createError('getTileWithMaxZoom error:x/y/z is error'));
+                return;
+            }
             this.send(options, [], (error, image) => {
                 if (error || (promise as any).canceled) {
                     reject(error || FetchCancelError);
@@ -157,6 +179,28 @@ class TileActor extends worker.Actor {
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             if (!getCanvas()) {
                 reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
+            const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog, debug, returnBlobURL } = options;
+            const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
+            if (!projection) {
+                reject(createError('transformTile error:not find projection'));
+                return;
+            }
+            if (SUPPORTPROJECTION.indexOf(projection) === -1) {
+                reject(createError('transformTile error:not support projection:' + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
+                return;
+            }
+            if (!maxZoomEnable) {
+                reject(createError('transformTile error:maxAvailableZoom is error'));
+                return;
+            }
+            if (!urlTemplate) {
+                reject(createError('transformTile error:urlTemplate is error'));
+                return;
+            }
+            if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
+                reject(createError('transformTile error:x/y/z is error'));
                 return;
             }
             this.send(options, [], (error, image) => {
@@ -180,13 +224,34 @@ class TileActor extends worker.Actor {
                 reject(CANVAS_ERROR_MESSAGE);
                 return;
             }
+            const { tile, tileBBOX, projection, tileSize, maskId } = options;
+            if (!tile) {
+                reject(createError('clipTile error:tile is null.It should be a ImageBitmap'));
+                return;
+            }
+            if (!tileBBOX) {
+                reject(createError('clipTile error:tileBBOX is null'));
+                return;
+            }
+            if (!projection) {
+                reject(createError('clipTile error:projection is null'));
+                return;
+            }
+            if (!tileSize) {
+                reject(createError('clipTile error:tileSize is null'));
+                return;
+            }
+            if (!maskId) {
+                reject(createError('clipTile error:maskId is null'));
+                return;
+            }
             const buffers: ArrayBuffer[] = [];
             if (isImageBitmap(options.tile)) {
                 buffers.push(options.tile as unknown as ArrayBuffer);
             }
             this.send(options, buffers, (error, image) => {
-                if (error) {
-                    reject(error);
+                if (error || (promise as any).canceled) {
+                    reject(error || FetchCancelError);
                 } else {
                     resolve(image);
                 }
@@ -199,15 +264,15 @@ class TileActor extends worker.Actor {
     injectMask(maskId: string, geojsonFeature: GeoJSONPolygon | GeoJSONMultiPolygon) {
         const promise = new Promise((resolve, reject) => {
             if (!maskId) {
-                reject(createError('maskId is null'));
+                reject(createError('injectMask error:maskId is null'));
                 return;
             }
             if (maskMap[maskId]) {
-                reject(createError(`${maskId} has injected`));
+                reject(createError(`injectMask error:${maskId} has injected`));
                 return;
             }
             if (!isPolygon(geojsonFeature)) {
-                reject(createError('geojsonFeature is not Polygon,It should be GeoJSON Polygon/MultiPolygon'));
+                reject(createError('injectMask error:geojsonFeature is not Polygon,It should be GeoJSON Polygon/MultiPolygon'));
                 return;
             }
             this.broadcast({
@@ -230,7 +295,7 @@ class TileActor extends worker.Actor {
     removeMask(maskId: string) {
         const promise = new Promise((resolve, reject) => {
             if (!maskId) {
-                reject(createError('maskId is null'));
+                reject(createError('removeMask error:maskId is null'));
                 return;
             }
             this.broadcast({
@@ -251,7 +316,7 @@ class TileActor extends worker.Actor {
 
     maskHasInjected(maskId: string) {
         if (!maskId) {
-            console.error('maskId is null');
+            console.error('maskHasInjected error:maskId is null');
             return false;
         }
         return !!maskMap[maskId];
@@ -263,6 +328,11 @@ class TileActor extends worker.Actor {
         const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
             if (!getCanvas()) {
                 reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
+            const { url } = options;
+            if (!url) {
+                reject(createError('url is null'));
                 return;
             }
             this.send(options, [], (error, result) => {
@@ -342,6 +412,16 @@ class TileActor extends worker.Actor {
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             if (!getCanvas()) {
                 reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
+            const { url, terrainType } = options;
+            if (!url) {
+                reject(createError('encodeTerrainTile error:url is null'));
+                return;
+            }
+
+            if (!terrainType) {
+                reject(createError('encodeTerrainTile error:terrainType is null'));
                 return;
             }
             this.send(Object.assign({ terrainWidth: 65, tileSize: 256 }, options), [], (error, image) => {
