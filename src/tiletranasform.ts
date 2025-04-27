@@ -3,7 +3,7 @@ import { getTileWithMaxZoom } from "./tileget";
 import { SphericalMercator } from '@mapbox/sphericalmercator';
 // import tileCover from '@mapbox/tile-cover';
 import { createError, disposeImage, isNumber, lnglat2Mercator } from "./util";
-import { getBlankTile, getCanvas, getCanvasContext, mergeTiles, resizeCanvas, toBlobURL } from "./canvas";
+import { getBlankTile, getCanvas, getCanvasContext, layoutTiles, resizeCanvas, toBlobURL } from "./canvas";
 import { bboxOfBBOXList, BBOXtype, toBBOX, toPoints } from "./bbox";
 
 const FirstRes = 1.40625, mFirstRes = 156543.03392804097;
@@ -388,7 +388,7 @@ export function tileTransform(options) {
             result.loadCount = 0;
             const loadTile = () => {
                 if (result.loadCount >= tiles.length) {
-                    const image = mergeTiles(tiles, debug);
+                    const image = layoutTiles(tiles, debug);
                     let image1;
                     if (projection === 'EPSG:4326') {
                         const imageData = tilesImageData(image, result.tilesbbox, result.bbox, projection);

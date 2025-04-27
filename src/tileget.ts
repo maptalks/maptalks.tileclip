@@ -1,5 +1,5 @@
 import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions } from './index';
-import { getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeImages, resizeCanvas, toBlobURL } from './canvas';
+import { getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeTiles, resizeCanvas, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
 import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage, transformMapZen } from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain } from './terrain';
@@ -164,7 +164,7 @@ export function getTile(url, options: getTileOptions) {
         const { returnBlobURL, globalCompositeOperation } = options;
         Promise.all(fetchTiles).then(imagebits => {
             const canvas = getCanvas();
-            const image = mergeImages(imagebits, globalCompositeOperation);
+            const image = mergeTiles(imagebits, globalCompositeOperation);
             if (image instanceof Error) {
                 reject(image);
                 return;
@@ -262,7 +262,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
 
         Promise.all(fetchTiles).then(imagebits => {
             const canvas = getCanvas();
-            const image = mergeImages(imagebits, globalCompositeOperation);
+            const image = mergeTiles(imagebits, globalCompositeOperation);
             if (image instanceof Error) {
                 reject(image);
                 return;
@@ -321,7 +321,7 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
             });
             Promise.all(fetchTiles).then(imagebits => {
                 const canvas = getCanvas();
-                const image = mergeImages(imagebits);
+                const image = mergeTiles(imagebits);
                 if (image instanceof Error) {
                     reject(image);
                     return;

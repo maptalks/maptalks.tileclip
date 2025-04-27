@@ -51,7 +51,7 @@ export function get404Tile(tileSize?: number) {
     return canvas.transferToImageBitmap();
 }
 
-export function mergeImages(images: Array<ImageBitmap>, globalCompositeOperation?: GlobalCompositeOperation) {
+export function mergeTiles(images: Array<ImageBitmap>, globalCompositeOperation?: GlobalCompositeOperation) {
     if (images.length === 1) {
         return images[0];
     }
@@ -190,7 +190,7 @@ export function imageOpacity(image: ImageBitmap, opacity = 1) {
 }
 
 
-export function mergeTiles(tiles, debug: boolean) {
+export function layoutTiles(tiles, debug: boolean) {
     let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
     let tileSize = 256;
     tiles.forEach(tile => {

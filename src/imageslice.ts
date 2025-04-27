@@ -1,4 +1,4 @@
-import { clearCanvas, getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, mergeImages, resizeCanvas } from "./canvas";
+import { clearCanvas, getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, mergeTiles, resizeCanvas } from "./canvas";
 import { getTileOptions } from "./index";
 import { fetchTile } from "./tileget";
 import { checkTileUrl, createError, HEADERS, CANVAS_ERROR_MESSAGE, uuid, disposeImage } from "./util";
@@ -16,7 +16,7 @@ export function imageSlicing(options: getTileOptions) {
         });
         Promise.all(fetchTiles).then(imagebits => {
             const canvas = getCanvas(SIZE);
-            const image = mergeImages(imagebits);
+            const image = mergeTiles(imagebits);
             if (image instanceof Error) {
                 reject(image);
                 return;
