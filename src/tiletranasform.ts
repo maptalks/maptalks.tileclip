@@ -5,6 +5,7 @@ import { SphericalMercator } from '@mapbox/sphericalmercator';
 import { createError, disposeImage, isNumber, lnglat2Mercator } from "./util";
 import { getBlankTile, getCanvas, getCanvasContext, layoutTiles, resizeCanvas, toBlobURL } from "./canvas";
 import { bboxOfBBOXList, BBOXtype, toBBOX, toPoints } from "./bbox";
+import gcoord from 'gcoord';
 
 const FirstRes = 1.40625, mFirstRes = 156543.03392804097;
 const TILESIZE = 256;
@@ -47,12 +48,68 @@ function tile4326BBOX(x: number, y: number, z: number): BBOXtype {
 }
 
 
-function cal4326Tiles(x: number, y: number, z: number, zoomOffset = 0) {
+function offsetTileBBOX(bbox: BBOXtype, projection: string, isGCJ02) {
+    if (!isGCJ02) {
+        return;
+    }
+    const points = toPoints(bbox);
+    const newPoints = points.map(p => {
+        if (projection === 'EPSG:3857') {
+            const c = gcoord.transform(p as any, gcoord.WebMercator, gcoord.WGS84);
+            return c;
+        } else {
+            return p;
+        }
+    });
+    const transformPoints = newPoints.map(p => {
+        return gcoord.transform(p as any, gcoord.WGS84, gcoord.AMap);
+    });
+    let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+    transformPoints.forEach(p => {
+        const [x, y] = p;
+        minx = Math.min(minx, x);
+        miny = Math.min(miny, y);
+        maxx = Math.max(maxx, x);
+        maxy = Math.max(maxy, y);
+    });
+    if (projection === 'EPSG:4326') {
+        bbox[0] = minx;
+        bbox[1] = miny;
+        bbox[2] = maxx;
+        bbox[3] = maxy;
+    } else {
+        const points = toPoints([minx, miny, maxx, maxx]).map(p => {
+            return lnglat2Mercator(p) as [number, number];
+        });
+        let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+        points.forEach(p => {
+            const [x, y] = p;
+            x1 = Math.min(x1, x);
+            y1 = Math.min(y1, y);
+            x2 = Math.max(x2, x);
+            y2 = Math.max(y2, y);
+        });
+        bbox[0] = x1;
+        bbox[1] = y1;
+        bbox[2] = x2;
+        bbox[3] = y2;
+
+    }
+}
+/**
+ *  x,y,z is墨卡托
+ * @param x 
+ * @param y 
+ * @param z 
+ * @param zoomOffset 
+ * @returns 
+ */
+function cal4326Tiles(x: number, y: number, z: number, zoomOffset = 0, isGCJ02) {
     zoomOffset = zoomOffset || 0;
     const [orginX, orginY] = ORIGIN;
     const res = get4326Res(z) * TILESIZE;
     const tileBBOX = merc.bbox(x, y, z);
-    // console.log(tileBBOX);
+    offsetTileBBOX(tileBBOX, 'EPSG:4326', isGCJ02);
     const [minx, miny, maxx, maxy] = tileBBOX;
     let mincol = (minx - orginX) / res, maxcol = (maxx - orginX) / res;
     // const MAXROW = Math.floor(orginY * 2 / res);
@@ -93,12 +150,12 @@ function cal4326Tiles(x: number, y: number, z: number, zoomOffset = 0) {
     };
 }
 
-function cal3857Tiles(x: number, y: number, z: number, zoomOffset = 0) {
+function cal3857Tiles(x: number, y: number, z: number, zoomOffset = 0, isGCJ02) {
     zoomOffset = zoomOffset || 0;
     const [orginX, orginY] = MORIGIN;
     const res = get3857Res(z) * TILESIZE;
     const tileBBOX = tile4326BBOX(x, y, z);
-    // console.log(tileBBOX);
+    offsetTileBBOX(tileBBOX, 'EPSG:4326', isGCJ02);
     const mbbox = toBBOX(toPoints(tileBBOX as any).map(c => {
         const result = merc.forward(c);
         return result;
@@ -281,6 +338,16 @@ function checkBoundaryBlank(ctx: OffscreenCanvasRenderingContext2D) {
         }
         return true;
     }
+    const colIsBlank = (col) => {
+        for (let row = 1; row <= height; row++) {
+            const idx = (width * 4) * (row - 1) + (col - 1) * 4;
+            const a = data[idx + 3];
+            if (a > 0) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     // const topIsBlank = () => {
     //     for (let col = 1; col <= width; col++) {
@@ -349,6 +416,41 @@ function checkBoundaryBlank(ctx: OffscreenCanvasRenderingContext2D) {
     //         data[idx1 + 3] = a;
     //     }
     // }
+    const colBlanks = [];
+    for (let col = 1, len = width; col <= len; col++) {
+        colBlanks.push(colIsBlank(col));
+    }
+    const hasColBlank = colBlanks.indexOf(true) > -1;
+    if (hasColBlank) {
+        const fixCol = (col1, col2) => {
+            for (let row = 1; row <= height; row++) {
+                const idx1 = (width * 4) * (row - 1) + (col1 - 1) * 4;
+                const idx2 = (width * 4) * (row - 1) + (col2 - 1) * 4;
+                const r = data[idx2];
+                const g = data[idx2 + 1];
+                const b = data[idx2 + 2];
+                const a = data[idx2 + 3];
+
+                data[idx1] = r;
+                data[idx1 + 1] = g;
+                data[idx1 + 2] = b;
+                data[idx1 + 3] = a;
+            }
+        }
+        for (let col = 1; col <= width; col++) {
+            const current = colBlanks[col - 1];
+            if (!current) {
+                continue;
+            }
+            const next = colBlanks[col];
+            const pre = colBlanks[col - 1];
+            if (!next) {
+                fixCol(col, col + 1);
+            } else if (!pre) {
+                fixCol(col, col - 1);
+            }
+        }
+    }
     ctx.putImageData(imageData, 0, 0);
 }
 
@@ -357,7 +459,7 @@ function checkBoundaryBlank(ctx: OffscreenCanvasRenderingContext2D) {
 
 export function tileTransform(options) {
     return new Promise((resolve, reject) => {
-        const { x, y, z, projection, zoomOffset, errorLog, debug, returnBlobURL } = options;
+        const { x, y, z, projection, zoomOffset, errorLog, debug, returnBlobURL, isGCJ02 } = options;
         const returnImage = (opImage) => {
             if (!returnBlobURL) {
                 resolve(opImage);
@@ -374,10 +476,10 @@ export function tileTransform(options) {
         const loadTiles = () => {
             let result;
             if (projection === 'EPSG:4326') {
-                result = cal4326Tiles(x, y, z, zoomOffset || 0);
+                result = cal4326Tiles(x, y, z, zoomOffset || 0, isGCJ02);
 
             } else if (projection === 'EPSG:3857') {
-                result = cal3857Tiles(x, y, z, zoomOffset || 0);
+                result = cal3857Tiles(x, y, z, zoomOffset || 0, isGCJ02);
             }
             // console.log(result);
             const { tiles } = result || {};
