@@ -60,7 +60,8 @@
                     z,
                     urlTemplate,
                     projection: 'EPSG:3857',
-                    maxAvailableZoom: 18
+                    maxAvailableZoom: 18,
+                    isGCJ02: true
                 }).then(imagebitmap => {
                     callback(imagebitmap);
                 }).catch(error => {
@@ -72,51 +73,24 @@
 
         var map = new maptalks.Map('map1', {
             zoomControl: true,
-            "center": [121.65586045, 31.12453538], "zoom": 7.064897200334302, "pitch": 0, "bearing": 0,
+            "center": [120.39551233, 31.19774311], "zoom": 13.97297120395792, "pitch": 0, "bearing": 0,
             spatialReference: {
                 projection: "EPSG:4326",
             },
         });
         baseLayer.addTo(map);
 
-        const layer = new maptalks.VectorLayer('layer').addTo(map);
+        const baseLayer1 = new maptalks.TileLayer('base1', {
+            // debug: true,
+            // urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
+            tileSystem: [1, -1, -180, 90],
+            urlTemplate: 'https://t0.tianditu.gov.cn/vec_c/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=c&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=6901643c38b65f1f9770196343cf72b2',
+            subdomains: ["a", "b", "c", "d"],
+        }).addTo(map);
 
 
-        const symbol = {
-            polygonOpacity: 0,
-            lineColor: 'red'
-        }
-
-        // fetch('./上海市.json').then(res => res.json()).then(geojson => {
-        //     const polygons = maptalks.GeoJSON.toGeometry(geojson, (geo => {
-        //         geo.setSymbol(symbol);
-        //     }));
-        //     layer.addGeometry(polygons);
-        //     tileActor.injectMask(maskId, geojson.features[0]).then(data => {
-        //         baseLayer.addTo(map);
-        //         console.log(tileActor.maskHasInjected(maskId))
-        //     }).catch(error => {
-        //         console.error(error);
-        //     })
-        // })
 
 
-        // var map2 = new maptalks.Map('map2', {
-        //     zoomControl: true,
-        //     "center": [121.65586045, 31.12453538], "zoom": 13.064897200334302, "pitch": 0, "bearing": 0,
-        //     // spatialReference: {
-        //     //     projection: "EPSG:4326",
-        //     // },
-        // });
-        // const baseLayer1 = new maptalks.TileLayer('base', {
-        //     repeat: false,
-        //     debug: true,
-        //     urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
-        //     // urlTemplate: "https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
-        //     subdomains: ["a", "b", "c", "d"],
-        //     // bufferPixel: 1
-        // });
-        // baseLayer1.addTo(map2);
 
     </script>
 </body>
