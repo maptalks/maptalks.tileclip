@@ -66,6 +66,14 @@
 
         const layer = new maptalks.VectorLayer('layer').addTo(map);
 
+        const baseLayer1 = new maptalks.TileLayer('base1', {
+            // debug: true,
+            // urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
+            // tileSystem: [1, -1, -180, 90],
+            urlTemplate:'https://wprd04.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=8&ltype=11',
+            subdomains: ["a", "b", "c", "d"],
+        }).addTo(map);
+
 
     </script>
 </body>
