@@ -416,3 +416,45 @@ export function createTerrainImage(terrainData) {
         console.log(error);
     }
 }
+
+export function transformMapZen(imageData) {
+    const data = imageData.data;
+    const out = [0, 0, 0];
+    for (let i = 0, len = data.length; i < len; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const a = data[i + 3];
+        if (a === 0) {
+            continue;
+        }
+        const height = (r * 256 + g + b / 256) - 32768;
+        const [r1, g1, b1] = encodeMapBox(height, out);
+        data[i] = r1;
+        data[i + 1] = g1;
+        data[i + 2] = b1;
+    }
+    return imageData;
+}
+
+export function transformArcgis(result) {
+    const { width, height, pixels } = result;
+    const canvas = getCanvas();
+    resizeCanvas(canvas, width, height);
+    const ctx = getCanvasContext(canvas);
+    if (!pixels || pixels.length === 0) {
+        return null;
+    }
+    const heights = pixels[0];
+    const imageData = ctx.createImageData(width, height);
+    for (let i = 0, len = imageData.data.length; i < len; i += 4) {
+        const height = heights[i / 4];
+        const [r, g, b] = encodeMapBox(height);
+        imageData.data[i] = r;
+        imageData.data[i + 1] = g;
+        imageData.data[i + 2] = b;
+        imageData.data[i + 3] = 255;
+    }
+    ctx.putImageData(imageData, 0, 0);
+    return canvas.transferToImageBitmap();
+}

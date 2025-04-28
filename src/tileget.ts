@@ -1,8 +1,9 @@
 import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions } from './index';
 import { getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeTiles, resizeCanvas, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
-import { isNumber, checkTileUrl, CANVAS_ERROR_MESSAGE, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage, transformMapZen } from './util';
-import { cesiumTerrainToHeights, generateTiandituTerrain } from './terrain';
+import { isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage } from './util';
+import { cesiumTerrainToHeights, generateTiandituTerrain, transformArcgis, transformMapZen } from './terrain';
+import * as lerc from './lerc';
 
 
 const tileImageCache = new LRUCache(200, (image) => {
@@ -337,7 +338,7 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
             }).catch(error => {
                 reject(error);
             })
-        } else if (terrainType === 'tianditu' || terrainType === 'cesium') {
+        } else if (terrainType === 'tianditu' || terrainType === 'cesium' || terrainType === 'arcgis') {
             const fetchTiles = urls.map(tileUrl => {
                 return fetchTileBuffer(tileUrl, headers, options)
             });
@@ -354,10 +355,13 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
                 let result;
                 if (terrainType === 'tianditu') {
                     result = generateTiandituTerrain(buffer, terrainWidth, tileSize);
-                } else {
+                } else if (terrainType === 'cesium') {
                     result = cesiumTerrainToHeights(buffer, terrainWidth, tileSize);
+                } else {
+                    result = lerc.decode(buffer);
+                    result.image = transformArcgis(result);
                 }
-                if (!result.image) {
+                if (!result || !result.image) {
                     reject(createError('generate terrain data error,not find image data'));
                     return;
                 }
