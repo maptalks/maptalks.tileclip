@@ -49,6 +49,7 @@
 ### Terrain
 
 * [mapzen terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-mapzen.html)
+* [arcgis terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-mapzen.html)
 
 ## Others
 
@@ -103,13 +104,12 @@ const tileActor = getTileActor();
 
 #### methods
 
-
 | method                                  | describe                                                            |
 | --------------------------------------- | ------------------------------------------------------------------- |
 | getTile(options)                        | Request tile support for batch and some processing                  |
 | getTileWithMaxZoom(options)             | Cutting tiles, automatically cutting beyond the maximum level limit |
 | transformTile(options)                  | Tile reprojection                                                   |
-| injectMask(maskId,Polygon/MultiPolygon) | Inject geojson data for tile clipping service                       |
+| injectMask(maskId, Polygon/MultiPolygon) | Inject geojson data for tile clipping service                       |
 | removeMask(maskId)                      | remove Inject geojson data                                          |
 | maskHasInjected(maskId)                 | Has the geojson data been injected                                  |
 | clipTile(options)                       | Crop tiles using injected geojson data                              |
@@ -231,11 +231,11 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,              `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,               `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
-  + `options?.isGCJ02`:Is it the isGCJ02 coordinate system
+  + `options?.isGCJ02`: Is it the isGCJ02 coordinate system
   + `options?.errorog`: Is there a printing error
   + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
   + `options?.headers`:fetch headers params. if need
@@ -404,7 +404,7 @@ tileActor.injectMask(maskId, polygon).then(data => {
 
 * `encodeTerrainTile(options)` transform other terrain tile to mapbox terrain rgb tile  by fetch in worker, return `Promise`
   + `options.url`:tile url
-  + `options.terrainType`:'mapzen' | 'tianditu' | 'cesium'; 
+  + `options.terrainType`:'mapzen' | 'tianditu' | 'cesium'|'arcgs'
   + `options?.terrainWidth` default is 65
   + `options?.tileSize` default value is 256
   + `options?.headers`:fetch headers params. if need
@@ -419,7 +419,7 @@ tileActor.injectMask(maskId, polygon).then(data => {
       //   img(Image): an Image object
       //   url(String): the url of the tile
       e.renderer.loadTileBitmap = function(url, tile, callback) {
-        //transform mapzen terrain tile to mapbox terrain rgb tile
+          //transform mapzen terrain tile to mapbox terrain rgb tile
           tileActor.encodeTerrainTile({
               url: maptalks.Util.getAbsoluteURL(url),
               terrainType: 'mapzen',
