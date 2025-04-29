@@ -94,17 +94,25 @@ function checkOptions(options, type: string) {
     return Object.assign({ referrer: document.location.href, tileSize: 256 }, options, { _type: type, __taskId: uuid(), __workerId: getWorkerId() });
 }
 
+function getTaskId(options) {
+    const workerId = options.__workerId;
+    const taskId = options.__taskId;
+    return {
+        workerId,
+        taskId
+    }
+}
+
 
 class TileActor extends worker.Actor {
 
     _cancelTask(options: privateOptions) {
-        const workerId = options.__workerId;
-        const __taskId = options.__taskId;
-        if (!isNumber(workerId) || !isNumber(__taskId)) {
+        const { workerId, taskId } = getTaskId(options);
+        if (!isNumber(workerId) || !isNumber(taskId)) {
             return;
         }
-        if (__taskId) {
-            this.send({ _type: 'cancelFetch', __taskId }, [], (error, image) => {
+        if (taskId) {
+            this.send({ _type: 'cancelFetch', __taskId: taskId }, [], (error, image) => {
                 // if (error) {
                 //     reject(error);
                 // } else {
@@ -116,7 +124,7 @@ class TileActor extends worker.Actor {
 
     getTile(options: getTileOptions) {
         options = checkOptions(options, 'getTile');
-        const workerId = (options as privateOptions).__workerId;
+        const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             if (!getCanvas()) {
                 reject(CANVAS_ERROR_MESSAGE);
@@ -141,7 +149,7 @@ class TileActor extends worker.Actor {
 
     getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
         options = checkOptions(options, 'getTileWithMaxZoom');
-        const workerId = (options as unknown as privateOptions).__workerId;
+        const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             if (!getCanvas()) {
                 reject(CANVAS_ERROR_MESSAGE);
@@ -175,7 +183,7 @@ class TileActor extends worker.Actor {
 
     transformTile(options: transformTileOptions) {
         options = checkOptions(options, 'transformTile');
-        const workerId = (options as unknown as privateOptions).__workerId;
+        const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             if (!getCanvas()) {
                 reject(CANVAS_ERROR_MESSAGE);
@@ -243,6 +251,10 @@ class TileActor extends worker.Actor {
             }
             if (!maskId) {
                 reject(createError('clipTile error:maskId is null'));
+                return;
+            }
+            if (!this.maskHasInjected(maskId)) {
+                reject(createError('not find mask by maskId:' + maskId));
                 return;
             }
             const buffers: ArrayBuffer[] = [];
@@ -324,7 +336,7 @@ class TileActor extends worker.Actor {
 
     imageSlicing(options: getTileOptions) {
         options = checkOptions(options, 'imageSlicing');
-        const workerId = (options as privateOptions).__workerId;
+        const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
             if (!getCanvas()) {
                 reject(CANVAS_ERROR_MESSAGE);
@@ -408,7 +420,7 @@ class TileActor extends worker.Actor {
 
     encodeTerrainTile(options: encodeTerrainTileOptions) {
         options = checkOptions(options, 'encodeTerrainTile');
-        const workerId = (options as privateOptions).__workerId;
+        const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
             if (!getCanvas()) {
                 reject(CANVAS_ERROR_MESSAGE);

@@ -88,10 +88,6 @@ export function clip(options: clipTileOptions) {
     return new Promise((resolve, reject) => {
         const { tile, tileBBOX, projection, tileSize, maskId, returnBlobURL, reverse } = options;
         const feature = GeoJSONCache[maskId];
-        if (!feature) {
-            reject(createError('not find mask by maskId:' + maskId));
-            return;
-        }
         const canvas = getCanvas(tileSize);
         const returnImage = (image) => {
             if (!returnBlobURL) {
