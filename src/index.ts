@@ -28,7 +28,7 @@ export type getTileOptions = {
 }
 
 export type encodeTerrainTileOptions = {
-    url: string | Array<string>;
+    url: string;
     terrainType: 'mapzen' | 'tianditu' | 'cesium' | 'arcgis';
     terrainWidth?: number;
     tileSize?: number;
