@@ -2,7 +2,7 @@ import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions } f
 import { getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeTiles, resizeCanvas, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
 import { isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage } from './util';
-import { cesiumTerrainToHeights, generateTiandituTerrain, transferToQGisGray, transformArcgis, transformMapZen } from './terrain';
+import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
 
 
@@ -316,7 +316,10 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
                 });
             }
         };
-        if (terrainType === 'mapzen' || terrainType === 'qgis-gray') {
+        const isMapZen = terrainType === 'mapzen', isGQIS = terrainType === 'qgis-gray',
+            isTianditu = terrainType === 'tianditu',
+            isCesium = terrainType === 'cesium', isArcgis = terrainType === 'arcgis';
+        if (isMapZen || isGQIS) {
             const fetchTiles = urls.map(tileUrl => {
                 return fetchTile(tileUrl, headers, options)
             });
@@ -331,10 +334,10 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
                 const ctx = getCanvasContext(canvas);
                 ctx.drawImage(image, 0, 0);
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                if (terrainType === 'mapzen') {
+                if (isMapZen) {
                     transformMapZen(imageData);
                 } else {
-                    transferToQGisGray(imageData, minHeight, maxHeight);
+                    transformQGisGray(imageData, minHeight, maxHeight);
                 }
                 ctx.putImageData(imageData, 0, 0);
                 const terrainImage = canvas.transferToImageBitmap();
@@ -342,7 +345,7 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
             }).catch(error => {
                 reject(error);
             })
-        } else if (terrainType === 'tianditu' || terrainType === 'cesium' || terrainType === 'arcgis') {
+        } else if (isTianditu || isCesium || isArcgis) {
             const fetchTiles = urls.map(tileUrl => {
                 return fetchTileBuffer(tileUrl, headers, options)
             });
@@ -357,11 +360,11 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
                     return;
                 }
                 let result;
-                if (terrainType === 'tianditu') {
+                if (isTianditu) {
                     result = generateTiandituTerrain(buffer, terrainWidth, tileSize);
-                } else if (terrainType === 'cesium') {
+                } else if (isCesium) {
                     result = cesiumTerrainToHeights(buffer, terrainWidth, tileSize);
-                } else {
+                } else if (isArcgis) {
                     result = lerc.decode(buffer);
                     result.image = transformArcgis(result);
                 }

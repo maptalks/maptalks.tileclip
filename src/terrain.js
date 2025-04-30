@@ -286,7 +286,7 @@ export function cesiumTerrainToHeights(buffer, terrainWidth, tileSize) {
     return result;
 }
 
-export function generateCesiumTerrain(buffer) {
+function generateCesiumTerrain(buffer) {
     // cesium 格式说明：
     // https://www.cnblogs.com/oloroso/p/11080222.html
     let pos = 0;
@@ -385,7 +385,7 @@ export function generateCesiumTerrain(buffer) {
     return { positions, radius, min: minimumHeight, max: maximumHeight, indices };
 }
 
-export function createTerrainImage(terrainData) {
+function createTerrainImage(terrainData) {
     const canvas = getCanvas();
     const { width, height, data, tileSize } = terrainData;
     if (!width || !height || !data) {
@@ -459,7 +459,7 @@ export function transformArcgis(result) {
     return canvas.transferToImageBitmap();
 }
 
-export function transferToQGisGray(imageData, minHeight, maxHeight) {
+export function transformQGisGray(imageData, minHeight, maxHeight) {
     const data = imageData.data;
     const ah = (maxHeight - minHeight) / (255 * 255 * 255);
     for (let i = 0, len = data.length; i < len; i += 4) {

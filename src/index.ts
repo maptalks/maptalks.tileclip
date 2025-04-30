@@ -13,6 +13,7 @@ registerWorkerAdapter(WORKERNAME, WORKERCODE as unknown as string);
 
 const maskMap = {};
 const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
+const TerrainTypes = ['mapzen', 'tianditu', 'cesium', 'arcgis', 'qgis-gray'];
 
 export type getTileOptions = {
     url: string | Array<string>;
@@ -436,6 +437,10 @@ class TileActor extends worker.Actor {
 
             if (!terrainType) {
                 reject(createError('encodeTerrainTile error:terrainType is null'));
+                return;
+            }
+            if (TerrainTypes.indexOf(terrainType) === -1) {
+                reject(createError('encodeTerrainTile error:terrainType:not support the terrainType:' + terrainType));
                 return;
             }
             if (terrainType === 'qgis-gray') {
