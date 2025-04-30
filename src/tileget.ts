@@ -2,7 +2,7 @@ import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions } f
 import { getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeTiles, resizeCanvas, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
 import { isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage } from './util';
-import { cesiumTerrainToHeights, generateTiandituTerrain, transformArcgis, transformMapZen } from './terrain';
+import { cesiumTerrainToHeights, generateTiandituTerrain, transferToQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
 
 
@@ -303,7 +303,7 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
 
         const urls = checkTileUrl(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
-        const { returnBlobURL, terrainWidth, tileSize, terrainType } = options;
+        const { returnBlobURL, terrainWidth, tileSize, terrainType, minHeight, maxHeight } = options;
         const returnImage = (terrainImage: ImageBitmap) => {
             if (!returnBlobURL) {
                 resolve(terrainImage);
@@ -316,7 +316,7 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
                 });
             }
         };
-        if (terrainType === 'mapzen') {
+        if (terrainType === 'mapzen' || terrainType === 'qgis-gray') {
             const fetchTiles = urls.map(tileUrl => {
                 return fetchTile(tileUrl, headers, options)
             });
@@ -331,7 +331,11 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
                 const ctx = getCanvasContext(canvas);
                 ctx.drawImage(image, 0, 0);
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                transformMapZen(imageData);
+                if (terrainType === 'mapzen') {
+                    transformMapZen(imageData);
+                } else {
+                    transferToQGisGray(imageData, minHeight, maxHeight);
+                }
                 ctx.putImageData(imageData, 0, 0);
                 const terrainImage = canvas.transferToImageBitmap();
                 returnImage(terrainImage);

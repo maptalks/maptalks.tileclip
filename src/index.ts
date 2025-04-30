@@ -29,7 +29,9 @@ export type getTileOptions = {
 
 export type encodeTerrainTileOptions = {
     url: string;
-    terrainType: 'mapzen' | 'tianditu' | 'cesium' | 'arcgis';
+    terrainType: 'mapzen' | 'tianditu' | 'cesium' | 'arcgis' | 'qgis-gray';
+    minHeight?: number;
+    maxHeight?: number;
     terrainWidth?: number;
     tileSize?: number;
     referrer?: string;
@@ -426,7 +428,7 @@ class TileActor extends worker.Actor {
                 reject(CANVAS_ERROR_MESSAGE);
                 return;
             }
-            const { url, terrainType } = options;
+            const { url, terrainType, minHeight, maxHeight } = options;
             if (!url) {
                 reject(createError('encodeTerrainTile error:url is null'));
                 return;
@@ -435,6 +437,12 @@ class TileActor extends worker.Actor {
             if (!terrainType) {
                 reject(createError('encodeTerrainTile error:terrainType is null'));
                 return;
+            }
+            if (terrainType === 'qgis-gray') {
+                if (!isNumber(minHeight) || !isNumber(maxHeight) || minHeight > maxHeight) {
+                    reject(createError('encodeTerrainTile error:terrainType:qgis-gray,require minHeight/maxHeight should number'));
+                    return;
+                }
             }
             this.send(Object.assign({ terrainWidth: 65, tileSize: 256 }, options), [], (error, image) => {
                 if (error || (promise as any).canceled) {

@@ -458,3 +458,19 @@ export function transformArcgis(result) {
     ctx.putImageData(imageData, 0, 0);
     return canvas.transferToImageBitmap();
 }
+
+export function transferToQGisGray(imageData, minHeight, maxHeight) {
+    const data = imageData.data;
+    const ah = (maxHeight - minHeight) / (255 * 255 * 255);
+    for (let i = 0, len = data.length; i < len; i += 4) {
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const height = b * ah + (g * 255) * ah + (r * 255 * 255) * ah + minHeight;
+        const [r1, g1, b1] = encodeMapBox(height);
+        data[i] = r1;
+        data[i + 1] = g1;
+        data[i + 2] = b1;
+    }
+    return imageData;
+}
