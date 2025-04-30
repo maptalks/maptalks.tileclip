@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Interactions - Draw tool to draw geometries</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+</style>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.css' />
+<script type='text/javascript' src='http://localhost/d/maptalks.js/packages/maptalks/dist/maptalks.js'></script>
+<script type='text/javascript' src='http://localhost/d/maptalks.js/packages/gl/dist/maptalksgl.js'></script>
+<script type='text/javascript' src='../dist/maptalks.tileclip.js'></script>
+
+<body>
+    <div id="map" class="container"></div>
+    <script>
+
+        const tileActor = maptalks.getTileActor();
+
+        const map = new maptalks.Map("map", {
+            // "center": [119.09557457, 30.14442343, 339.73126220703125], "zoom": 11.856275713521464, "pitch": 61.80000000000011, "bearing": -64.07337236948052,
+            "center": [108.95986733, 34.21997952, 430.3062438964844], "zoom": 12.698416480987284, "pitch": 0, "bearing": 1.8437368186266667,
+            // cameraInfiniteFar: true,
+            // heightFactor: 4.2,
+            zoomControl: true,
+            // baseLayer: new maptalks.TileLayer('base', {
+            //     urlTemplate: "https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
+            //     subdomains: ["a", "b", "c", "d"],
+            // })
+        });
+
+
+        const sceneConfig = {
+            postProcess: {
+                enable: true,
+                antialias: {
+                    enable: true,
+                },
+            },
+        };
+
+        const colors4 = [
+            [0, '#F0F9E9'],
+            [200, '#D7EFD1'],
+            [400, '#A6DCB6'],
+            [650, '#8FD4BD'],
+            [880, '#67C1CB'],
+            [1100, '#3C9FC8'],
+            [1300, '#1171B1'],
+            [1450, '#085799'],
+            [1600, '#084586'],
+        ];
+
+        let isGray = true;
+        const terrain = {
+            type: 'mapbox',
+            //强制指定tileSize
+            // tileSize: 256,
+            maxAvailableZoom: 14,
+
+            requireSkuToken: false,
+            urlTemplate: 'https://microget-1300406971.cos.ap-shanghai.myqcloud.com/maptalks-study/assets/data/tile-rgb/{z}/{x}/{y}.png',
+            urlTemplate: "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
+            // urlTemplate: "http://localhost/e/vt-test-data/terrain-gray-tiles/{z}/{x}/{y}.png",
+            subdomains: ['a', 'b', 'c', 'd'],
+            colors: colors4,
+            exaggeration: 4,
+        };
+        if (isGray) {
+            terrain.urlTemplate = 'http://localhost/e/vt-test-data/qgis-gray-terrain-tile/{z}/{x}/{y}.png'
+        }
+        const group = new maptalks.GroupGLLayer('group', [], {
+            terrain
+        });
+        group.addTo(map);
+
+
+        const terrainLayer = group.getTerrainLayer();
+        console.log(terrainLayer);
+
+
+
+        let min = 210, max = 1980;
+        if (isGray) {
+            terrainLayer.getRenderer().loadTileBitmap = function (url, tile, callback, options) {
+                console.log(url);
+                tileActor.encodeTerrainTile({
+                    url: maptalks.Util.getAbsoluteURL(url),
+                    terrainType: 'qgis-gray',
+                    minHeight: min,
+                    maxHeight: max
+                    // timeout: 5000
+                }).then(imagebitmap => {
+                    callback(null, imagebitmap)
+
+
+                }).catch(error => {
+                    //do some things
+                    console.error(error);
+                    callback(null, maptalks.getBlankTile());
+                })
+            };
+        }
+
+
+
+
+
+
+        map.setView({
+            "center": [111.40856582, 34.43335672, 430.3062438964844], "zoom": 9.93822512953862, "pitch": 0, "bearing": 0.40705084326828
+        })
+
+        map.on('click', e => {
+            console.log(e.coordinate.toArray());
+        })
+
+        const coordinates = [
+            [112.02819520059498, 35.01339392945135]
+
+            , [112.02671158192311, 33.99563534706898]
+
+            , [110.97671133215502, 33.98126696719903]
+
+            , [110.95792672937864, 35.01603868483507]
+        ];
+
+        const mask = new maptalks.ClipOutsideMask(coordinates);
+        terrainLayer.setMask(mask);
+
+
+
+
+
+
+
+
+
+    </script>
+</body>
+
+</html>
