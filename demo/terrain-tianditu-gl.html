@@ -56,16 +56,15 @@
         };
 
         const colors4 = [
-            [0, '#267300'],
-            [200, '#428501'],
-            [400, '#6CA102'],
-            [650, '#9FC100'],
-            [880, '#ACCC00'],
-            [1100, '#E0ED04'],
-            [1300, '#FBE100'],
-            [1450, '#FCB600'],
-            [1600, '#FF8D03'],
-            [2000, '#FE2200']
+            [0, '#F0F9E9'],
+            [200, '#D7EFD1'],
+            [400, '#A6DCB6'],
+            [650, '#8FD4BD'],
+            [880, '#67C1CB'],
+            [1100, '#3C9FC8'],
+            [1300, '#1171B1'],
+            [1450, '#085799'],
+            [1600, '#084586'],
         ];
 
 
@@ -85,32 +84,37 @@
         const group = new maptalks.GroupGLLayer('group', [], {
             terrain
         });
-        group.addTo(map);
-
+  
         map.setView({
             "center": [118.25079334, 30.1210681, 430.3062438964844], "zoom": 8.892086520379873, "pitch": 66.64999999999992, "bearing": 112.90705084326646
         })
 
-        const terrainLayer = group.getTerrainLayer();
-        console.log(terrainLayer);
+        group.on('terrainlayercreated', e => {
+            const terrainLayer = group.getTerrainLayer();
+            console.log(terrainLayer);
 
-        terrainLayer.getRenderer().loadTileBitmap = function (url, tile, callback, options) {
-            // console.log(url);
-            tileActor.encodeTerrainTile({
-                url: maptalks.Util.getAbsoluteURL(url),
-                terrainType: terrain.type,
-                // timeout: 5000
-            }).then(imagebitmap => {
-                callback(null, imagebitmap)
+            terrainLayer.getRenderer().loadTileBitmap = function (url, tile, callback, options) {
+                // console.log(url);
+                tileActor.encodeTerrainTile({
+                    url: maptalks.Util.getAbsoluteURL(url),
+                    terrainType: terrain.type,
+                    // timeout: 5000
+                }).then(imagebitmap => {
+                    callback(null, imagebitmap)
 
 
-            }).catch(error => {
-                //do some things
-                console.error(error);
+                }).catch(error => {
+                    //do some things
+                    console.error(error);
 
-                callback(null, maptalks.getBlankTile());
-            })
-        };
+                    callback(null, maptalks.getBlankTile());
+                })
+            };
+        });
+        group.addTo(map);
+
+
+
 
 
 

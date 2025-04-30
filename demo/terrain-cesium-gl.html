@@ -80,33 +80,40 @@
         const group = new maptalks.GroupGLLayer('group', [], {
             terrain
         });
-        group.addTo(map);
+  
 
         map.setView({
             "center": [106.63906041, 29.46901528, 430.3062438964844], "zoom": 12.336833621741476, "pitch": 66.35000000000008, "bearing": 92.20705084326664
         })
 
-        const terrainLayer = group.getTerrainLayer();
-        console.log(terrainLayer);
+        group.on('terrainlayercreated', e => {
+            console.log(e);
+            const terrainLayer = group.getTerrainLayer();
+            console.log(terrainLayer);
 
-        terrainLayer.getRenderer().loadTileBitmap = function (url, tile, callback, options) {
-            tileActor.encodeTerrainTile({
-                url: maptalks.Util.getAbsoluteURL(url),
-                terrainType: terrain.type,
-                headers: {
-                    Authorization: 'Bearer ' + terrain.accessToken,
-                    'Accept': 'application/vnd.quantized-mesh,application/octet-stream;q=0.9,*/*;q=0.01'
-                }
-                // timeout: 5000
-            }).then(imagebitmap => {
-                callback(null, imagebitmap)
-            }).catch(error => {
-                //do some things
-                console.error(error);
+            terrainLayer.getRenderer().loadTileBitmap = function (url, tile, callback, options) {
+                tileActor.encodeTerrainTile({
+                    url: maptalks.Util.getAbsoluteURL(url),
+                    terrainType: terrain.type,
+                    headers: {
+                        Authorization: 'Bearer ' + terrain.accessToken,
+                        'Accept': 'application/vnd.quantized-mesh,application/octet-stream;q=0.9,*/*;q=0.01'
+                    }
+                    // timeout: 5000
+                }).then(imagebitmap => {
+                    callback(null, imagebitmap)
+                }).catch(error => {
+                    //do some things
+                    console.error(error);
 
-                callback(null, maptalks.getBlankTile());
-            })
-        };
+                    callback(null, maptalks.getBlankTile());
+                })
+            };
+        })
+
+        group.addTo(map);
+
+
 
 
 

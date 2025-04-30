@@ -61,7 +61,7 @@
             [1600, '#084586'],
         ];
 
-        let isGray = true;
+
         const terrain = {
             type: 'mapbox',
             //强制指定tileSize
@@ -71,27 +71,27 @@
             requireSkuToken: false,
             urlTemplate: 'https://microget-1300406971.cos.ap-shanghai.myqcloud.com/maptalks-study/assets/data/tile-rgb/{z}/{x}/{y}.png',
             urlTemplate: "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
-            // urlTemplate: "http://localhost/e/vt-test-data/terrain-gray-tiles/{z}/{x}/{y}.png",
+            urlTemplate: './qgis-gray-terrain-tile/{z}/{x}/{y}.png',
             subdomains: ['a', 'b', 'c', 'd'],
             colors: colors4,
             exaggeration: 4,
         };
-        if (isGray) {
-            terrain.urlTemplate = 'http://localhost/e/vt-test-data/qgis-gray-terrain-tile/{z}/{x}/{y}.png'
-        }
+
         const group = new maptalks.GroupGLLayer('group', [], {
             terrain
         });
-        group.addTo(map);
-
-
-        const terrainLayer = group.getTerrainLayer();
-        console.log(terrainLayer);
 
 
 
-        let min = 210, max = 1980;
-        if (isGray) {
+
+        group.on('terrainlayercreated', e => {
+
+            const terrainLayer = group.getTerrainLayer();
+            console.log(terrainLayer);
+
+
+
+            let min = 210, max = 1980;
             terrainLayer.getRenderer().loadTileBitmap = function (url, tile, callback, options) {
                 console.log(url);
                 tileActor.encodeTerrainTile({
@@ -110,10 +110,24 @@
                     callback(null, maptalks.getBlankTile());
                 })
             };
-        }
+
+            const coordinates = [
+                [112.02819520059498, 35.01339392945135]
+
+                , [112.02671158192311, 33.99563534706898]
+
+                , [110.97671133215502, 33.98126696719903]
+
+                , [110.95792672937864, 35.01603868483507]
+            ];
+
+            const mask = new maptalks.ClipOutsideMask(coordinates);
+            terrainLayer.setMask(mask);
+
+        });
 
 
-
+        group.addTo(map);
 
 
 
@@ -125,18 +139,7 @@
             console.log(e.coordinate.toArray());
         })
 
-        const coordinates = [
-            [112.02819520059498, 35.01339392945135]
 
-            , [112.02671158192311, 33.99563534706898]
-
-            , [110.97671133215502, 33.98126696719903]
-
-            , [110.95792672937864, 35.01603868483507]
-        ];
-
-        const mask = new maptalks.ClipOutsideMask(coordinates);
-        terrainLayer.setMask(mask);
 
 
 
