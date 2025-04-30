@@ -49,7 +49,8 @@
 ### Terrain
 
 * [mapzen terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-mapzen.html)
-* [arcgis terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-mapzen.html)
+* [arcgis terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-arcgis.html)
+* [qgis gray terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-qgis-gray.html)
 
 ## Others
 
@@ -231,7 +232,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,               `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -404,8 +405,10 @@ tileActor.injectMask(maskId, polygon).then(data => {
 
 * `encodeTerrainTile(options)` transform other terrain tile to mapbox terrain rgb tile  by fetch in worker, return `Promise`
   + `options.url`:tile url
-  + `options.terrainType`:'mapzen' | 'tianditu' | 'cesium'|'arcgs'
+  + `options.terrainType`:'mapzen' | 'tianditu' | 'cesium'|'arcgs'|'qgis-gray'
   + `options?.terrainWidth` default is 65
+  + `options?.minHeight` min height when terrainType is 'qgis-gray'
+  + `options?.maxHeight` max height when terrainType is 'qgis-gray'
   + `options?.tileSize` default value is 256
   + `options?.headers`:fetch headers params. if need
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
