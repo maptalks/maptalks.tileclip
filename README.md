@@ -30,23 +30,22 @@
 
 * [update mask](https://maptalks.github.io/maptalks.tileclip/demo/update-mask.html)
 * [mask remove or add](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-remve.html)
-* [water mark](https://maptalks.github.io/maptalks.tileclip/demo/watermark.html)
 * [gaussian Blur](https://maptalks.github.io/maptalks.tileclip/demo/gaussianBlurRadius.html)
 * [big image slice](https://maptalks.github.io/maptalks.tileclip/demo/imageslicing.html)
 
-### Custom Prj
+### Clip By Custom Prj
 
 * [EPSG:4326](https://maptalks.github.io/maptalks.tileclip/demo/4326.html)
 * [custom SpatialReference](https://maptalks.github.io/maptalks.tileclip/demo/custom-sp.html)
 * [identify projection](https://maptalks.github.io/maptalks.tileclip/demo/identify.html)
 * [EPSG:9807](https://maptalks.github.io/maptalks.tileclip/demo/epsg9807.html)
 
-### Transform
+### Transform Tile
 
 * [transform EPSG4326 to EPSG3857](https://maptalks.github.io/maptalks.tileclip/demo/4326-transform-3857.html)
 * [transform EPSG3857 to EPSG4326](https://maptalks.github.io/maptalks.tileclip/demo/3857-transform-4326.html)
 
-### Terrain
+### Terrain Encode
 
 * [mapzen terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-mapzen.html)
 * [arcgis terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-arcgis.html)
@@ -54,6 +53,7 @@
 
 ## Others
 
+* [water mark](https://maptalks.github.io/maptalks.tileclip/demo/watermark.html)
 * [underground by clip tile](https://maptalks.github.io/maptalks.tileclip/demo/underground.html)
 * [leaflet clip demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet.html)
 * [leaflet gettile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-simple.html)
