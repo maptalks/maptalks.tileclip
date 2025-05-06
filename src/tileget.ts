@@ -1,15 +1,16 @@
 import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions } from './index';
 import { getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeTiles, resizeCanvas, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
-import { isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage } from './util';
+import { isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage, replaceAll } from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
 
+const LRUCount = 200;
 
-const tileImageCache = new LRUCache(200, (image) => {
+const tileImageCache = new LRUCache(LRUCount, (image) => {
     disposeImage(image);
 });
-const tileBufferCache = new LRUCache(200, (buffer) => {
+const tileBufferCache = new LRUCache(LRUCount, (buffer) => {
     // disposeImage(image);
 });
 
@@ -20,10 +21,7 @@ function formatTileUrlBySubdomains(url, subdomains) {
     const len = subdomains.length;
     let index = Math.floor(Math.random() * len);
     index = Math.min(index, len - 1);
-    while (url.indexOf('{s}') > -1) {
-        url = url.replace('{s}', subdomains[index]);
-    }
-    return url;
+    return replaceAll(url, '{s}', subdomains[index])
 }
 
 const CONTROLCACHE: Record<string, Array<AbortController>> = {};
@@ -242,17 +240,11 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
         }
         const urls = urlTemplates.map(urlTemplate => {
             let key = '{x}';
-            while (urlTemplate.indexOf(key) > -1) {
-                urlTemplate = urlTemplate.replace(key, tileX as unknown as string);
-            }
+            urlTemplate = replaceAll(urlTemplate, key, tileX as unknown as string);
             key = '{y}';
-            while (urlTemplate.indexOf(key) > -1) {
-                urlTemplate = urlTemplate.replace(key, tileY as unknown as string);
-            }
+            urlTemplate = replaceAll(urlTemplate, key, tileY as unknown as string);
             key = '{z}';
-            while (urlTemplate.indexOf(key) > -1) {
-                urlTemplate = urlTemplate.replace(key, tileZ as unknown as string);
-            }
+            urlTemplate = replaceAll(urlTemplate, key, tileZ as unknown as string);
             return formatTileUrlBySubdomains(urlTemplate, subdomains);
         });
         const headers = Object.assign({}, HEADERS, options.headers || {});

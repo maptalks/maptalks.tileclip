@@ -85,3 +85,10 @@ export function encodeMapBox(height: number, out?: [number, number, number]) {
     }
 
 }
+
+export function replaceAll(template: string, key: string, value: string) {
+    while (template.indexOf(key) > -1) {
+        template = template.replace(key, value);
+    }
+    return template;
+}
