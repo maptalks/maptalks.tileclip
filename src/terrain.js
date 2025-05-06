@@ -282,7 +282,6 @@ export function cesiumTerrainToHeights(buffer, terrainWidth, tileSize) {
 
     const result = { data: heights, min, max, width: terrainWidth, height: terrainWidth, tileSize };
     createTerrainImage(result);
-    console.log(result);
     return result;
 }
 
@@ -459,14 +458,19 @@ export function transformArcgis(result) {
     return canvas.transferToImageBitmap();
 }
 
+const RGBTOTAL = (255 + 1 + 255 * 256 + 255 * 256 * 256);
 export function transformQGisGray(imageData, minHeight, maxHeight) {
     const data = imageData.data;
-    const ah = (maxHeight - minHeight) / (255 * 255 * 255);
+    const ah = (maxHeight - minHeight) / RGBTOTAL;
     for (let i = 0, len = data.length; i < len; i += 4) {
         const r = data[i];
         const g = data[i + 1];
         const b = data[i + 2];
-        const height = b * ah + (g * 255) * ah + (r * 255 * 255) * ah + minHeight;
+        const a = data[i + 3];
+        if (a === 0) {
+            continue;
+        }
+        const height = b * ah + (g * 256) * ah + (r * 256 * 256) * ah + minHeight;
         const [r1, g1, b1] = encodeMapBox(height);
         data[i] = r1;
         data[i + 1] = g1;
