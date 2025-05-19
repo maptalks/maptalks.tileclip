@@ -2,7 +2,7 @@ import { getTileWithMaxZoom } from "./tileget";
 //@ts-ignore
 import { SphericalMercator } from '@mapbox/sphericalmercator';
 // import tileCover from '@mapbox/tile-cover';
-import { createError, disposeImage, isNumber, lnglat2Mercator } from "./util";
+import { disposeImage, lnglat2Mercator } from "./util";
 import { getBlankTile, getCanvas, getCanvasContext, layoutTiles, resizeCanvas, toBlobURL } from "./canvas";
 import { bboxOfBBOXList, BBOXtype, toBBOX, toPoints } from "./bbox";
 import gcoord from 'gcoord';

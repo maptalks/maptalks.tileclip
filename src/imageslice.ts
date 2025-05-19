@@ -1,7 +1,7 @@
-import { clearCanvas, getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, mergeTiles, resizeCanvas } from "./canvas";
+import { getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, mergeTiles, resizeCanvas } from "./canvas";
 import { getTileOptions } from "./index";
 import { fetchTile } from "./tileget";
-import { checkTileUrl, createError, HEADERS, CANVAS_ERROR_MESSAGE, uuid, disposeImage } from "./util";
+import { checkTileUrl, HEADERS, uuid, disposeImage } from "./util";
 
 const SIZE = 512;
 

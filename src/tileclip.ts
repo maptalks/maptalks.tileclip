@@ -3,7 +3,7 @@ import lineclip from 'lineclip';
 import { getBlankTile, getCanvas, imageClip, toBlobURL } from './canvas';
 import { bboxInBBOX, bboxIntersect, BBOXtype } from './bbox';
 import { clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon } from './index';
-import { CANVAS_ERROR_MESSAGE, createError, lnglat2Mercator, isPolygon, isEPSG3857 } from './util';
+import { createError, lnglat2Mercator, isPolygon, isEPSG3857 } from './util';
 
 const GeoJSONCache = {};
 
