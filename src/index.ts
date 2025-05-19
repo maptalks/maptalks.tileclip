@@ -1,13 +1,12 @@
 import { registerWorkerAdapter, worker } from 'maptalks';
 //@ts-ignore
 import WORKERCODE from './worker/worker.bundle.js';
-import { CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon } from './util';
 import { BBOXtype } from './bbox';
-import { createError, FetchCancelError, isNumber, uuid } from './util.js';
+import { createError, FetchCancelError, isNumber, uuid, CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon } from './util.js';
 import { getCanvas } from './canvas';
 export { getBlankTile, get404Tile } from './canvas';
 
-const WORKERNAME = '__maptalks.tileclip';
+const WORKERNAME = '__maptalks.tileclip__';
 
 registerWorkerAdapter(WORKERNAME, WORKERCODE as unknown as string);
 

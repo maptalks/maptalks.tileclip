@@ -4,7 +4,7 @@ import { SphericalMercator } from '@mapbox/sphericalmercator';
 // import tileCover from '@mapbox/tile-cover';
 import { disposeImage, lnglat2Mercator } from "./util";
 import { getBlankTile, getCanvas, getCanvasContext, layoutTiles, resizeCanvas, toBlobURL } from "./canvas";
-import { bboxOfBBOXList, BBOXtype, toBBOX, toPoints } from "./bbox";
+import { bboxOfBBOXList, BBOXtype, pointsToBBOX, bboxToPoints } from "./bbox";
 import gcoord from 'gcoord';
 
 const FirstRes = 1.40625, mFirstRes = 156543.03392804097;
@@ -52,7 +52,7 @@ function offsetTileBBOX(bbox: BBOXtype, projection: string, isGCJ02) {
     if (!isGCJ02) {
         return;
     }
-    const points = toPoints(bbox);
+    const points = bboxToPoints(bbox);
     const newPoints = points.map(p => {
         if (projection === 'EPSG:3857') {
             const c = gcoord.transform(p as any, gcoord.WebMercator, gcoord.WGS84);
@@ -78,7 +78,7 @@ function offsetTileBBOX(bbox: BBOXtype, projection: string, isGCJ02) {
         bbox[2] = maxx;
         bbox[3] = maxy;
     } else {
-        const points = toPoints([minx, miny, maxx, maxx]).map(p => {
+        const points = bboxToPoints([minx, miny, maxx, maxx]).map(p => {
             return lnglat2Mercator(p) as [number, number];
         });
         let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
@@ -136,14 +136,14 @@ function cal4326Tiles(x: number, y: number, z: number, zoomOffset = 0, isGCJ02) 
     const ymax = orginY - (minrow) * res;
 
     // console.log(xmin, xmax, ymin, ymax);
-    const coordinates: Array<[number, number]> = toPoints(tileBBOX).map(c => {
+    const coordinates: Array<[number, number]> = bboxToPoints(tileBBOX).map(c => {
         return lnglat2Mercator(c) as [number, number];
     })
     return {
         tiles,
         tilesbbox: [xmin, ymin, xmax, ymax],
         bbox: tileBBOX,
-        mbbox: toBBOX(coordinates),
+        mbbox: pointsToBBOX(coordinates),
         x,
         y,
         z
@@ -156,7 +156,7 @@ function cal3857Tiles(x: number, y: number, z: number, zoomOffset = 0, isGCJ02) 
     const res = get3857Res(z) * TILESIZE;
     const tileBBOX = tile4326BBOX(x, y, z);
     offsetTileBBOX(tileBBOX, 'EPSG:4326', isGCJ02);
-    const mbbox = toBBOX(toPoints(tileBBOX as any).map(c => {
+    const mbbox = pointsToBBOX(bboxToPoints(tileBBOX as any).map(c => {
         const result = merc.forward(c);
         return result;
     }));

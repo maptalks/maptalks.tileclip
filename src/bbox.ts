@@ -21,7 +21,7 @@ export function bboxInBBOX(bbox1: BBOXtype, bbox2: BBOXtype) {
     return x1 >= bbox2[0] && x2 <= bbox2[2] && y1 >= bbox2[1] && y2 <= bbox2[3];
 }
 
-export function toPoints(bbox: BBOXtype) {
+export function bboxToPoints(bbox: BBOXtype) {
     const [minx, miny, maxx, maxy] = bbox;
     return [
         [minx, miny],
@@ -31,7 +31,7 @@ export function toPoints(bbox: BBOXtype) {
     ];
 }
 
-export function toBBOX(points: Array<[number, number]>): BBOXtype {
+export function pointsToBBOX(points: Array<[number, number]>): BBOXtype {
     let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
     points.forEach(point => {
         xmin = Math.min(xmin, point[0]);

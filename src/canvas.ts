@@ -36,16 +36,16 @@ export function getCanvasContext(canvas: OffscreenCanvas) {
 
 export function getBlankTile(tileSize?: number) {
     const canvas = getCanvas(tileSize);
-    const ctx = getCanvasContext(canvas);
+    getCanvasContext(canvas);
     return canvas.transferToImageBitmap();
 }
 
 export function get404Tile(tileSize?: number) {
     const canvas = getCanvas(tileSize);
     const ctx = getCanvasContext(canvas);
-    ctx.textAlign='center';
-    ctx.textBaseline='middle';
-    ctx.fillStyle='gray';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'gray';
     ctx.font = "bold 24px serif";
     ctx.fillText('404', canvas.width / 2, canvas.height / 2)
     return canvas.transferToImageBitmap();
