@@ -70,7 +70,7 @@ const bundles = [
             'format': 'umd',
             'name': 'maptalks',
             'file': `dist/${FILEMANE}.min.js`,
-            'sourcemap': false,
+            'sourcemap': true,
             'extend': true,
             'banner': banner,
             globals
