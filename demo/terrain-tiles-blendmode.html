@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Interactions - Draw tool to draw geometries</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+</style>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.css' />
+<script type='text/javascript' src='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js'></script>
+<script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
+<script type='text/javascript' src='https://cdn.jsdelivr.net/npm/colorin@0.7.0/dist/colorin.min.js'></script>
+
+<body>
+    <div id="map" class="container"></div>
+    <script>
+
+        const tileActor = maptalks.getTileActor();
+        const maskId = '1';
+       
+        //terrain layer
+        const baseLayer = new maptalks.TileLayer('base', {
+            // debug: true,
+            urlTemplate: "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer/tile/{z}/{y}/{x}",
+            subdomains: ["a", "b", "c", "d"],
+            // zIndex: -1
+            // bufferPixel: 1
+        })
+
+        function rgb2Height(R, G, B) {
+            return -10000 + ((R * 256 * 256 + G * 256 + B) * 0.1);
+        }
+
+        const ci = new colorin.ColorIn([
+            [0, 'rgba(0, 0, 0, 0)'],
+            [4000, 'rgba(0, 0, 0, 1)'],
+
+        ])
+        const canvas = new OffscreenCanvas(1, 1);
+
+        function resizeCanvas(canvas, width, height) {
+            if (canvas.width !== width || canvas.height !== height) {
+                canvas.width = width;
+                canvas.height = height;
+            }
+        }
+        //colors terrain tile
+        function decodeTerrainTile(image) {
+            const { width, height } = image;
+            resizeCanvas(canvas, width, height);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, width, height);
+            ctx.drawImage(image, 0, 0);
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                const R = data[i];
+                const G = data[i + 1];
+                const B = data[i + 2];
+                const A = data[i + 3];
+                if (A === 0) {
+                    data[i] = 0;
+                    data[i + 1] = 0;
+                    data[i + 2] = 0;
+                } else {
+                    const height = rgb2Height(R, G, B);
+                    const [r, g, b, a] = ci.getColor(height);
+                    data[i] = r;
+                    data[i + 1] = g;
+                    data[i + 2] = b;
+                    data[i + 3] = a;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+            return canvas.transferToImageBitmap();
+        }
+
+        function mergeTiles(images, blendMode) {
+            const { width, height } = images[0];
+            resizeCanvas(canvas, width, height);
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, width, height);
+            ctx.save();
+            if (blendMode) {
+                ctx.globalCompositeOperation = blendMode;
+            }
+            for (let i = 0; i < images.length; i++) {
+                ctx.drawImage(images[i], 0, 0);
+            }
+            ctx.restore();
+            return canvas.transferToImageBitmap();
+        }
+
+        function getTileUrl(url, x, y, z) {
+            return url.replaceAll('{x}', x).replaceAll('{y}', y).replaceAll('{z}', z);
+        }
+
+        const ImageTileURL = 'https://server.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+        const BaseTileURL = 'https://server.arcgisonline.com/arcgis/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+        baseLayer.on('renderercreate', function (e) {
+            //load tile image
+            //   img(Image): an Image object
+            //   url(String): the url of the tile
+            e.renderer.loadTileBitmap = function (url, tile, callback) {
+                const { x, y, z } = tile;
+                tileActor.encodeTerrainTile({
+                    url: maptalks.Util.getAbsoluteURL(url),
+                    terrainType: 'arcgis',
+                    // timeout: 5000
+                }).then(terrainTile => {
+                    const colorTile = decodeTerrainTile(terrainTile);
+
+                    const url1 = getTileUrl(ImageTileURL, x, y, z);
+                    tileActor.getTile({
+                        url: maptalks.Util.getAbsoluteURL(url1),
+                        // timeout: 5000
+                    }).then(imageTile => {
+
+                        const tempTile = mergeTiles([imageTile, colorTile], 'destination-atop');
+
+                        const url2 = getTileUrl(BaseTileURL, x, y, z);
+                        tileActor.getTile({
+                            url: maptalks.Util.getAbsoluteURL(url2),
+                            // timeout: 5000
+                        }).then(baseTile => {
+
+                            const mergeTile = mergeTiles([baseTile, tempTile]);
+                            callback(mergeTile);
+
+                        }).catch(error => {
+                            //do some things
+                            console.error(error);
+                        })
+
+
+                    }).catch(error => {
+                        //do some things
+                        console.error(error);
+                    })
+
+
+                }).catch(error => {
+                    //do some things
+                    console.error(error);
+                })
+            };
+        });
+
+        var map = new maptalks.Map('map', {
+            "center": [61.51987613, 31.90388953], "zoom": 4.0991484153139055, "pitch": 0, "bearing": 0
+        });
+
+        const layer = new maptalks.VectorLayer('layer').addTo(map);
+        baseLayer.addTo(map);
+
+    </script>
+</body>
+
+</html>
