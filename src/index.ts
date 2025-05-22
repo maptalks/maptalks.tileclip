@@ -39,6 +39,7 @@ export type encodeTerrainTileOptions = {
     fetchOptions?: Record<string, any>;
     timeout?: number;
     returnBlobURL?: boolean;
+    terrainColors?: Array<[number, string]>
 }
 
 export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {

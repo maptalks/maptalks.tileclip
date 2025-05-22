@@ -1,9 +1,10 @@
 import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions } from './index';
 import { getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeTiles, resizeCanvas, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
-import { isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage, replaceAll, isImageBitmap } from './util';
+import { isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage, replaceAll, isImageBitmap, rgb2Height } from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
+import { ColorIn } from 'colorin';
 
 const LRUCount = 200;
 
@@ -299,7 +300,7 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
 
         const urls = checkTileUrl(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
-        const { returnBlobURL, terrainWidth, tileSize, terrainType, minHeight, maxHeight } = options;
+        const { returnBlobURL, terrainWidth, tileSize, terrainType, minHeight, maxHeight, terrainColors } = options;
         const returnImage = (terrainImage: ImageBitmap) => {
             if (!returnBlobURL) {
                 resolve(terrainImage);
@@ -337,7 +338,7 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
                 }
                 ctx.putImageData(imageData, 0, 0);
                 const terrainImage = canvas.transferToImageBitmap();
-                returnImage(terrainImage);
+                returnImage(colorsTerrainTile(terrainColors, terrainImage));
             }).catch(error => {
                 reject(error);
             })
@@ -368,7 +369,7 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
                     reject(createError('generate terrain data error,not find image data'));
                     return;
                 }
-                resolve(result.image);
+                returnImage(colorsTerrainTile(terrainColors, result.image));
             }).catch(error => {
                 reject(error);
             })
@@ -377,4 +378,47 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
         }
 
     });
+}
+
+const colorInCache = new Map();
+
+function colorsTerrainTile(colors, image: ImageBitmap) {
+    if (!colors || !Array.isArray(colors) || colors.length < 2) {
+        return image;
+    }
+    const key = JSON.stringify(colors);
+    let ci = colorInCache.get(key);
+    if (!ci) {
+        ci = new ColorIn(colors);
+        colorInCache.set(key, ci);
+    }
+    const { width, height } = image;
+    const canvas = getCanvas();
+    resizeCanvas(canvas, width, height);
+    const ctx = getCanvasContext(canvas);
+    ctx.drawImage(image, 0, 0);
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+        const R = data[i];
+        const G = data[i + 1];
+        const B = data[i + 2];
+        const A = data[i + 3];
+        if (A === 0) {
+            data[i] = 0;
+            data[i + 1] = 0;
+            data[i + 2] = 0;
+        } else {
+            const height = rgb2Height(R, G, B);
+            const [r, g, b, a] = ci.getColor(height);
+            data[i] = r;
+            data[i + 1] = g;
+            data[i + 2] = b;
+            data[i + 3] = a;
+        }
+    }
+    ctx.putImageData(imageData, 0, 0);
+    disposeImage(image);
+    return canvas.transferToImageBitmap();
 }

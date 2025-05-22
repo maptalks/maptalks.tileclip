@@ -85,6 +85,10 @@ export function encodeMapBox(height: number, out?: [number, number, number]) {
 
 }
 
+export function rgb2Height(R: number, G: number, B: number) {
+    return -10000 + ((R * 256 * 256 + G * 256 + B) * 0.1);
+}
+
 export function replaceAll(template: string, key: string, value: string) {
     while (template.indexOf(key) > -1) {
         template = template.replace(key, value);
