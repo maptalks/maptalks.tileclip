@@ -27,7 +27,7 @@
 
         const tileActor = maptalks.getTileActor();
         const maskId = '1';
-       
+
         //terrain layer
         const baseLayer = new maptalks.TileLayer('base', {
             // debug: true,
@@ -86,21 +86,21 @@
             return canvas.transferToImageBitmap();
         }
 
-        function mergeTiles(images, blendMode) {
-            const { width, height } = images[0];
-            resizeCanvas(canvas, width, height);
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, width, height);
-            ctx.save();
-            if (blendMode) {
-                ctx.globalCompositeOperation = blendMode;
-            }
-            for (let i = 0; i < images.length; i++) {
-                ctx.drawImage(images[i], 0, 0);
-            }
-            ctx.restore();
-            return canvas.transferToImageBitmap();
-        }
+        // function mergeTiles(images, blendMode) {
+        //     const { width, height } = images[0];
+        //     resizeCanvas(canvas, width, height);
+        //     const ctx = canvas.getContext('2d');
+        //     ctx.clearRect(0, 0, width, height);
+        //     ctx.save();
+        //     if (blendMode) {
+        //         ctx.globalCompositeOperation = blendMode;
+        //     }
+        //     for (let i = 0; i < images.length; i++) {
+        //         ctx.drawImage(images[i], 0, 0);
+        //     }
+        //     ctx.restore();
+        //     return canvas.transferToImageBitmap();
+        // }
 
         function getTileUrl(url, x, y, z) {
             return url.replaceAll('{x}', x).replaceAll('{y}', y).replaceAll('{z}', z);
@@ -112,31 +112,28 @@
             //load tile image
             //   img(Image): an Image object
             //   url(String): the url of the tile
+            const getAbsoluteURL = maptalks.Util.getAbsoluteURL;
             e.renderer.loadTileBitmap = function (url, tile, callback) {
                 const { x, y, z } = tile;
                 tileActor.encodeTerrainTile({
-                    url: maptalks.Util.getAbsoluteURL(url),
+                    url: getAbsoluteURL(url),
                     terrainType: 'arcgis',
                     // timeout: 5000
                 }).then(terrainTile => {
                     const colorTile = decodeTerrainTile(terrainTile);
-
                     const url1 = getTileUrl(ImageTileURL, x, y, z);
                     tileActor.getTile({
-                        url: maptalks.Util.getAbsoluteURL(url1),
+                        url: [getAbsoluteURL(url1), colorTile],
+                        globalCompositeOperation: 'destination-atop'
                         // timeout: 5000
                     }).then(imageTile => {
 
-                        const tempTile = mergeTiles([imageTile, colorTile], 'destination-atop');
-
                         const url2 = getTileUrl(BaseTileURL, x, y, z);
                         tileActor.getTile({
-                            url: maptalks.Util.getAbsoluteURL(url2),
+                            url: [getAbsoluteURL(url2), imageTile]
                             // timeout: 5000
                         }).then(baseTile => {
-
-                            const mergeTile = mergeTiles([baseTile, tempTile]);
-                            callback(mergeTile);
+                            callback(baseTile);
 
                         }).catch(error => {
                             //do some things
