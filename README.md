@@ -411,6 +411,7 @@ tileActor.injectMask(maskId, polygon).then(data => {
   + `options?.minHeight` min height when terrainType is 'qgis-gray'
   + `options?.maxHeight` max height when terrainType is 'qgis-gray'
   + `options?.tileSize` default value is 256
+  + `options?.terrainColors` Colored terrain tiles. Color interpolation based on altitude
   + `options?.headers`:fetch headers params. if need
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
   + `options?.timeout`: fetch timeout
