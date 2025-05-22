@@ -1,7 +1,7 @@
 import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions } from './index';
 import { getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeTiles, resizeCanvas, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
-import { isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage, replaceAll } from './util';
+import { isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage, replaceAll, isImageBitmap } from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
 
@@ -71,6 +71,10 @@ export function fetchTile(url: string, headers = {}, options) {
                 reject(error);
             });
         };
+        if (isImageBitmap(url)) {
+            copyImageBitMap(url as unknown as ImageBitmap);
+            return;
+        }
         const taskId = options.__taskId;
         if (!taskId) {
             reject(createError('taskId is null'));

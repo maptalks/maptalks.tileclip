@@ -2,7 +2,7 @@ import { registerWorkerAdapter, worker } from 'maptalks';
 //@ts-ignore
 import WORKERCODE from './worker/worker.bundle.js';
 import { BBOXtype } from './bbox';
-import { createError, FetchCancelError, isNumber, uuid, CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon } from './util.js';
+import { createError, FetchCancelError, isNumber, uuid, CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon, checkTileUrl, checkBuffers } from './util.js';
 import { getCanvas } from './canvas';
 export { getBlankTile, get404Tile } from './canvas';
 
@@ -15,7 +15,7 @@ const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
 const TerrainTypes = ['mapzen', 'tianditu', 'cesium', 'arcgis', 'qgis-gray'];
 
 export type getTileOptions = {
-    url: string | Array<string>;
+    url: string | ImageBitmap | Array<string | ImageBitmap>;
     referrer?: string;
     filter?: string;
     headers?: Record<string, string>;
@@ -137,7 +137,8 @@ class TileActor extends worker.Actor {
                 reject(createError('getTile error:url is null'));
                 return;
             }
-            this.send(options, [], (error, image) => {
+            const buffers = checkBuffers(url);
+            this.send(options, buffers, (error, image) => {
                 if (error || (promise as any).canceled) {
                     reject(error || FetchCancelError);
                 } else {
@@ -349,7 +350,8 @@ class TileActor extends worker.Actor {
                 reject(createError('url is null'));
                 return;
             }
-            this.send(options, [], (error, result) => {
+            const buffers = checkBuffers(url);
+            this.send(options, buffers, (error, result) => {
                 if (error || (promise as any).canceled) {
                     reject(error || FetchCancelError);
                 } else {

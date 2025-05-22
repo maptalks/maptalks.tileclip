@@ -2,18 +2,10 @@ import { imageSlicing, imageToBlobURL } from './imageslice';
 import { clip, injectMask, removeMask } from './tileclip';
 import { cancelFetch, encodeTerrainTile, getTile, getTileWithMaxZoom } from './tileget';
 import { tileTransform } from './tiletranasform';
-import { createError, isImageBitmap } from './util';
+import { checkBuffers, createError, isImageBitmap } from './util';
 
 export const initialize = function () {
 };
-
-function checkBuffers(image) {
-    const buffers = [];
-    if (isImageBitmap(image)) {
-        buffers.push(image);
-    }
-    return buffers;
-}
 
 export const onmessage = function (message, postResponse) {
     const data = message.data || {};

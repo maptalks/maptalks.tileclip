@@ -9,7 +9,7 @@ export function imageSlicing(options: getTileOptions) {
     (options as any).disableCache = true;
     return new Promise((resolve, reject) => {
         const url = options.url;
-        const urls = checkTileUrl(url);
+        const urls = checkTileUrl(url as string);
         const headers = Object.assign({}, HEADERS, options.headers || {});
         const fetchTiles = urls.map(tileUrl => {
             return fetchTile(tileUrl, headers, options)

@@ -91,3 +91,15 @@ export function replaceAll(template: string, key: string, value: string) {
     }
     return template;
 }
+
+
+export function checkBuffers(image: any) {
+    const images = checkTileUrl(image);
+    const buffers = [];
+    images.forEach(item => {
+        if (isImageBitmap(item)) {
+            buffers.push(item);
+        }
+    });
+    return buffers;
+}
