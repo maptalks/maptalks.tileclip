@@ -50,6 +50,7 @@
 * [mapzen terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-mapzen.html)
 * [arcgis terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-arcgis.html)
 * [qgis gray terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-qgis-gray.html)
+* [terrain colors](https://maptalks.github.io/maptalks.tileclip/demo/terrain-colors.html)
 
 ## Others
 

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Interactions - Draw tool to draw geometries</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+</style>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.css' />
+<script type='text/javascript' src='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js'></script>
+<script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
+
+<body>
+    <div id="map" class="container"></div>
+    <script>
+
+        const tileActor = maptalks.getTileActor();
+        const maskId = '1';
+        const baseLayer = new maptalks.TileLayer('base', {
+            // debug: true,
+            urlTemplate: "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
+            subdomains: ["a", "b", "c", "d"],
+            zIndex: -1
+            // bufferPixel: 1
+        })
+
+        const colors = [[-160, "#226412"], [643, "#4C931B"], [1446, "#80BD3F"], [2249, "#B9E287"], [3052, "#E7F5D1"], [3855, "#F7F7F7"], [4658, "#FDE1EF"], [5461, "#F1B7DB"], [6265, "#DF78AF"], [7068, "#C6147E"]]
+
+
+
+
+        baseLayer.on('renderercreate', function (e) {
+            //load tile image
+            //   img(Image): an Image object
+            //   url(String): the url of the tile
+            e.renderer.loadTileBitmap = function (url, tile, callback) {
+                tileActor.encodeTerrainTile({
+                    url: maptalks.Util.getAbsoluteURL(url),
+                    terrainType: 'mapzen',
+                    terrainColors: colors,
+                    // timeout: 5000
+                }).then(imagebitmap => {
+                    callback(imagebitmap)
+
+
+                }).catch(error => {
+                    //do some things
+                    console.error(error);
+                })
+            };
+        });
+
+        var map = new maptalks.Map('map', {
+            "center": [111.63998627, 35.99066409], "zoom": 3.0991484153139055, "pitch": 0, "bearing": 0
+        });
+
+        const layer = new maptalks.VectorLayer('layer').addTo(map);
+
+
+        const symbol = {
+            polygonOpacity: 0,
+            lineColor: 'red'
+        }
+
+        fetch('./上海市.json').then(res => res.json()).then(geojson => {
+            const polygons = maptalks.GeoJSON.toGeometry(geojson, (geo => {
+                geo.setSymbol(symbol);
+            }));
+            // layer.addGeometry(polygons);
+            tileActor.injectMask(maskId, geojson.features[0]).then(data => {
+                baseLayer.addTo(map);
+                console.log(tileActor.maskHasInjected(maskId))
+            }).catch(error => {
+                console.error(error);
+            })
+        })
+
+
+    </script>
+</body>
+
+</html>
