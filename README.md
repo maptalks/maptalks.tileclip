@@ -32,6 +32,7 @@
 * [mask remove or add](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-remve.html)
 * [gaussian Blur](https://maptalks.github.io/maptalks.tileclip/demo/gaussianBlurRadius.html)
 * [big image slice](https://maptalks.github.io/maptalks.tileclip/demo/imageslicing.html)
+* [custom tile error](https://maptalks.github.io/maptalks.tileclip/demo/tile-custom-error.html)
 
 ### Clip By Custom Prj
 
