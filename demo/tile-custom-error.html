@@ -49,6 +49,11 @@
                 }).catch(error => {
                     //do some things
                     console.error(error);
+                    const v = Math.random();
+                    if (v < 0.5) {
+                        callback(maptalks.get404Tile());
+                        return;
+                    }
                     copy404Tile().then(imagebitmap => {
                         callback(imagebitmap);
                     }).catch(err => {
