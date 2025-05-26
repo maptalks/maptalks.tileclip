@@ -50,9 +50,13 @@
                     //do some things
                     console.error(error);
                     const v = Math.random();
-                    if (v < 0.5) {
+                    if (v < 0.3) {
                         callback(maptalks.get404Tile());
                         return;
+                    }
+                    if(v<0.6){
+                        callback(maptalks.getBlankTile());
+                        return
                     }
                     copy404Tile().then(imagebitmap => {
                         callback(imagebitmap);
