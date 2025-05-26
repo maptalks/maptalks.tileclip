@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Interactions - Draw tool to draw geometries</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+</style>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.css' />
+<script type='text/javascript' src='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js'></script>
+<script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
+
+<body>
+    <div id="map" class="container"></div>
+    <script>
+
+        const tileActor = maptalks.getTileActor();
+        const maskId = '1';
+        const baseLayer = new maptalks.TileLayer('base', {
+            // debug: true,
+            urlTemplate: "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer/tile/{z}/{y}/{x}",
+            subdomains: ["a", "b", "c", "d"],
+            zIndex: -1
+            // bufferPixel: 1
+        })
+
+        baseLayer.on('renderercreate', function (e) {
+            //load tile image
+            //   img(Image): an Image object
+            //   url(String): the url of the tile
+            e.renderer.loadTileBitmap = function (url, tile, callback) {
+                tileActor.encodeTerrainTile({
+                    url: maptalks.Util.getAbsoluteURL(url),
+                    terrainType: 'arcgis',
+                    //set timeout ,mock error
+                    timeout: 1000
+                }).then(imagebitmap => {
+                    callback(imagebitmap)
+                }).catch(error => {
+                    //do some things
+                    console.error(error);
+                    copy404Tile().then(imagebitmap => {
+                        callback(imagebitmap);
+                    }).catch(err => {
+                        console.error('Failed to load 404 tile:', err);
+                    });
+                })
+            };
+        });
+
+        var map = new maptalks.Map('map', {
+            "center": [111.63998627, 35.99066409], "zoom": 5.0991484153139055, "pitch": 0, "bearing": 0
+        });
+
+        const layer = new maptalks.VectorLayer('layer').addTo(map);
+
+
+
+        let tile404;
+
+        function copy404Tile() {
+            return createImageBitmap(tile404);
+        }
+        fetch('./404.png').then(res => res.blob()).then(blob => {
+            createImageBitmap(blob).then(image => {
+                tile404 = image;
+                baseLayer.addTo(map);
+            })
+        })
+
+
+    </script>
+</body>
+
+</html>
