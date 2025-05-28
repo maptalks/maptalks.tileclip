@@ -51,7 +51,8 @@
 * [mapzen terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-mapzen.html)
 * [arcgis terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-arcgis.html)
 * [qgis gray terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-qgis-gray.html)
-* [terrain colors](https://maptalks.github.io/maptalks.tileclip/demo/terrain-colors.html)
+* [terrain encode with colors](https://maptalks.github.io/maptalks.tileclip/demo/terrain-colors.html)
+* [color terrain tile](https://maptalks.github.io/maptalks.tileclip/demo/color-terrain-tile.html)
 
 ## Others
 
@@ -118,6 +119,7 @@ const tileActor = getTileActor();
 | maskHasInjected(maskId)                 | Has the geojson data been injected                                  |
 | clipTile(options)                       | Crop tiles using injected geojson data                              |
 | encodeTerrainTile(options)              | Encode other terrain tiles into mapbox terrain service format       |
+| colorTerrainTile(options)              | Terrain tile color matching      |
 | imageSlicing(options)                   | Cut a large image into multiple small images                        |
 
 all methods return Promise with `cancel()` method
@@ -235,7 +237,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                  `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -440,6 +442,51 @@ tileActor.injectMask(maskId, polygon).then(data => {
           })
       };
   });
+```
+
+* `colorTerrainTile(options)` Terrain tile color matching, return `Promise`
+  + `options.tile`:tile data, is ImageBitMap
+  + `options.colors`: Color Mapping Table
+  + `options?.returnBlobURL`: to return 
+  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+
+```js
+   const colors = [
+       [0, "#4B2991"],
+       [176, "#872CA2"],
+       [353, "#C0369D"],
+       [530, "#EA4F88"],
+       [706, "#FA7876"],
+       [883, "#F6A97A"],
+       [1060, "#EDD9A3"],
+       [1236, "#EDD9A3"],
+       [1413, "#ffffff"],
+       [1590, "#ffffff"]
+   ]
+
+   baseLayer.on('renderercreate', function(e) {
+       //load tile image
+       //   img(Image): an Image object
+       //   url(String): the url of the tile
+       e.renderer.loadTileBitmap = function(url, tile, callback) {
+           tileActor.getTile({
+               url: maptalks.Util.getAbsoluteURL(url)
+           }).then(imagebitmap => {
+               tileActor.colorTerrainTile({
+                   tile: imagebitmap,
+                   colors
+               }).then(image => {
+                   callback(image);
+               }).catch(error => {
+                   console.error(error);
+               })
+           }).catch(error => {
+               //do some things
+               // console.error(error);
+               callback(maptalks.get404Tile())
+           })
+       };
+   });
 ```
 
 * `imageSlicing(options)` slice big image  in worker, return `Promise`
