@@ -380,9 +380,10 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
     });
 }
 
+
 const colorInCache = new Map();
 
-function colorsTerrainTile(colors, image: ImageBitmap) {
+export function colorsTerrainTile(colors, image: ImageBitmap) {
     if (!colors || !Array.isArray(colors) || colors.length < 2) {
         return image;
     }

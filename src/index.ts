@@ -68,6 +68,11 @@ export type transformTileOptions = getTileWithMaxZoomOptions & {
     debug?: boolean;
 }
 
+export type colorTerrainTileOptions = {
+    tile: ImageBitmap;
+    colors: Array<[number, string]>;
+}
+
 type privateOptions = getTileOptions & {
     __taskId?: number;
     __workerId?: number;
@@ -458,6 +463,36 @@ class TileActor extends worker.Actor {
                     resolve(image);
                 }
             }, workerId);
+        });
+        wrapPromise(promise, options);
+        return promise;
+    }
+
+    colorTerrainTile(options: colorTerrainTileOptions) {
+        options = checkOptions(options, 'colorTerrainTile');
+        const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+            if (!getCanvas()) {
+                reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
+            const { tile, colors } = options;
+            if (!tile || !isImageBitmap(tile)) {
+                reject(createError('colorTerrainTile error:tile is not ImageBitMap'));
+                return;
+            }
+
+            if (!colors || !Array.isArray(colors) || colors.length === 0) {
+                reject(createError('colorTerrainTile error:colors is null'));
+                return;
+            }
+            const buffers = checkBuffers(tile);
+            this.send(Object.assign({}, options), buffers, (error, image) => {
+                if (error || (promise as any).canceled) {
+                    reject(error || FetchCancelError);
+                } else {
+                    resolve(image);
+                }
+            });
         });
         wrapPromise(promise, options);
         return promise;

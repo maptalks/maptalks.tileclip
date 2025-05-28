@@ -1,6 +1,6 @@
 import { imageSlicing, imageToBlobURL } from './imageslice';
 import { clip, injectMask, removeMask } from './tileclip';
-import { cancelFetch, encodeTerrainTile, getTile, getTileWithMaxZoom } from './tileget';
+import { cancelFetch, colorsTerrainTile, encodeTerrainTile, getTile, getTileWithMaxZoom } from './tileget';
 import { tileTransform } from './tiletranasform';
 import { checkBuffers, createError, isImageBitmap } from './util';
 
@@ -97,6 +97,13 @@ export const onmessage = function (message, postResponse) {
         }).catch(error => {
             postResponse(error);
         });
+        return;
+    }
+    if (type === 'colorTerrainTile') {
+        const { tile, colors } = data;
+        const image = colorsTerrainTile(colors, tile);
+        // console.log(image);
+        postResponse(null, image, checkBuffers(image));
         return;
     }
     const errorMessage = 'not support message type:' + type;
