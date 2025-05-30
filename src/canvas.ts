@@ -1,4 +1,4 @@
-import { createError, disposeImage, isImageBitmap, isNumber } from "./util";
+import { createDataError, createError, disposeImage, isImageBitmap, isNumber } from "./util";
 import glur from 'glur';
 
 let globalCanvas: OffscreenCanvas;
@@ -56,12 +56,12 @@ export function mergeTiles(images: Array<ImageBitmap>, globalCompositeOperation?
         return images[0];
     }
     if (images.length === 0) {
-        return createError('merge tiles error,not find imagebitmaps');
+        return createDataError('merge tiles error,not find imagebitmaps');
     }
     for (let i = 0, len = images.length; i < len; i++) {
         const image = images[i];
         if (!isImageBitmap(image)) {
-            return createError('merge tiles error,images not imagebitmap');
+            return createDataError('merge tiles error,images not imagebitmap');
         }
     }
     const tileSize = images[0].width;

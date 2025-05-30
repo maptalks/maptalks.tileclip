@@ -3,7 +3,7 @@ import lineclip from 'lineclip';
 import { createImageBlobURL, getBlankTile, getCanvas, imageClip, toBlobURL } from './canvas';
 import { bboxInBBOX, bboxIntersect, BBOXtype } from './bbox';
 import { clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon } from './index';
-import { createError, lnglat2Mercator, isPolygon, isEPSG3857 } from './util';
+import { createError, lnglat2Mercator, isPolygon, isEPSG3857, createParamsValidateError } from './util';
 
 const GeoJSONCache = {};
 
@@ -11,10 +11,10 @@ const GeoJSONCache = {};
 
 export function injectMask(maskId: string, geojson: GeoJSONPolygon | GeoJSONMultiPolygon) {
     if (!isPolygon(geojson)) {
-        return createError('geojson.feature is not Polygon');
+        return createParamsValidateError('geojson.feature is not Polygon');
     }
     if (GeoJSONCache[maskId]) {
-        return createError('the' + maskId + ' geojson Already exists');
+        return createParamsValidateError('the' + maskId + ' geojson Already exists');
     }
     GeoJSONCache[maskId] = geojson;
     checkGeoJSONFeatureBBOX(geojson);

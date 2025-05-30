@@ -2,7 +2,7 @@ import { registerWorkerAdapter, worker } from 'maptalks';
 //@ts-ignore
 import WORKERCODE from './worker/worker.bundle.js';
 import { BBOXtype } from './bbox';
-import { createError, FetchCancelError, isNumber, uuid, CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon, checkTileUrl, checkBuffers } from './util.js';
+import { createError, createParamsValidateError, FetchCancelError, isNumber, uuid, CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon, checkTileUrl, checkBuffers } from './util.js';
 import { getCanvas } from './canvas';
 export { getBlankTile, get404Tile } from './canvas';
 
@@ -144,7 +144,7 @@ class TileActor extends worker.Actor {
             }
             const { url } = options;
             if (!url) {
-                reject(createError('getTile error:url is null'));
+                reject(createParamsValidateError('getTile error:url is null'));
                 return;
             }
             const buffers = checkBuffers(url);
@@ -171,15 +171,15 @@ class TileActor extends worker.Actor {
             const { urlTemplate, maxAvailableZoom, x, y, z } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!maxZoomEnable) {
-                reject(createError('getTileWithMaxZoom error:maxAvailableZoom is error'));
+                reject(createParamsValidateError('getTileWithMaxZoom error:maxAvailableZoom is error'));
                 return;
             }
             if (!urlTemplate) {
-                reject(createError('getTileWithMaxZoom error:urlTemplate is error'));
+                reject(createParamsValidateError('getTileWithMaxZoom error:urlTemplate is error'));
                 return;
             }
             if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
-                reject(createError('getTileWithMaxZoom error:x/y/z is error'));
+                reject(createParamsValidateError('getTileWithMaxZoom error:x/y/z is error'));
                 return;
             }
             this.send(options, [], (error, image) => {
@@ -205,23 +205,23 @@ class TileActor extends worker.Actor {
             const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog, debug, returnBlobURL } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!projection) {
-                reject(createError('transformTile error:not find projection'));
+                reject(createParamsValidateError('transformTile error:not find projection'));
                 return;
             }
             if (SUPPORTPROJECTION.indexOf(projection) === -1) {
-                reject(createError('transformTile error:not support projection:' + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
+                reject(createParamsValidateError('transformTile error:not support projection:' + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
                 return;
             }
             if (!maxZoomEnable) {
-                reject(createError('transformTile error:maxAvailableZoom is error'));
+                reject(createParamsValidateError('transformTile error:maxAvailableZoom is error'));
                 return;
             }
             if (!urlTemplate) {
-                reject(createError('transformTile error:urlTemplate is error'));
+                reject(createParamsValidateError('transformTile error:urlTemplate is error'));
                 return;
             }
             if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
-                reject(createError('transformTile error:x/y/z is error'));
+                reject(createParamsValidateError('transformTile error:x/y/z is error'));
                 return;
             }
             this.send(options, [], (error, image) => {
@@ -247,27 +247,27 @@ class TileActor extends worker.Actor {
             }
             const { tile, tileBBOX, projection, tileSize, maskId } = options;
             if (!tile) {
-                reject(createError('clipTile error:tile is null.It should be a ImageBitmap'));
+                reject(createParamsValidateError('clipTile error:tile is null.It should be a ImageBitmap'));
                 return;
             }
             if (!tileBBOX) {
-                reject(createError('clipTile error:tileBBOX is null'));
+                reject(createParamsValidateError('clipTile error:tileBBOX is null'));
                 return;
             }
             if (!projection) {
-                reject(createError('clipTile error:projection is null'));
+                reject(createParamsValidateError('clipTile error:projection is null'));
                 return;
             }
             if (!tileSize) {
-                reject(createError('clipTile error:tileSize is null'));
+                reject(createParamsValidateError('clipTile error:tileSize is null'));
                 return;
             }
             if (!maskId) {
-                reject(createError('clipTile error:maskId is null'));
+                reject(createParamsValidateError('clipTile error:maskId is null'));
                 return;
             }
             if (!this.maskHasInjected(maskId)) {
-                reject(createError('not find mask by maskId:' + maskId));
+                reject(createParamsValidateError('not find mask by maskId:' + maskId));
                 return;
             }
             const buffers: ArrayBuffer[] = [];
@@ -289,15 +289,15 @@ class TileActor extends worker.Actor {
     injectMask(maskId: string, geojsonFeature: GeoJSONPolygon | GeoJSONMultiPolygon) {
         const promise = new Promise((resolve, reject) => {
             if (!maskId) {
-                reject(createError('injectMask error:maskId is null'));
+                reject(createParamsValidateError('injectMask error:maskId is null'));
                 return;
             }
             if (maskMap[maskId]) {
-                reject(createError(`injectMask error:${maskId} has injected`));
+                reject(createParamsValidateError(`injectMask error:${maskId} has injected`));
                 return;
             }
             if (!isPolygon(geojsonFeature)) {
-                reject(createError('injectMask error:geojsonFeature is not Polygon,It should be GeoJSON Polygon/MultiPolygon'));
+                reject(createParamsValidateError('injectMask error:geojsonFeature is not Polygon,It should be GeoJSON Polygon/MultiPolygon'));
                 return;
             }
             this.broadcast({
@@ -320,7 +320,7 @@ class TileActor extends worker.Actor {
     removeMask(maskId: string) {
         const promise = new Promise((resolve, reject) => {
             if (!maskId) {
-                reject(createError('removeMask error:maskId is null'));
+                reject(createParamsValidateError('removeMask error:maskId is null'));
                 return;
             }
             this.broadcast({
@@ -357,7 +357,7 @@ class TileActor extends worker.Actor {
             }
             const { url } = options;
             if (!url) {
-                reject(createError('url is null'));
+                reject(createParamsValidateError('url is null'));
                 return;
             }
             const buffers = checkBuffers(url);
@@ -442,21 +442,21 @@ class TileActor extends worker.Actor {
             }
             const { url, terrainType, minHeight, maxHeight } = options;
             if (!url) {
-                reject(createError('encodeTerrainTile error:url is null'));
+                reject(createParamsValidateError('encodeTerrainTile error:url is null'));
                 return;
             }
 
             if (!terrainType) {
-                reject(createError('encodeTerrainTile error:terrainType is null'));
+                reject(createParamsValidateError('encodeTerrainTile error:terrainType is null'));
                 return;
             }
             if (TerrainTypes.indexOf(terrainType) === -1) {
-                reject(createError('encodeTerrainTile error:terrainType:not support the terrainType:' + terrainType));
+                reject(createParamsValidateError('encodeTerrainTile error:terrainType:not support the terrainType:' + terrainType));
                 return;
             }
             if (terrainType === 'qgis-gray') {
                 if (!isNumber(minHeight) || !isNumber(maxHeight) || minHeight > maxHeight) {
-                    reject(createError('encodeTerrainTile error:terrainType:qgis-gray,require minHeight/maxHeight should number'));
+                    reject(createParamsValidateError('encodeTerrainTile error:terrainType:qgis-gray,require minHeight/maxHeight should number'));
                     return;
                 }
             }
@@ -481,12 +481,12 @@ class TileActor extends worker.Actor {
             }
             const { tile, colors } = options;
             if (!tile || !isImageBitmap(tile)) {
-                reject(createError('colorTerrainTile error:tile is not ImageBitMap'));
+                reject(createParamsValidateError('colorTerrainTile error:tile is not ImageBitMap'));
                 return;
             }
 
             if (!colors || !Array.isArray(colors) || colors.length === 0) {
-                reject(createError('colorTerrainTile error:colors is null'));
+                reject(createParamsValidateError('colorTerrainTile error:colors is null'));
                 return;
             }
             const buffers = checkBuffers(tile);

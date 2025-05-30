@@ -1,7 +1,7 @@
 import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions } from './index';
 import { createImageBlobURL, getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeTiles, postProcessingImage, resizeCanvas, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
-import { isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage, replaceAll, isImageBitmap, rgb2Height } from './util';
+import { isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createError, createParamsValidateError, createInnerError, HEADERS, disposeImage, replaceAll, isImageBitmap, rgb2Height, createDataError } from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
 import { ColorIn } from 'colorin';
@@ -78,7 +78,7 @@ export function fetchTile(url: string, headers = {}, options) {
         }
         const taskId = options.__taskId;
         if (!taskId) {
-            reject(createError('taskId is null'));
+            reject(createInnerError('taskId is null'));
             return;
         }
         const image = tileImageCache.get(url);
@@ -121,7 +121,7 @@ export function fetchTileBuffer(url: string, headers = {}, options) {
         };
         const taskId = options.__taskId;
         if (!taskId) {
-            reject(createError('taskId is null'));
+            reject(createInnerError('taskId is null'));
             return;
         }
         const buffer = tileBufferCache.get(url);
@@ -194,7 +194,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
             const urlTemplate = urlTemplates[i];
             if (urlTemplate && urlTemplate.indexOf('{s}') > -1) {
                 if (!subdomains || subdomains.length === 0) {
-                    reject(createError('not find subdomains'));
+                    reject(createParamsValidateError('not find subdomains'));
                     return;
                 }
             }
@@ -330,12 +330,12 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
             });
             Promise.all(fetchTiles).then(buffers => {
                 if (!buffers || buffers.length === 0) {
-                    reject(createError('buffers is null'));
+                    reject(createDataError('buffers is null'));
                     return;
                 }
                 const buffer = buffers[0];
                 if (buffer.byteLength === 0) {
-                    reject(createError('buffer is empty'));
+                    reject(createDataError('buffer is empty'));
                     return;
                 }
                 let result;
@@ -348,7 +348,7 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
                     result.image = transformArcgis(result);
                 }
                 if (!result || !result.image) {
-                    reject(createError('generate terrain data error,not find image data'));
+                    reject(createInnerError('generate terrain data error,not find image data'));
                     return;
                 }
                 returnImage(colorsTerrainTile(terrainColors, result.image));
@@ -356,7 +356,7 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
                 reject(error);
             })
         } else {
-            reject(createError('not support terrainType:' + terrainType));
+            reject(createParamsValidateError('not support terrainType:' + terrainType));
         }
 
     });

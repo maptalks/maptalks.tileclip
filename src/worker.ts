@@ -3,7 +3,7 @@ import { imageSlicing, imageToBlobURL } from './imageslice';
 import { clip, injectMask, removeMask } from './tileclip';
 import { cancelFetch, colorsTerrainTile, encodeTerrainTile, getTile, getTileWithMaxZoom } from './tileget';
 import { tileTransform } from './tiletranasform';
-import { checkBuffers, createError, isImageBitmap } from './util';
+import { checkBuffers, createError, createInnerError, isImageBitmap } from './util';
 
 export const initialize = function () {
 };
@@ -61,7 +61,7 @@ export const onmessage = function (message, postResponse) {
     if (type === 'cancelFetch') {
         const taskId = data.taskId || data.__taskId;
         if (!taskId) {
-            postResponse(createError('cancelFetch need taskId'));
+            postResponse(createInnerError('cancelFetch need taskId'));
             return;
         }
         cancelFetch(taskId);
@@ -115,5 +115,5 @@ export const onmessage = function (message, postResponse) {
     }
     const errorMessage = 'not support message type:' + type;
     console.error(errorMessage);
-    postResponse(createError(errorMessage));
+    postResponse(createInnerError(errorMessage));
 };

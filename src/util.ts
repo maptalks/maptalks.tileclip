@@ -1,5 +1,12 @@
 import { GeoJSONMultiPolygon, GeoJSONPolygon } from './index';
 
+class CustomError extends Error {
+    constructor(message: string, code: number) {
+        super(message);
+        (this as any).code = code;
+    }
+}
+
 export const HEADERS = {
     'accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.26'
@@ -9,8 +16,20 @@ export function isNumber(value) {
     return typeof value === 'number';
 }
 
-export function createError(message: string): Error {
-    return new Error(message);
+export function createError(message: string, code: number): Error {
+    return new CustomError(message, code);
+}
+
+export function createParamsValidateError(message) {
+    return createError(message, -1);
+}
+
+export function createDataError(message) {
+    return createError(message, -2);
+}
+
+export function createInnerError(message) {
+    return createError(message, -3);
 }
 
 export function checkTileUrl(url: string | Array<string>): Array<string> {
@@ -20,9 +39,9 @@ export function checkTileUrl(url: string | Array<string>): Array<string> {
     return [url];
 }
 
-export const CANVAS_ERROR_MESSAGE = createError('not find canvas.The current environment does not support OffscreenCanvas');
-export const FetchCancelError = createError('fetch tile data cancel');
-export const FetchTimeoutError = createError('fetch tile data timeout');
+export const CANVAS_ERROR_MESSAGE = createError('not find canvas.The current environment does not support OffscreenCanvas', -4);
+export const FetchCancelError = createError('fetch tile data cancel', 499);
+export const FetchTimeoutError = createError('fetch tile data timeout', 408);
 
 export function lnglat2Mercator(coordinates: Array<number>) {
     const [lng, lat] = coordinates;
