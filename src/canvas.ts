@@ -228,3 +228,28 @@ export function layoutTiles(tiles, debug: boolean) {
     }))
     return canvas.transferToImageBitmap();
 }
+
+export function postProcessingImage(image: ImageBitmap, options) {
+    const canvas = getCanvas();
+    const filterImage = imageFilter(canvas, image, options.filter);
+    const blurImage = imageGaussianBlur(canvas, filterImage, options.gaussianBlurRadius);
+
+    const opImage = imageOpacity(blurImage, options.opacity);
+    return opImage;
+}
+
+
+export function createImageBlobURL(image: ImageBitmap, returnBlobURL: boolean) {
+    return new Promise((resolve: (image: ImageBitmap | string) => void, reject) => {
+        if (!returnBlobURL) {
+            resolve(image);
+        } else {
+            toBlobURL(image).then(blob => {
+                const url = URL.createObjectURL(blob);
+                resolve(url);
+            }).catch(error => {
+                reject(error);
+            });
+        }
+    })
+}

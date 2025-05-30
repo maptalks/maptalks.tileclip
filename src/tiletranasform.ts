@@ -3,7 +3,7 @@ import { getTileWithMaxZoom } from "./tileget";
 import { SphericalMercator } from '@mapbox/sphericalmercator';
 // import tileCover from '@mapbox/tile-cover';
 import { disposeImage, lnglat2Mercator } from "./util";
-import { getBlankTile, getCanvas, getCanvasContext, layoutTiles, resizeCanvas, toBlobURL } from "./canvas";
+import { createImageBlobURL, getBlankTile, getCanvas, getCanvasContext, layoutTiles, resizeCanvas, toBlobURL } from "./canvas";
 import { bboxOfBBOXList, BBOXtype, pointsToBBOX, bboxToPoints } from "./bbox";
 import gcoord from 'gcoord';
 
@@ -461,16 +461,11 @@ export function tileTransform(options) {
     return new Promise((resolve, reject) => {
         const { x, y, z, projection, zoomOffset, errorLog, debug, returnBlobURL, isGCJ02 } = options;
         const returnImage = (opImage) => {
-            if (!returnBlobURL) {
-                resolve(opImage);
-            } else {
-                toBlobURL(opImage).then(blob => {
-                    const url = URL.createObjectURL(blob);
-                    resolve(url);
-                }).catch(error => {
-                    reject(error);
-                });
-            }
+            createImageBlobURL(opImage, returnBlobURL).then(url => {
+                resolve(url);
+            }).catch(error => {
+                reject(error);
+            })
         }
 
         const loadTiles = () => {

@@ -71,6 +71,9 @@ export type transformTileOptions = getTileWithMaxZoomOptions & {
 export type colorTerrainTileOptions = {
     tile: ImageBitmap;
     colors: Array<[number, string]>;
+    filter?: string;
+    opacity?: number;
+    gaussianBlurRadius?: number;
     returnBlobURL?: boolean;
 }
 

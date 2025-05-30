@@ -1,5 +1,5 @@
 import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions } from './index';
-import { getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeTiles, resizeCanvas, toBlobURL } from './canvas';
+import { createImageBlobURL, getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeTiles, postProcessingImage, resizeCanvas, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
 import { isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createError, HEADERS, disposeImage, replaceAll, isImageBitmap, rgb2Height } from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
@@ -174,20 +174,12 @@ export function getTile(url, options: getTileOptions) {
                 return;
             }
             // const filter = options.filter;
-            const filterImage = imageFilter(canvas, image, options.filter);
-            const blurImage = imageGaussianBlur(canvas, filterImage, options.gaussianBlurRadius);
-
-            const opImage = imageOpacity(blurImage, options.opacity);
-            if (!returnBlobURL) {
-                resolve(opImage);
-            } else {
-                toBlobURL(opImage).then(blob => {
-                    const url = URL.createObjectURL(blob);
-                    resolve(url);
-                }).catch(error => {
-                    reject(error);
-                });
-            }
+            const postImage = postProcessingImage(image, options);
+            createImageBlobURL(postImage, returnBlobURL).then(url => {
+                resolve(url);
+            }).catch(error => {
+                reject(error);
+            })
         }).catch(error => {
             reject(error);
         })
@@ -265,29 +257,24 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
                 reject(image);
                 return;
             }
-            const filterImage = imageFilter(canvas, image, options.filter);
-            const blurImage = imageGaussianBlur(canvas, filterImage, options.gaussianBlurRadius);
+            // const filterImage = imageFilter(canvas, image, options.filter);
+            // const blurImage = imageGaussianBlur(canvas, filterImage, options.gaussianBlurRadius);
 
-
-            let opImage;
+            const postImage = postProcessingImage(image, options);
+            let sliceImage;
             if (zoomOffset <= 0) {
-                opImage = (imageOpacity(blurImage, options.opacity));
+                sliceImage = postImage;
             } else {
-                const { width, height } = blurImage;
+                const { width, height } = postImage;
                 const dx = width * dxScale, dy = height * dyScale, w = width * wScale, h = height * hScale;
-                const imageBitMap = imageTileScale(canvas, blurImage, dx, dy, w, h);
-                opImage = imageOpacity(imageBitMap, options.opacity);
+                sliceImage = imageTileScale(canvas, postImage, dx, dy, w, h);
+                // opImage = imageOpacity(imageBitMap, options.opacity);
             }
-            if (!returnBlobURL) {
-                resolve(opImage);
-            } else {
-                toBlobURL(opImage).then(blob => {
-                    const url = URL.createObjectURL(blob);
-                    resolve(url);
-                }).catch(error => {
-                    reject(error);
-                });
-            }
+            createImageBlobURL(sliceImage, returnBlobURL).then(url => {
+                resolve(url);
+            }).catch(error => {
+                reject(error);
+            })
         }).catch(error => {
             reject(error);
         })
@@ -302,16 +289,11 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
         const headers = Object.assign({}, HEADERS, options.headers || {});
         const { returnBlobURL, terrainWidth, tileSize, terrainType, minHeight, maxHeight, terrainColors } = options;
         const returnImage = (terrainImage: ImageBitmap) => {
-            if (!returnBlobURL) {
-                resolve(terrainImage);
-            } else {
-                toBlobURL(terrainImage).then(blob => {
-                    const url = URL.createObjectURL(blob);
-                    resolve(url);
-                }).catch(error => {
-                    reject(error);
-                });
-            }
+            createImageBlobURL(terrainImage, returnBlobURL).then(url => {
+                resolve(url);
+            }).catch(error => {
+                reject(error);
+            })
         };
         const isMapZen = terrainType === 'mapzen', isGQIS = terrainType === 'qgis-gray',
             isTianditu = terrainType === 'tianditu',
