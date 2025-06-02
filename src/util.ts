@@ -1,9 +1,11 @@
 import { GeoJSONMultiPolygon, GeoJSONPolygon } from './index';
 
 class CustomError extends Error {
+    public code: number;
+    
     constructor(message: string, code: number) {
         super(message);
-        (this as any).code = code;
+        this.code = code;
     }
 }
 
