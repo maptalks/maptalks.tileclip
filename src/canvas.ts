@@ -207,7 +207,7 @@ export function layoutTiles(tiles, debug: boolean) {
     resizeCanvas(canvas, width, height);
     const ctx = getCanvasContext(canvas);
     if (debug) {
-        ctx.font = "bold 48px serif";
+        ctx.font = "bold 28px serif";
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = 'red';

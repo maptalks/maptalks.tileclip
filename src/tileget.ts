@@ -1,5 +1,5 @@
-import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions } from './index';
-import { createImageBlobURL, getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, mergeTiles, postProcessingImage, resizeCanvas, toBlobURL } from './canvas';
+import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions, layoutTilesOptions } from './index';
+import { createImageBlobURL, getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, layoutTiles, mergeTiles, postProcessingImage, resizeCanvas, toBlobURL } from './canvas';
 import LRUCache from './LRUCache';
 import { isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createError, createParamsValidateError, createInnerError, HEADERS, disposeImage, replaceAll, isImageBitmap, rgb2Height, createDataError } from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
@@ -15,7 +15,7 @@ const tileBufferCache = new LRUCache(LRUCount, (buffer) => {
     // disposeImage(image);
 });
 
-function formatTileUrlBySubdomains(url, subdomains) {
+function formatTileUrlBySubdomains(url: string, subdomains: string[]) {
     if (!subdomains || !subdomains.length) {
         return url;
     }
@@ -23,6 +23,25 @@ function formatTileUrlBySubdomains(url, subdomains) {
     let index = Math.floor(Math.random() * len);
     index = Math.min(index, len - 1);
     return replaceAll(url, '{s}', subdomains[index])
+}
+
+function getTileUrl(urlTemplate: string, x: number, y: number, z: number, subdomains: string[]) {
+    let key = '{x}';
+    let url = replaceAll(urlTemplate, key, x as unknown as string);
+    key = '{y}';
+    url = replaceAll(url, key, y as unknown as string);
+    key = '{z}';
+    url = replaceAll(url, key, z as unknown as string);
+    return formatTileUrlBySubdomains(url, subdomains);
+}
+
+function validateSubdomains(urlTemplate: string, subdomains: string[]) {
+    if (urlTemplate && urlTemplate.indexOf('{s}') > -1) {
+        if (!subdomains || subdomains.length === 0) {
+            return false;
+        }
+    }
+    return true;
 }
 
 const CONTROLCACHE: Record<string, Array<AbortController>> = {};
@@ -192,11 +211,9 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
         const urlTemplates = checkTileUrl(urlTemplate);
         for (let i = 0, len = urlTemplates.length; i < len; i++) {
             const urlTemplate = urlTemplates[i];
-            if (urlTemplate && urlTemplate.indexOf('{s}') > -1) {
-                if (!subdomains || subdomains.length === 0) {
-                    reject(createParamsValidateError('not find subdomains'));
-                    return;
-                }
+            if (!validateSubdomains(urlTemplate, subdomains)) {
+                reject(createParamsValidateError('not find subdomains'));
+                return;
             }
         }
         let dxScale, dyScale, wScale, hScale;
@@ -236,13 +253,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
             tileZ = maxAvailableZoom;
         }
         const urls = urlTemplates.map(urlTemplate => {
-            let key = '{x}';
-            urlTemplate = replaceAll(urlTemplate, key, tileX as unknown as string);
-            key = '{y}';
-            urlTemplate = replaceAll(urlTemplate, key, tileY as unknown as string);
-            key = '{z}';
-            urlTemplate = replaceAll(urlTemplate, key, tileZ as unknown as string);
-            return formatTileUrlBySubdomains(urlTemplate, subdomains);
+            return getTileUrl(urlTemplate, tileX, tileY, tileZ, subdomains);
         });
         const headers = Object.assign({}, HEADERS, options.headers || {});
 
@@ -271,6 +282,41 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
                 // opImage = imageOpacity(imageBitMap, options.opacity);
             }
             createImageBlobURL(sliceImage, returnBlobURL).then(url => {
+                resolve(url);
+            }).catch(error => {
+                reject(error);
+            })
+        }).catch(error => {
+            reject(error);
+        })
+    });
+
+}
+export function layout_Tiles(options: layoutTilesOptions) {
+    const { urlTemplate, tiles, subdomains, returnBlobURL, debug } = options;
+    return new Promise((resolve, reject) => {
+        if (!validateSubdomains(urlTemplate, subdomains)) {
+            reject(createParamsValidateError('not find subdomains'));
+            return;
+        }
+
+        const urls = tiles.map(tile => {
+            const [tileX, tileY, tileZ] = tile;
+            return getTileUrl(urlTemplate, tileX, tileY, tileZ, subdomains);
+        });
+        const headers = Object.assign({}, HEADERS, options.headers || {});
+
+        const fetchTiles = urls.map(url => {
+            return fetchTile(url, headers, options);
+        })
+
+        Promise.all(fetchTiles).then(imagebits => {
+            imagebits.forEach((image, index) => {
+                (tiles[index] as any).tileImage = image;
+            });
+            const bigImage = layoutTiles(tiles, debug);
+            const postImage = postProcessingImage(bigImage, options);
+            createImageBlobURL(postImage, returnBlobURL).then(url => {
                 resolve(url);
             }).catch(error => {
                 reject(error);

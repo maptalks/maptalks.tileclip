@@ -14,18 +14,32 @@ const maskMap = {};
 const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
 const TerrainTypes = ['mapzen', 'tianditu', 'cesium', 'arcgis', 'qgis-gray'];
 
-export type getTileOptions = {
-    url: string | ImageBitmap | Array<string | ImageBitmap>;
-    referrer?: string;
+export type postProcessingOptions = {
     filter?: string;
+    opacity?: number;
+    gaussianBlurRadius?: number;
+}
+
+export type fetchOptionsType = {
+    referrer?: string;
     headers?: Record<string, string>;
     fetchOptions?: Record<string, any>;
     timeout?: number;
-    opacity?: number;
-    returnBlobURL?: boolean;
-    gaussianBlurRadius?: number;
-    globalCompositeOperation?: GlobalCompositeOperation;
 }
+
+export type getTileOptions = {
+    url: string | ImageBitmap | Array<string | ImageBitmap>;
+    returnBlobURL?: boolean;
+    globalCompositeOperation?: GlobalCompositeOperation;
+} & postProcessingOptions & fetchOptionsType;
+
+export type layoutTilesOptions = {
+    urlTemplate: string;
+    tiles: Array<[number, number, number]>;
+    subdomains?: Array<string>;
+    returnBlobURL?: boolean;
+    debug?: boolean;
+} & postProcessingOptions & fetchOptionsType;
 
 export type encodeTerrainTileOptions = {
     url: string;
@@ -34,13 +48,9 @@ export type encodeTerrainTileOptions = {
     maxHeight?: number;
     terrainWidth?: number;
     tileSize?: number;
-    referrer?: string;
-    headers?: Record<string, string>;
-    fetchOptions?: Record<string, any>;
-    timeout?: number;
     returnBlobURL?: boolean;
     terrainColors?: Array<[number, string]>
-}
+} & fetchOptionsType;
 
 export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {
     urlTemplate: string | Array<string>;
@@ -71,11 +81,8 @@ export type transformTileOptions = getTileWithMaxZoomOptions & {
 export type colorTerrainTileOptions = {
     tile: ImageBitmap;
     colors: Array<[number, string]>;
-    filter?: string;
-    opacity?: number;
-    gaussianBlurRadius?: number;
     returnBlobURL?: boolean;
-}
+} & postProcessingOptions;
 
 type privateOptions = getTileOptions & {
     __taskId?: number;
@@ -148,6 +155,36 @@ class TileActor extends worker.Actor {
                 return;
             }
             const buffers = checkBuffers(url);
+            this.send(options, buffers, (error, image) => {
+                if (error || (promise as any).canceled) {
+                    reject(error || FetchCancelError);
+                } else {
+                    resolve(image);
+                }
+            }, workerId);
+        });
+        wrapPromise(promise, options);
+        return promise;
+    }
+
+    layoutTiles(options: layoutTilesOptions) {
+        options = checkOptions(options, 'layoutTiles');
+        const { workerId } = getTaskId(options);
+        const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+            if (!getCanvas()) {
+                reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
+            const { urlTemplate, tiles } = options;
+            if (!urlTemplate) {
+                reject(createParamsValidateError('layoutTiles error:urlTemplate is null'));
+                return;
+            }
+            if (!tiles || tiles.length === 0) {
+                reject(createParamsValidateError('layoutTiles error:tiles is null'));
+                return;
+            }
+            const buffers = [];
             this.send(options, buffers, (error, image) => {
                 if (error || (promise as any).canceled) {
                     reject(error || FetchCancelError);
