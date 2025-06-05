@@ -211,6 +211,7 @@ export function layoutTiles(tiles, debug: boolean) {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = 'red';
+        ctx.strokeStyle = 'red'
     }
     tiles.forEach(tile => {
         const [x, y, z] = tile;
@@ -219,6 +220,8 @@ export function layoutTiles(tiles, debug: boolean) {
         let tileImage = tile.tileImage;
         ctx.drawImage(tileImage, dx, dy, tileSize, tileSize);
         if (debug) {
+            ctx.rect(dx, dy, tileSize, tileSize);
+            ctx.stroke();
             ctx.fillText([x, y, z].join('_').toString(), dx + 100, dy + 100);
         }
 
