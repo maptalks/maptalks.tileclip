@@ -5,6 +5,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import { terser } from 'rollup-plugin-terser';
 import typescript from '@rollup/plugin-typescript';
+import babel from '@rollup/plugin-babel';
 import mtkWorkerPlugin from './worker-plugin';
 
 import pkg from './package.json';
@@ -26,10 +27,13 @@ const plugins = [
     }),
     nodeResolve(),
     commonjs()
-    // babel({
-    //     // exclude: ['node_modules/**']
-    // })
+
 ];
+
+const babelPlugin = babel({
+    extensions: ['.ts', '.js'],
+    babelHelpers: 'bundled'
+});
 
 function getEntry() {
     return path.join(__dirname, './src/index.ts');
@@ -39,7 +43,7 @@ const bundles = [
     {
         input: 'src/worker.ts',
         external: external,
-        plugins: product ? plugins.concat([terser(), mtkWorkerPlugin()]) : plugins.concat([mtkWorkerPlugin()]),
+        plugins: product ? plugins.concat([babelPlugin, terser(), mtkWorkerPlugin()]) : plugins.concat([babelPlugin, mtkWorkerPlugin()]),
         output: {
             format: 'amd',
             name: 'maptalks',
