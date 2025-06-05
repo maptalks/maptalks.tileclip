@@ -113,6 +113,7 @@ const tileActor = getTileActor();
 | --------------------------------------- | ------------------------------------------------------------------- |
 | getTile(options)                        | Request tile support for batch and some processing                  |
 | getTileWithMaxZoom(options)             | Cutting tiles, automatically cutting beyond the maximum level limit |
+| layoutTiles(options)                  | Tile layout arrangement |
 | transformTile(options)                  | Tile reprojection                                                   |
 | injectMask(maskId, Polygon/MultiPolygon) | Inject geojson data for tile clipping service                       |
 | removeMask(maskId)                      | remove Inject geojson data                                          |
@@ -233,11 +234,72 @@ promise.then((imagebitmap) => {
 })
 ```
 
+* `layoutTile(options)` layout tiles [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap) by fetch in worker, return `Promise`.
+  + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
+  + `options.tiles`: tile Data set
+  + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
+  + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
+  + `options?.headers`:fetch headers params. if need
+  + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
+  + `options?.timeout`: fetch timeout
+  + `options?.opacity`: tile opacity if need
+  + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
+  + `options?.returnBlobURL`: to return 
+  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+
+```js
+const {
+    x,
+    y,
+    z
+} = tile;
+const urlTemplate = baseLayer.options.urlTemplate;
+
+tileActor.layoutTiles({
+
+    urlTemplate,
+    tiles: [
+        [x, y, z],
+        [x + 1, y, z],
+        [x, y + 1, z],
+        [x + 1, y + 1, z]
+
+    ]
+    fetchOptions: {
+        referrer: document.location.href,
+        headers: {
+            ...
+        }
+        ...
+    }
+}).then(imagebitmap => {
+    consle.log(imagebitmap);
+}).catch(error => {
+    //do some things
+})
+
+//or if you want to cancel task
+const promise = tileActor.layoutTiles({
+    ...
+});
+//mock cancel fetch task
+setTimeout(() => {
+    promise.cancel();
+}, 2000);
+
+promise.then((imagebitmap) => {
+
+}).catch(error => {
+    //do some things
+    console.error(error);
+})
+```
+
 * `transformTile(options)` Reprojection tile in worker, return `Promise`
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                  `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                   `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
