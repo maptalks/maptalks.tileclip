@@ -31,6 +31,7 @@
 * [update mask](https://maptalks.github.io/maptalks.tileclip/demo/update-mask.html)
 * [mask remove or add](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-remve.html)
 * [gaussian Blur](https://maptalks.github.io/maptalks.tileclip/demo/gaussianBlurRadius.html)
+* [layout tiles](https://maptalks.github.io/maptalks.tileclip/demo/layouttiles.html)
 * [big image slice](https://maptalks.github.io/maptalks.tileclip/demo/imageslicing.html)
 * [custom tile error](https://maptalks.github.io/maptalks.tileclip/demo/tile-custom-error.html)
 
@@ -235,7 +236,7 @@ promise.then((imagebitmap) => {
 ```
 
 * `layoutTile(options)` layout tiles [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap) by fetch in worker, return `Promise`.
-  + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
+  + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x}
   + `options.tiles`: tile Data set
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
   + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
