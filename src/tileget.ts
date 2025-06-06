@@ -1,7 +1,10 @@
 import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions, layoutTilesOptions } from './index';
-import { createImageBlobURL, getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, imageTileScale, layoutTiles, mergeTiles, postProcessingImage, resizeCanvas, toBlobURL } from './canvas';
+import { createImageBlobURL, getCanvas, getCanvasContext, imageTileScale, layoutTiles, mergeTiles, postProcessingImage, resizeCanvas } from './canvas';
 import LRUCache from './LRUCache';
-import { isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createError, createParamsValidateError, createInnerError, HEADERS, disposeImage, replaceAll, isImageBitmap, rgb2Height, createDataError } from './util';
+import {
+    isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createParamsValidateError, createInnerError, HEADERS, disposeImage,
+    isImageBitmap, rgb2Height, createDataError, validateSubdomains, getTileUrl
+} from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
 import { ColorIn } from 'colorin';
@@ -15,34 +18,6 @@ const tileBufferCache = new LRUCache(LRUCount, (buffer) => {
     // disposeImage(image);
 });
 
-function formatTileUrlBySubdomains(url: string, subdomains: string[]) {
-    if (!subdomains || !subdomains.length) {
-        return url;
-    }
-    const len = subdomains.length;
-    let index = Math.floor(Math.random() * len);
-    index = Math.min(index, len - 1);
-    return replaceAll(url, '{s}', subdomains[index])
-}
-
-function getTileUrl(urlTemplate: string, x: number, y: number, z: number, subdomains: string[]) {
-    let key = '{x}';
-    let url = replaceAll(urlTemplate, key, x as unknown as string);
-    key = '{y}';
-    url = replaceAll(url, key, y as unknown as string);
-    key = '{z}';
-    url = replaceAll(url, key, z as unknown as string);
-    return formatTileUrlBySubdomains(url, subdomains);
-}
-
-function validateSubdomains(urlTemplate: string, subdomains: string[]) {
-    if (urlTemplate && urlTemplate.indexOf('{s}') > -1) {
-        if (!subdomains || subdomains.length === 0) {
-            return false;
-        }
-    }
-    return true;
-}
 
 const CONTROLCACHE: Record<string, Array<AbortController>> = {};
 

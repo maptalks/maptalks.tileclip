@@ -2,7 +2,7 @@ import { GeoJSONMultiPolygon, GeoJSONPolygon } from './index';
 
 class CustomError extends Error {
     public code: number;
-    
+
     constructor(message: string, code: number) {
         super(message);
         this.code = code;
@@ -103,7 +103,6 @@ export function encodeMapBox(height: number, out?: [number, number, number]) {
     } else {
         return [r, g, b];
     }
-
 }
 
 export function rgb2Height(R: number, G: number, B: number) {
@@ -127,4 +126,35 @@ export function checkBuffers(image: any) {
         }
     });
     return buffers;
+}
+
+
+
+function formatTileUrlBySubdomains(url: string, subdomains: string[]) {
+    if (!subdomains || !subdomains.length) {
+        return url;
+    }
+    const len = subdomains.length;
+    let index = Math.floor(Math.random() * len);
+    index = Math.min(index, len - 1);
+    return replaceAll(url, '{s}', subdomains[index])
+}
+
+export function getTileUrl(urlTemplate: string, x: number, y: number, z: number, subdomains: string[]) {
+    let key = '{x}';
+    let url = replaceAll(urlTemplate, key, x as unknown as string);
+    key = '{y}';
+    url = replaceAll(url, key, y as unknown as string);
+    key = '{z}';
+    url = replaceAll(url, key, z as unknown as string);
+    return formatTileUrlBySubdomains(url, subdomains);
+}
+
+export function validateSubdomains(urlTemplate: string, subdomains: string[]) {
+    if (urlTemplate && urlTemplate.indexOf('{s}') > -1) {
+        if (!subdomains || subdomains.length === 0) {
+            return false;
+        }
+    }
+    return true;
 }

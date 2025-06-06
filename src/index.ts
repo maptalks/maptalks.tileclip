@@ -2,7 +2,7 @@ import { registerWorkerAdapter, worker } from 'maptalks';
 //@ts-ignore
 import WORKERCODE from './worker/worker.bundle.js';
 import { BBOXtype } from './bbox';
-import { createError, createParamsValidateError, FetchCancelError, isNumber, uuid, CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon, checkTileUrl, checkBuffers } from './util.js';
+import { createParamsValidateError, FetchCancelError, isNumber, uuid, CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon, checkBuffers } from './util.js';
 import { getCanvas } from './canvas';
 export { getBlankTile, get404Tile } from './canvas';
 
@@ -33,13 +33,16 @@ export type getTileOptions = {
     globalCompositeOperation?: GlobalCompositeOperation;
 } & postProcessingOptions & fetchOptionsType;
 
+export type returnResultType = {
+    returnBlobURL?: boolean;
+}
+
 export type layoutTilesOptions = {
     urlTemplate: string;
     tiles: Array<[number, number, number]>;
     subdomains?: Array<string>;
-    returnBlobURL?: boolean;
     debug?: boolean;
-} & postProcessingOptions & fetchOptionsType;
+} & postProcessingOptions & fetchOptionsType & returnResultType;
 
 export type encodeTerrainTileOptions = {
     url: string;
@@ -48,9 +51,8 @@ export type encodeTerrainTileOptions = {
     maxHeight?: number;
     terrainWidth?: number;
     tileSize?: number;
-    returnBlobURL?: boolean;
     terrainColors?: Array<[number, string]>
-} & fetchOptionsType;
+} & fetchOptionsType & returnResultType;
 
 export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {
     urlTemplate: string | Array<string>;
@@ -68,8 +70,7 @@ export type clipTileOptions = {
     maskId: string;
     tileSize?: number;
     reverse?: boolean;
-    returnBlobURL?: boolean;
-}
+} & returnResultType;
 
 export type transformTileOptions = getTileWithMaxZoomOptions & {
     projection: 'EPSG:4326' | 'EPSG:3857';
@@ -81,8 +82,7 @@ export type transformTileOptions = getTileWithMaxZoomOptions & {
 export type colorTerrainTileOptions = {
     tile: ImageBitmap;
     colors: Array<[number, string]>;
-    returnBlobURL?: boolean;
-} & postProcessingOptions;
+} & postProcessingOptions & returnResultType;
 
 type privateOptions = getTileOptions & {
     __taskId?: number;
@@ -109,11 +109,11 @@ export type GeoJSONMultiPolygon = {
     bbox?: BBOXtype
 }
 
-function checkOptions(options, type: string) {
+function checkOptions(options, type) {
     return Object.assign({ referrer: document.location.href, tileSize: 256 }, options, { _type: type, __taskId: uuid(), __workerId: getWorkerId() });
 }
 
-function getTaskId(options) {
+function getTaskId(options: Record<string, any>) {
     const workerId = options.__workerId;
     const taskId = options.__taskId;
     return {

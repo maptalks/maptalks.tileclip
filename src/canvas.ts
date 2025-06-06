@@ -1,4 +1,4 @@
-import { createDataError, createError, disposeImage, isImageBitmap, isNumber } from "./util";
+import { createDataError, disposeImage, isImageBitmap, isNumber } from "./util";
 import glur from 'glur';
 
 let globalCanvas: OffscreenCanvas;

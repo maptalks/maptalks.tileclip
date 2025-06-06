@@ -1,4 +1,4 @@
-import { getCanvas, getCanvasContext, imageFilter, imageGaussianBlur, imageOpacity, mergeTiles, postProcessingImage, resizeCanvas } from "./canvas";
+import { getCanvas, getCanvasContext, mergeTiles, postProcessingImage, resizeCanvas } from "./canvas";
 import { getTileOptions } from "./index";
 import { fetchTile } from "./tileget";
 import { checkTileUrl, HEADERS, uuid, disposeImage } from "./util";

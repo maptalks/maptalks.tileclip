@@ -1,9 +1,9 @@
 import geojsonbbox from '@maptalks/geojson-bbox';
 import lineclip from 'lineclip';
-import { createImageBlobURL, getBlankTile, getCanvas, imageClip, toBlobURL } from './canvas';
+import { createImageBlobURL, getBlankTile, getCanvas, imageClip } from './canvas';
 import { bboxInBBOX, bboxIntersect, BBOXtype } from './bbox';
 import { clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon } from './index';
-import { createError, lnglat2Mercator, isPolygon, isEPSG3857, createParamsValidateError } from './util';
+import { lnglat2Mercator, isPolygon, isEPSG3857, createParamsValidateError } from './util';
 
 const GeoJSONCache = {};
 
