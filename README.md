@@ -60,6 +60,7 @@
 * [water mark](https://maptalks.github.io/maptalks.tileclip/demo/watermark.html)
 * [underground by clip tile](https://maptalks.github.io/maptalks.tileclip/demo/underground.html)
 * [terrain-tiles-blendmode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-tiles-blendmode.html)
+* [terrain-tiles-blendmode shadow](https://maptalks.github.io/maptalks.tileclip/demo/terrain-tiles-blendmode-shadow.html)
 * [leaflet clip demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet.html)
 * [leaflet gettile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-simple.html)
 * [leaflet transform tile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-transform.html)
