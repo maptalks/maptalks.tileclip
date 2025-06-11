@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Interactions - Draw tool to draw geometries</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+</style>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.css' />
+<script type='text/javascript' src='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.js'></script>
+<script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
+<script type='text/javascript' src='https://cdn.jsdelivr.net/npm/colorin@0.7.0/dist/colorin.min.js'></script>
+
+<body>
+    <div id="map" class="container"></div>
+    <script>
+
+        const tileActor = maptalks.getTileActor();
+        const maskId = '1';
+
+        //terrain layer
+        const baseLayer = new maptalks.TileLayer('base', {
+            // debug: true,
+            urlTemplate: "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer/tile/{z}/{y}/{x}",
+            subdomains: ["a", "b", "c", "d"],
+            // zIndex: -1
+            // bufferPixel: 1
+        })
+
+        function getTileUrl(url, x, y, z) {
+            return url.replaceAll('{x}', x).replaceAll('{y}', y).replaceAll('{z}', z);
+        }
+
+        const ImageTileURL = 'https://server.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+        const BaseTileURL = 'https://server.arcgisonline.com/arcgis/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+        const BaseTileURL1 = 'https://services.arcgisonline.com/arcgis/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
+        const BaseTileURL2 = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+        const BaseTileURL3 = 'https://services.arcgisonline.com/arcgis/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}';
+        const BaseTileURL4 = 'https://services.arcgisonline.com/arcgis/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}';
+
+        const terrainColors = [
+            //隐藏海拔低的地方，一般是水系，露出陆地
+            [0, 'rgba(0, 0, 0, 0)'],
+            [10, 'rgba(0, 0, 0, 1)'],
+        ]
+        baseLayer.on('renderercreate', function (e) {
+            //load tile image
+            //   img(Image): an Image object
+            //   url(String): the url of the tile
+            const getAbsoluteURL = maptalks.Util.getAbsoluteURL;
+            e.renderer.loadTileBitmap = function (url, tile, callback) {
+                const { x, y, z } = tile;
+                tileActor.encodeTerrainTile({
+                    url: getAbsoluteURL(url),
+                    terrainType: 'arcgis',
+                    //custom terrain tile colors
+                    terrainColors: terrainColors
+                    // timeout: 5000
+                }).then(terrainTile => {
+                    const url1 = getTileUrl(BaseTileURL, x, y, z);
+                    tileActor.getTile({
+                        url: [getAbsoluteURL(url1), terrainTile],
+                        globalCompositeOperation: 'destination-atop',
+                        //https://developer.mozilla.org/zh-CN/docs/Web/CSS/filter-function/drop-shadow
+                        filter: 'drop-shadow(0 0 6px black)'
+                        // timeout: 5000
+                    }).then(imageTile => {
+
+                        const url2 = getTileUrl(BaseTileURL, x, y, z);
+                        tileActor.getTile({
+                            url: [getAbsoluteURL(url2), imageTile],
+                        }).then(imageTile1 => {
+                            callback(imageTile1);
+                        }).catch(error => {
+                            //do some things
+                            console.error(error);
+                        })
+                    }).catch(error => {
+                        //do some things
+                        console.error(error);
+                    })
+
+
+                }).catch(error => {
+                    //do some things
+                    console.error(error);
+                })
+            };
+        });
+
+        var map = new maptalks.Map('map', {
+            "center": [61.51987613, 31.90388953], "zoom": 4.0991484153139055, "pitch": 0, "bearing": 0
+        });
+
+        const layer = new maptalks.VectorLayer('layer').addTo(map);
+        baseLayer.addTo(map);
+
+    </script>
+</body>
+
+</html>
