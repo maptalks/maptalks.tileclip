@@ -3,7 +3,7 @@ import { imageSlicing, imageToBlobURL } from './imageslice';
 import { clip, injectMask, removeMask } from './tileclip';
 import { cancelFetch, colorsTerrainTile, encodeTerrainTile, getTile, getTileWithMaxZoom, layout_Tiles } from './tileget';
 import { tileTransform } from './tiletranasform';
-import { checkBuffers, createError, createInnerError, isImageBitmap } from './util';
+import { checkBuffers, createInnerError, isImageBitmap } from './util';
 
 export const initialize = function () {
 };

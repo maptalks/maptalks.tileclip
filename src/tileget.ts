@@ -3,7 +3,8 @@ import { createImageBlobURL, getCanvas, getCanvasContext, imageTileScale, layout
 import LRUCache from './LRUCache';
 import {
     isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createParamsValidateError, createInnerError, HEADERS, disposeImage,
-    isImageBitmap, rgb2Height, createDataError, validateSubdomains, getTileUrl
+    isImageBitmap, rgb2Height, createDataError, validateSubdomains, getTileUrl,
+    createNetWorkError
 } from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
@@ -94,7 +95,12 @@ export function fetchTile(url: string, headers = {}, options) {
             fetchOptions.signal = signal;
             delete fetchOptions.timeout;
             cacheFetch(taskId, control);
-            fetch(url, fetchOptions).then(res => res.blob()).then(blob => createImageBitmap(blob)).then(image => {
+            fetch(url, fetchOptions).then(res => {
+                if (!res.ok) {
+                    reject(createNetWorkError(url))
+                }
+                return res.blob();
+            }).then(blob => createImageBitmap(blob)).then(image => {
                 if (options.disableCache !== true) {
                     tileImageCache.add(url, image);
                 }
@@ -137,7 +143,12 @@ export function fetchTileBuffer(url: string, headers = {}, options) {
             fetchOptions.signal = signal;
             delete fetchOptions.timeout;
             cacheFetch(taskId, control);
-            fetch(url, fetchOptions).then(res => res.arrayBuffer()).then(buffer => {
+            fetch(url, fetchOptions).then(res => {
+                if (!res.ok) {
+                    reject(createNetWorkError(url))
+                }
+                return res.arrayBuffer();
+            }).then(buffer => {
                 if (options.disableCache !== true) {
                     tileBufferCache.add(url, buffer);
                 }
