@@ -49,6 +49,7 @@ const bundles = [
             name: 'maptalks',
             globals,
             extend: true,
+            'banner': banner,
             file: 'src/worker/worker.bundle.js'
         }
     },
