@@ -12,10 +12,10 @@ import { ColorIn } from 'colorin';
 
 const LRUCount = 200;
 
-const tileImageCache = new LRUCache(LRUCount, (image) => {
+const tileImageCache = new LRUCache<ImageBitmap>(LRUCount, (image) => {
     disposeImage(image as ImageBitmap);
 });
-const tileBufferCache = new LRUCache(LRUCount, (buffer) => {
+const tileBufferCache = new LRUCache<ArrayBuffer>(LRUCount, (buffer) => {
     // disposeImage(image);
 });
 
@@ -76,7 +76,7 @@ export function fetchTile(url: string, headers = {}, options) {
             reject(createInnerError('taskId is null'));
             return;
         }
-        const image = tileImageCache.get(url) as ImageBitmap;
+        const image = tileImageCache.get(url);
         if (image) {
             copyImageBitMap(image);
         } else {
@@ -124,7 +124,7 @@ export function fetchTileBuffer(url: string, headers = {}, options) {
             reject(createInnerError('taskId is null'));
             return;
         }
-        const buffer = tileBufferCache.get(url) as ArrayBuffer;
+        const buffer = tileBufferCache.get(url);
         if (buffer) {
             copyBuffer(buffer);
         } else {

@@ -1,14 +1,14 @@
 // copy from https://github.com/maptalks/maptalks.js/blob/master/src/core/util/LRUCache.ts
 const nullOnRemove = () => { };
 
-type cacheItemType = ImageBitmap | ArrayBuffer;
+// type cacheItemType = ImageBitmap | ArrayBuffer;
 
-class LRUCache {
+class LRUCache<T> {
     max: number;
-    onRemove: (item: cacheItemType) => void;
-    data: Map<string, cacheItemType>;
+    onRemove: (item: T) => void;
+    data: Map<string, T>;
 
-    constructor(max: number, onRemove: (item: cacheItemType) => void) {
+    constructor(max: number, onRemove: (item: T) => void) {
         this.max = max;
         this.onRemove = onRemove || nullOnRemove;
         this.reset();
@@ -31,7 +31,7 @@ class LRUCache {
         delete this.onRemove;
     }
 
-    add(key: string, data: cacheItemType) {
+    add(key: string, data: T) {
         if (!data) {
             return this;
         }
