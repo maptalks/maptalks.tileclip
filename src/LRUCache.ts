@@ -1,8 +1,14 @@
 // copy from https://github.com/maptalks/maptalks.js/blob/master/src/core/util/LRUCache.ts
 const nullOnRemove = () => { };
 
+type cacheItemType = ImageBitmap | ArrayBuffer;
+
 class LRUCache {
-    constructor(max, onRemove) {
+    max: number;
+    onRemove: (item: cacheItemType) => void;
+    data: Map<string, cacheItemType>;
+
+    constructor(max: number, onRemove: (item: cacheItemType) => void) {
         this.max = max;
         this.onRemove = onRemove || nullOnRemove;
         this.reset();
@@ -25,7 +31,7 @@ class LRUCache {
         delete this.onRemove;
     }
 
-    add(key, data) {
+    add(key: string, data: cacheItemType) {
         if (!data) {
             return this;
         }
@@ -45,7 +51,7 @@ class LRUCache {
         return this;
     }
 
-    keys() {
+    keys(): string[] {
         const keys = new Array(this.data.size);
         let i = 0;
         const iterator = this.data.keys();
@@ -67,11 +73,11 @@ class LRUCache {
         }
     }
 
-    has(key) {
+    has(key: string) {
         return this.data.has(key);
     }
 
-    getAndRemove(key) {
+    getAndRemove(key: string) {
         if (!this.has(key)) { return null; }
 
         const data = this.data.get(key);
@@ -79,14 +85,14 @@ class LRUCache {
         return data;
     }
 
-    get(key) {
+    get(key: string) {
         if (!this.has(key)) { return null; }
 
         const data = this.data.get(key);
         return data;
     }
 
-    remove(key) {
+    remove(key: string) {
         if (!this.has(key)) { return this; }
 
         const data = this.data.get(key);
@@ -96,7 +102,7 @@ class LRUCache {
         return this;
     }
 
-    setMaxSize(max) {
+    setMaxSize(max: number) {
         this.max = max;
         if (this.data.size > this.max) {
             this.shrink();
