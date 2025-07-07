@@ -13,15 +13,15 @@ export type fetchOptionsType = {
     timeout?: number;
 }
 
-export type getTileOptions = {
-    url: string | ImageBitmap | Array<string | ImageBitmap>;
-    returnBlobURL?: boolean;
-    globalCompositeOperation?: GlobalCompositeOperation;
-} & postProcessingOptions & fetchOptionsType;
-
 export type returnResultType = {
     returnBlobURL?: boolean;
 }
+
+export type getTileOptions = {
+    url: string | ImageBitmap | Array<string | ImageBitmap>;
+    globalCompositeOperation?: GlobalCompositeOperation;
+} & postProcessingOptions & fetchOptionsType & returnResultType;
+
 
 export type layoutTilesOptions = {
     urlTemplate: string;
