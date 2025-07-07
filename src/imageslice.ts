@@ -1,5 +1,5 @@
 import { getCanvas, getCanvasContext, mergeTiles, postProcessingImage, resizeCanvas } from "./canvas";
-import { getTileOptions } from "./index";
+import { getTileOptions } from "./types";
 import { fetchTile } from "./tileget";
 import { checkTileUrl, HEADERS, uuid, disposeImage } from "./util";
 

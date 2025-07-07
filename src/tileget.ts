@@ -1,4 +1,4 @@
-import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions, layoutTilesOptions } from './index';
+import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions, layoutTilesOptions } from './types';
 import { createImageBlobURL, getCanvas, getCanvasContext, imageTileScale, layoutTiles, mergeTiles, postProcessingImage, resizeCanvas } from './canvas';
 import LRUCache from './LRUCache';
 import {

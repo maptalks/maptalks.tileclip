@@ -1,4 +1,4 @@
-import { GeoJSONMultiPolygon, GeoJSONPolygon } from './index';
+import { GeoJSONMultiPolygon, GeoJSONPolygon } from './types';
 
 class CustomError extends Error {
     public code: number;
