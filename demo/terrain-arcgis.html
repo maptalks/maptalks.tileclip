@@ -67,10 +67,10 @@
         }
 
         fetch('./上海市.json').then(res => res.json()).then(geojson => {
-            const polygons = maptalks.GeoJSON.toGeometry(geojson, (geo => {
-                geo.setSymbol(symbol);
-            }));
-            layer.addGeometry(polygons);
+            // const polygons = maptalks.GeoJSON.toGeometry(geojson, (geo => {
+            //     geo.setSymbol(symbol);
+            // }));
+            // layer.addGeometry(polygons);
             tileActor.injectMask(maskId, geojson.features[0]).then(data => {
                 baseLayer.addTo(map);
                 console.log(tileActor.maskHasInjected(maskId))
