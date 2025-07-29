@@ -14,7 +14,7 @@
 
 * [simple get tile](https://maptalks.github.io/maptalks.tileclip/demo/tile.html)
 * [merge tiles](https://maptalks.github.io/maptalks.tileclip/demo/tile-array.html)
-* [tiles filter by geojson mask](https://maptalks.github.io/maptalks.tileclip/demo/tile-mask-filter.html)
+* [tiles filter by geojson mask(only load tiles in mask)](https://maptalks.github.io/maptalks.tileclip/demo/tile-mask-filter.html)
 * [css filter](https://maptalks.github.io/maptalks.tileclip/demo/cssfilter.html)
 * [clip by polygon](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip.html)
 * [clip by polygon with holes](https://maptalks.github.io/maptalks.tileclip/demo/polygon-hole-clip.html)
@@ -115,14 +115,15 @@ const tileActor = getTileActor();
 | --------------------------------------- | ------------------------------------------------------------------- |
 | getTile(options)                        | Request tile support for batch and some processing                  |
 | getTileWithMaxZoom(options)             | Cutting tiles, automatically cutting beyond the maximum level limit |
-| layoutTiles(options)                  | Tile layout arrangement |
+| layoutTiles(options)                    | Tile layout arrangement |
 | transformTile(options)                  | Tile reprojection                                                   |
 | injectMask(maskId, Polygon/MultiPolygon) | Inject geojson data for tile clipping service                       |
 | removeMask(maskId)                      | remove Inject geojson data                                          |
 | maskHasInjected(maskId)                 | Has the geojson data been injected                                  |
 | clipTile(options)                       | Crop tiles using injected geojson data                              |
+| tileIntersectMask(options)              | Does tile intersect with mask                            |
 | encodeTerrainTile(options)              | Encode other terrain tiles into mapbox terrain service format       |
-| colorTerrainTile(options)              | Terrain tile color matching      |
+| colorTerrainTile(options)               | Terrain tile color matching      |
 | imageSlicing(options)                   | Cut a large image into multiple small images                        |
 
 all methods return Promise with `cancel()` method
@@ -301,7 +302,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                   `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                     `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -453,6 +454,80 @@ baseLayer.on('renderercreate', function(e) {
         }).catch(error => {
             //do some things
             console.error(error);
+        })
+    };
+});
+
+const polygon = {
+    "type": "Feature",
+    "geometry": {
+        "type": "Polygon",
+        "coordinates": []
+    }
+}
+
+tileActor.injectMask(maskId, polygon).then(data => {
+    baseLayer.addTo(map);
+}).catch(error => {
+    console.error(error);
+})
+```
+
+* `tileIntersectMask(options)` clip tile by mask . return `Promise`
+
+  + `options.tileBBOX`:tile BBOX `[minx,miny,maxx,maxy]`
+  + `options.maskId`:mask key
+
+```js
+import * as maptalks from 'maptalks-gl';
+import {
+    getTileActor
+} from 'maptalks.tileclip';
+
+const tileActor = getTileActor();
+const maskId = 'china';
+
+const baseLayer = new maptalks.TileLayer('base', {
+    debug: true,
+    urlTemplate: '/arcgisonline/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x}',
+    subdomains: ["a", "b", "c", "d"],
+    // bufferPixel: 1
+})
+
+baseLayer.on('renderercreate', function(e) {
+    //load tile image
+    //   img(Image): an Image object
+    //   url(String): the url of the tile
+    e.renderer.loadTileBitmap = function(url, tile, callback) {
+        const tileBBOX = baseLayer._getTileBBox(tile);
+        const blankTile = () => {
+            callback(maptalks.getBlankTile())
+        }
+        tileActor.tileIntersectMask({
+            tileBBOX,
+            maskId
+        }).then(result => {
+            // callback(result);
+            const {
+                intersect
+            } = result;
+            if (intersect) {
+                tileActor.getTile({
+                    url: maptalks.Util.getAbsoluteURL(url)
+                }).then(imagebitmap => {
+                    callback(imagebitmap);
+                }).catch(error => {
+                    //do some things
+                    console.error(error);
+                    blankTile();
+                })
+            } else {
+                blankTile();
+            }
+        }).catch(error => {
+            //do some things
+            console.error(error);
+            blankTile();
         })
     };
 });
