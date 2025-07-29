@@ -1,6 +1,6 @@
 import { createImageBlobURL, postProcessingImage, toBlobURL } from './canvas';
 import { imageSlicing, imageToBlobURL } from './imageslice';
-import { clip, injectMask, removeMask } from './tileclip';
+import { clip, injectMask, removeMask, tileBBOXIntersectMask } from './tileclip';
 import { cancelFetch, colorsTerrainTile, encodeTerrainTile, getTile, getTileWithMaxZoom, layout_Tiles } from './tileget';
 import { tileTransform } from './tiletranasform';
 import { checkBuffers, createInnerError, isImageBitmap } from './util';
@@ -39,6 +39,15 @@ export const onmessage = function (message, postResponse) {
     if (type === 'clipTile') {
         clip(data).then(image => {
             postResponse(null, image, checkBuffers(image));
+        }).catch(error => {
+            postResponse(error);
+        });
+        return;
+    }
+    if (type === 'tileIntersectMask') {
+        const { tileBBOX, maskId } = data;
+        tileBBOXIntersectMask(tileBBOX, maskId).then(result => {
+            postResponse(null, result, checkBuffers(result));
         }).catch(error => {
             postResponse(error);
         });

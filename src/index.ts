@@ -6,7 +6,8 @@ import { getCanvas } from './canvas';
 import {
     privateOptions, getTileOptions, layoutTilesOptions, getTileWithMaxZoomOptions,
     transformTileOptions, clipTileOptions, GeoJSONPolygon, GeoJSONMultiPolygon,
-    encodeTerrainTileOptions, colorTerrainTileOptions
+    encodeTerrainTileOptions, colorTerrainTileOptions,
+    tileIntersectMaskOptions
 } from './types.js';
 export { getBlankTile, get404Tile } from './canvas';
 
@@ -225,6 +226,37 @@ class TileActor extends worker.Actor {
                     reject(error || FetchCancelError);
                 } else {
                     resolve(image);
+                }
+            });
+        });
+        wrapPromise(promise, options);
+        return promise;
+    }
+
+    tileIntersectMask(options: tileIntersectMaskOptions) {
+        options = checkOptions(options, 'tileIntersectMask');
+        delete (options as unknown as privateOptions).__taskId;
+        delete (options as unknown as privateOptions).__workerId;
+        const promise = new Promise((resolve: (result: { intersect: boolean }) => void, reject: (error: Error) => void) => {
+            const { tileBBOX, maskId } = options;
+            if (!tileBBOX) {
+                reject(createParamsValidateError('tileIntersectMask error:tileBBOX is null'));
+                return;
+            }
+            if (!maskId) {
+                reject(createParamsValidateError('tileIntersectMask error:maskId is null'));
+                return;
+            }
+            if (!this.maskHasInjected(maskId)) {
+                reject(createParamsValidateError('not find mask by maskId:' + maskId));
+                return;
+            }
+            const buffers: ArrayBuffer[] = [];
+            this.send(options, buffers, (error, result) => {
+                if (error || (promise as any).canceled) {
+                    reject(error || FetchCancelError);
+                } else {
+                    resolve(result);
                 }
             });
         });

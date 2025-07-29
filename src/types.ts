@@ -58,6 +58,11 @@ export type clipTileOptions = {
     reverse?: boolean;
 } & returnResultType;
 
+export type tileIntersectMaskOptions = {
+    tileBBOX: BBOXtype;
+    maskId: string;
+};
+
 export type transformTileOptions = getTileWithMaxZoomOptions & {
     projection: 'EPSG:4326' | 'EPSG:3857';
     errorLog?: boolean;

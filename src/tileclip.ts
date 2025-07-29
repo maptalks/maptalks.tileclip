@@ -84,6 +84,38 @@ function transformPixels(projection: string, tileBBOX: BBOXtype, tileSize: numbe
     }
 }
 
+const validateClipRing = (result) => {
+    if (result.length > 0) {
+        let minx = Infinity, maxx = -Infinity, miny = Infinity, maxy = -Infinity;
+        for (let j = 0, len1 = result.length; j < len1; j++) {
+            const [x, y] = result[j];
+            minx = Math.min(x, minx);
+            miny = Math.min(y, miny);
+            maxx = Math.max(x, maxx);
+            maxy = Math.max(y, maxy);
+        }
+        if (minx !== maxx && miny !== maxy) {
+            return true;
+        }
+    }
+    return false;
+};
+
+function clipPolygons(polygons, tileBBOX: BBOXtype) {
+    const clipRings = [];
+    for (let i = 0, len = polygons.length; i < len; i++) {
+        const polygon = polygons[i];
+        for (let j = 0, len1 = polygon.length; j < len1; j++) {
+            const ring = polygon[j];
+            const result = lineclip.polygon(ring, tileBBOX);
+            if (validateClipRing(result)) {
+                clipRings.push([result]);
+            }
+        }
+    }
+    return clipRings;
+}
+
 export function clip(options: clipTileOptions) {
     return new Promise((resolve, reject) => {
         const { tile, tileBBOX, projection, tileSize, maskId, returnBlobURL, reverse } = options;
@@ -132,34 +164,9 @@ export function clip(options: clipTileOptions) {
             return;
         }
 
-        const validateClipRing = (result) => {
-            if (result.length > 0) {
-                let minx = Infinity, maxx = -Infinity, miny = Infinity, maxy = -Infinity;
-                for (let j = 0, len1 = result.length; j < len1; j++) {
-                    const [x, y] = result[j];
-                    minx = Math.min(x, minx);
-                    miny = Math.min(y, miny);
-                    maxx = Math.max(x, maxx);
-                    maxy = Math.max(y, maxy);
-                }
-                if (minx !== maxx && miny !== maxy) {
-                    return true;
-                }
-            }
-            return false;
-        };
 
-        const clipRings = [];
-        for (let i = 0, len = polygons.length; i < len; i++) {
-            const polygon = polygons[i];
-            for (let j = 0, len1 = polygon.length; j < len1; j++) {
-                const ring = polygon[j];
-                const result = lineclip.polygon(ring, tileBBOX);
-                if (validateClipRing(result)) {
-                    clipRings.push([result]);
-                }
-            }
-        }
+
+        const clipRings = clipPolygons(polygons, tileBBOX);
         if (clipRings.length === 0) {
             judgeReverse();
             return;
@@ -170,5 +177,61 @@ export function clip(options: clipTileOptions) {
         const image = imageClip(canvas, pixels, tile, reverse);
         returnImage(image);
     });
+
+}
+
+export function tileBBOXIntersectMask(tileBBOX: BBOXtype, maskId: string) {
+    return new Promise((resolve, reject) => {
+        const feature = GeoJSONCache[maskId];
+        if (!feature) {
+            reject(createParamsValidateError('not find mask ,the maskId:' + maskId));
+            return;
+        }
+
+        const notIntersect = () => {
+            resolve({
+                intersect: false
+            });
+            return;
+        };
+
+        const beIntersect = () => {
+            resolve({
+                intersect: true
+            });
+            return;
+        };
+        
+        const bbox = feature.bbox;
+        if (!bbox) {
+            notIntersect();
+            return;
+        }
+        const { coordinates, type } = feature.geometry;
+        if (!coordinates.length) {
+            notIntersect();
+            return;
+        }
+        if (!bboxIntersect(bbox, tileBBOX)) {
+            notIntersect();
+            return;
+        }
+
+        if (bboxInBBOX(bbox, tileBBOX)) {
+            beIntersect();
+            return;
+        }
+        let polygons = coordinates;
+        if (type === 'Polygon') {
+            polygons = [polygons];
+        }
+        const clipRings = clipPolygons(polygons, tileBBOX);
+        if (clipRings.length === 0) {
+            notIntersect();
+            return;
+        }
+        beIntersect();
+
+    })
 
 }
