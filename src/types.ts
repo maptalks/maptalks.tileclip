@@ -99,3 +99,18 @@ export type GeoJSONMultiPolygon = {
     properties?: Record<string, any>;
     bbox?: BBOXtype
 }
+
+export type injectImageOptions = {
+    imageId: string;
+    url: string;
+    imageBBOX: BBOXtype;
+} & fetchOptionsType;
+
+
+export type getImageTileOptions = {
+    tileBBOX: BBOXtype,
+    imageId: string;
+    projection: string;
+    tileSize?: number;
+
+}

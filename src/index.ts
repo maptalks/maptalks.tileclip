@@ -1,14 +1,17 @@
-import { registerWorkerAdapter, worker } from 'maptalks';
+import { registerWorkerAdapter, worker, Util } from 'maptalks';
 //@ts-ignore
 import WORKERCODE from './worker/worker.bundle.js';
-import { createParamsValidateError, FetchCancelError, isNumber, uuid, CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon, checkBuffers } from './util.js';
+import { createParamsValidateError, FetchCancelError, isNumber, uuid, CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon, checkBuffers, createNetWorkError, disposeImage } from './util.js';
 import { getCanvas } from './canvas';
 import {
     privateOptions, getTileOptions, layoutTilesOptions, getTileWithMaxZoomOptions,
     transformTileOptions, clipTileOptions, GeoJSONPolygon, GeoJSONMultiPolygon,
     encodeTerrainTileOptions, colorTerrainTileOptions,
-    tileIntersectMaskOptions
+    tileIntersectMaskOptions,
+    injectImageOptions,
+    getImageTileOptions
 } from './types.js';
+import { imageTile } from './imagetile.js';
 export { getBlankTile, get404Tile } from './canvas';
 
 const WORKERNAME = '__maptalks.tileclip__';
@@ -16,6 +19,7 @@ const WORKERNAME = '__maptalks.tileclip__';
 registerWorkerAdapter(WORKERNAME, WORKERCODE as unknown as string);
 
 const maskMap = {};
+const imageMap = {};
 const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
 const TerrainTypes = ['mapzen', 'tianditu', 'cesium', 'arcgis', 'qgis-gray'];
 
@@ -479,6 +483,112 @@ class TileActor extends worker.Actor {
         wrapPromise(promise, options);
         return promise;
     }
+
+    injectImage(options: injectImageOptions) {
+        options = checkOptions(options, 'injectImage');
+        const promise = new Promise((resolve, reject) => {
+            if (!getCanvas()) {
+                reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
+            const { imageId, url, imageBBOX, headers, fetchOptions, referrer } = options;
+            if (!imageId) {
+                reject(createParamsValidateError('injectImage error:imageId is null'));
+                return;
+            }
+            if (imageMap[imageId]) {
+                reject(createParamsValidateError(`injectImage error:${imageId} has injected`));
+                return;
+            }
+            if (!imageBBOX) {
+                reject(createParamsValidateError('injectImage error:imageBBOX is null'));
+                return;
+            }
+            const imageInfo = imageMap[imageId] = {
+                imageBBOX,
+                url,
+                image: null
+            };
+            const url1 = Util.getAbsoluteURL(url);
+            const fetchParams = fetchOptions || {
+                headers,
+                referrer: referrer
+            };
+            fetch(url1, fetchParams).then(res => {
+                if (!res.ok) {
+                    reject(createNetWorkError(url));
+                    return;
+                }
+                return res.blob();
+            }).then(blob => createImageBitmap(blob)).then(image => {
+                imageInfo.image = image;
+                resolve(imageInfo);
+            }).catch(error => {
+                reject(error);
+            });
+
+        });
+        wrapPromise(promise, {});
+        return promise;
+    }
+
+    removeImage(imageId: string) {
+        const promise = new Promise((resolve, reject) => {
+            if (!imageId) {
+                reject(createParamsValidateError('removeImage error:imageId is null'));
+                return;
+            }
+            const imageInfo = imageMap[imageId] || {};
+            delete imageMap[imageId];
+            const image = imageInfo.image;
+            disposeImage(image);
+            resolve(null);
+        });
+        wrapPromise(promise, {});
+        return promise;
+    }
+
+    imageHasInjected(imageId: string) {
+        if (!imageId) {
+            console.error('imageHasInjected error:imageId is null');
+            return false;
+        }
+        return !!imageMap[imageId];
+    }
+
+    getImageTile(options: getImageTileOptions) {
+        options = checkOptions(options, 'clipTile');
+        const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
+            if (!getCanvas()) {
+                reject(CANVAS_ERROR_MESSAGE);
+                return;
+            }
+            const { tileBBOX, projection, imageId } = options;
+            if (!tileBBOX) {
+                reject(createParamsValidateError('getImageTile error:tileBBOX is null'));
+                return;
+            }
+            if (!imageId) {
+                reject(createParamsValidateError('getImageTile error:imageId is null'));
+                return;
+            }
+            if (!projection) {
+                reject(createParamsValidateError('getImageTile error:projection is null'));
+                return;
+            }
+            if (!this.imageHasInjected(imageId)) {
+                reject(createParamsValidateError('not find image by imageId:' + imageId));
+                return;
+            }
+            const imageInfo = imageMap[imageId];
+            const image = imageTile(imageInfo, options);
+            resolve(image);
+
+        });
+        wrapPromise(promise, options);
+        return promise;
+    }
+
 }
 
 let actor: TileActor;
