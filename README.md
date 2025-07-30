@@ -32,6 +32,10 @@
 * [mask remove or add](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-remve.html)
 * [gaussian Blur](https://maptalks.github.io/maptalks.tileclip/demo/gaussianBlurRadius.html)
 * [layout tiles](https://maptalks.github.io/maptalks.tileclip/demo/layouttiles.html)
+
+* [get tile from image](https://maptalks.github.io/maptalks.tileclip/demo/imagetile.html)  
+* [get tile and clip from image](https://maptalks.github.io/maptalks.tileclip/demo/imagetile-clip.html)  
+
 * [big image slice](https://maptalks.github.io/maptalks.tileclip/demo/imageslicing.html)
 * [custom tile error](https://maptalks.github.io/maptalks.tileclip/demo/tile-custom-error.html)
 
