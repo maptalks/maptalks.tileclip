@@ -125,6 +125,10 @@ const tileActor = getTileActor();
 | encodeTerrainTile(options)              | Encode other terrain tiles into mapbox terrain service format       |
 | colorTerrainTile(options)               | Terrain tile color matching      |
 | imageSlicing(options)                   | Cut a large image into multiple small images                        |
+| injectImage(options)                    | inject image source for    getImageTile                  |
+| removeImage(imageId)                    | remove image source                     |
+| imageHasInjected(imageId)               | Has the image data been injected                         |
+| getImageTile(options)                   | get tile data from    injectImage                |
 
 all methods return Promise with `cancel()` method
 
@@ -302,7 +306,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                     `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                             `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -664,3 +668,104 @@ tileActor.imageSlicing({
     //do some things
 
 })
+```
+
+* `injectImage(options)` inject Image for getImageTile . return `Promise`
+
+  + `options.url`:image url
+  + `options.imageBBOX`:image BBOX  `[minx,miny,maxx,maxy]`. Note that the coordinates of the bounding box should be consistent with the projected image
+  + `options.imageId`:image url
+  + `options?.headers`:fetch headers params. if need
+  + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
+
+```js
+const maskId = 'china';
+
+tileActor.injectImage({
+    imageId,
+    url: './test.jpg',
+    imageBBOX: [120, 31, 121, 32]
+}).then(data => {
+    // baseLayer.addTo(map);
+}).catch(error => {
+    console.error(error);
+})
+```
+
+* `removeImage(imageId)` remove image from cache . return `Promise`
+
+  + `imageId`: image id
+
+```js
+const imageId = 'china';
+
+tileActor.removeImage(maskId).then(data => {
+
+}).catch(error => {
+    console.error(error);
+})
+```
+
+* `imageHasInjected(imageId)` Has the image been injected . return `Boolean`
+
+  + `imageId`: image id
+
+```js
+const imageId = 'china';
+const result = tileActor.imageHasInjected(maskId);
+```
+
+* `getImageTile(options)` get tile data from image . return `Promise`
+  + `options.tileBBOX`:tile BBOX `[minx,miny,maxx,maxy]`
+  + `options.projection`: Projection code, such as : EPSG:3857
+  + `options.imageId`:mask key
+  + `options?.tileSize`:tile size 
+
+  
+
+```js
+import * as maptalks from 'maptalks-gl';
+import {
+    getTileActor
+} from 'maptalks.tileclip';
+
+const tileActor = getTileActor();
+const maskId = 'china';
+
+const baseLayer = new maptalks.TileLayer('base', {
+    debug: true,
+    urlTemplate: '/arcgisonline/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x}',
+    subdomains: ["a", "b", "c", "d"],
+    // bufferPixel: 1
+})
+baseLayer.on('renderercreate', function(e) {
+    //load tile image
+    //   img(Image): an Image object
+    //   url(String): the url of the tile
+    e.renderer.loadTileBitmap = function(url, tile, callback) {
+
+        tileActor.getImageTile({
+            imageId,
+            projection: baseLayer.getProjection().code,
+            tileSize: baseLayer.getTileSize().width,
+            tileBBOX: baseLayer._getTileBBox(tile),
+        }).then(imagebitmap => {
+            // console.log(imagebitmap);
+            callback(imagebitmap);
+        }).catch(error => {
+            //do some things
+            console.error(error);
+        })
+    };
+});
+
+tileActor.injectImage({
+    imageId,
+    url: './unnamed.jpg',
+    imageBBOX: [...m1, ...m2]
+}).then(data => {
+    baseLayer.addTo(groupLayer);
+}).catch(error => {
+    console.error(error);
+})
+```
