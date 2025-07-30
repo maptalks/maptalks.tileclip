@@ -44,6 +44,12 @@ export function imageTile(imageInfo, options: getImageTileOptions) {
     if (right < 0 || left > width || top > height || bottom < 0) {
         return getBlankTile();
     }
+    if (left === right) {
+        right++;
+    }
+    if (bottom === top) {
+        bottom--;
+    }
     tileSize = tileSize || 256;
     const canvas = getCanvas(tileSize);
     const ctx = getCanvasContext(canvas);
