@@ -310,7 +310,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                             `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                               `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -481,7 +481,7 @@ tileActor.injectMask(maskId, polygon).then(data => {
 })
 ```
 
-* `tileIntersectMask(options)` clip tile by mask . return `Promise`
+* `tileIntersectMask(options)` Does tile intersect with mask  . return `Promise`
 
   + `options.tileBBOX`:tile BBOX `[minx,miny,maxx,maxy]`
   + `options.maskId`:mask key
@@ -683,7 +683,7 @@ tileActor.imageSlicing({
   + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
 
 ```js
-const maskId = 'china';
+const imageId = 'china';
 
 tileActor.injectImage({
     imageId,
@@ -734,7 +734,7 @@ import {
 } from 'maptalks.tileclip';
 
 const tileActor = getTileActor();
-const maskId = 'china';
+const imageId = 'china';
 
 const baseLayer = new maptalks.TileLayer('base', {
     debug: true,
