@@ -24,7 +24,17 @@ const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
 const TerrainTypes = ['mapzen', 'tianditu', 'cesium', 'arcgis', 'qgis-gray'];
 
 function checkOptions(options, type) {
-    return Object.assign({ referrer: document.location.href, tileSize: 256 }, options, { _type: type, __taskId: uuid(), __workerId: getWorkerId() });
+    return Object.assign(
+        {
+            referrer: document.location.href,
+            tileSize: 256
+        },
+        options,
+        {
+            _type: type,
+            __taskId: uuid(),
+            __workerId: getWorkerId()
+        });
 }
 
 function getTaskId(options: Record<string, any>) {
@@ -485,18 +495,22 @@ class TileActor extends worker.Actor {
     }
 
     injectImage(options: injectImageOptions) {
-        options = checkOptions(options, 'injectImage');
+        options = checkOptions(options, 'fetchImage');
         const promise = new Promise((resolve, reject) => {
             if (!getCanvas()) {
                 reject(CANVAS_ERROR_MESSAGE);
                 return;
             }
-            const { imageId, url, imageBBOX, headers, fetchOptions, referrer } = options;
+            const { imageId, url, imageBBOX } = options;
             if (!imageId) {
                 reject(createParamsValidateError('injectImage error:imageId is null'));
                 return;
             }
-            if (imageMap[imageId]) {
+            if (!url) {
+                reject(createParamsValidateError('injectImage error:url is null'));
+                return;
+            }
+            if (this.imageHasInjected(imageId)) {
                 reject(createParamsValidateError(`injectImage error:${imageId} has injected`));
                 return;
             }
@@ -504,29 +518,21 @@ class TileActor extends worker.Actor {
                 reject(createParamsValidateError('injectImage error:imageBBOX is null'));
                 return;
             }
-            const imageInfo = imageMap[imageId] = {
-                imageBBOX,
-                url,
-                image: null
-            };
-            const url1 = Util.getAbsoluteURL(url);
-            const fetchParams = fetchOptions || {
-                headers,
-                referrer: referrer
-            };
-            fetch(url1, fetchParams).then(res => {
-                if (!res.ok) {
-                    reject(createNetWorkError(url));
-                    return;
-                }
-                return res.blob();
-            }).then(blob => createImageBitmap(blob)).then(image => {
-                imageInfo.image = image;
-                resolve(imageInfo);
-            }).catch(error => {
-                reject(error);
-            });
 
+            options.url = Util.getAbsoluteURL(url);
+
+            this.send(Object.assign({}, options), [], (error, image) => {
+                if (error || (promise as any).canceled) {
+                    reject(error || FetchCancelError);
+                } else {
+                    imageMap[imageId] = {
+                        imageBBOX,
+                        url,
+                        image
+                    };
+                    resolve(null);
+                }
+            });
         });
         wrapPromise(promise, {});
         return promise;
@@ -557,7 +563,7 @@ class TileActor extends worker.Actor {
     }
 
     getImageTile(options: getImageTileOptions) {
-        options = checkOptions(options, 'clipTile');
+        options = checkOptions(options, 'getImageTile');
         const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
             if (!getCanvas()) {
                 reject(CANVAS_ERROR_MESSAGE);
@@ -583,7 +589,6 @@ class TileActor extends worker.Actor {
             const imageInfo = imageMap[imageId];
             const image = imageTile(imageInfo, options);
             resolve(image);
-
         });
         wrapPromise(promise, options);
         return promise;

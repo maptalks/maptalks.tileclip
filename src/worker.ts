@@ -1,5 +1,6 @@
 import { createImageBlobURL, postProcessingImage, toBlobURL } from './canvas';
 import { imageSlicing, imageToBlobURL } from './imageslice';
+import { fetchImage } from './imagetile';
 import { clip, injectMask, removeMask, tileBBOXIntersectMask } from './tileclip';
 import { cancelFetch, colorsTerrainTile, encodeTerrainTile, getTile, getTileWithMaxZoom, layout_Tiles } from './tileget';
 import { tileTransform } from './tiletranasform';
@@ -128,7 +129,14 @@ export const onmessage = function (message, postResponse) {
             postResponse(error);
         })
         return;
-        // console.log(image);
+    }
+    if (type === 'fetchImage') {
+        fetchImage(data).then(image => {
+            postResponse(null, image, checkBuffers(image));
+        }).catch(error => {
+            postResponse(error);
+        })
+        return;
     }
     const errorMessage = 'not support message type:' + type;
     console.error(errorMessage);

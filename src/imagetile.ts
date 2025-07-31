@@ -1,7 +1,7 @@
 import { bboxIntersect, bboxToPoints } from "./bbox";
 import { getBlankTile, getCanvas, getCanvasContext } from "./canvas";
-import { getImageTileOptions } from "./types";
-import { isEPSG3857, lnglat2Mercator } from "./util";
+import { getImageTileOptions, injectImageOptions } from "./types";
+import { createNetWorkError, isEPSG3857, lnglat2Mercator } from "./util";
 
 export function imageTile(imageInfo, options: getImageTileOptions) {
     const imageBBOX = imageInfo.imageBBOX;
@@ -56,4 +56,25 @@ export function imageTile(imageInfo, options: getImageTileOptions) {
     ctx.drawImage(image, left, top, right - left, bottom - top, 0, 0, tileSize, tileSize);
     return canvas.transferToImageBitmap();
 
+}
+
+export function fetchImage(options: injectImageOptions) {
+    return new Promise((resolve: (image: ImageBitmap) => void, reject) => {
+        const { url, headers } = options;
+        const fetchOptions = options.fetchOptions || {
+            headers,
+            referrer: options.referrer
+        };
+
+        fetch(url, fetchOptions).then(res => {
+            if (!res.ok) {
+                reject(createNetWorkError(url))
+            }
+            return res.blob();
+        }).then(blob => createImageBitmap(blob)).then(image => {
+            resolve(image);
+        }).catch(error => {
+            reject(error);
+        });
+    })
 }
