@@ -1,5 +1,5 @@
 import { bboxIntersect, bboxToPoints } from "./bbox";
-import { getBlankTile, getCanvas, getCanvasContext } from "./canvas";
+import { createImageBlobURL, getBlankTile, getCanvas, getCanvasContext, postProcessingImage } from "./canvas";
 import { getImageTileOptions, injectImageOptions } from "./types";
 import { createNetWorkError, isEPSG3857, lnglat2Mercator } from "./util";
 
@@ -58,7 +58,7 @@ export function imageTile(imageInfo, options: getImageTileOptions) {
 
 }
 
-export function fetchImage(options: injectImageOptions) {
+export function imagetTileFetch(options: injectImageOptions) {
     return new Promise((resolve: (image: ImageBitmap) => void, reject) => {
         const { url, headers } = options;
         const fetchOptions = options.fetchOptions || {
@@ -77,4 +77,19 @@ export function fetchImage(options: injectImageOptions) {
             reject(error);
         });
     })
+}
+
+export function tileImageToBlobURL(options) {
+    return new Promise((resolve, reject) => {
+        const image = options.image;
+        const postImage = postProcessingImage(image, options);
+
+        createImageBlobURL(postImage, options.returnBlobURL).then(url => {
+            resolve(url);
+        }).catch(error => {
+            reject(error);
+        })
+    });
+
+
 }

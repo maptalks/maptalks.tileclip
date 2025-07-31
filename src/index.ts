@@ -495,7 +495,7 @@ class TileActor extends worker.Actor {
     }
 
     injectImage(options: injectImageOptions) {
-        options = checkOptions(options, 'fetchImage');
+        options = checkOptions(options, 'injectImage');
         const promise = new Promise((resolve, reject) => {
             if (!getCanvas()) {
                 reject(CANVAS_ERROR_MESSAGE);
@@ -521,7 +521,7 @@ class TileActor extends worker.Actor {
 
             options.url = Util.getAbsoluteURL(url);
 
-            this.send(Object.assign({}, options), [], (error, image) => {
+            this.send(Object.assign({}, options, { _type: 'imagetTileFetch' }), [], (error, image) => {
                 if (error || (promise as any).canceled) {
                     reject(error || FetchCancelError);
                 } else {
@@ -569,7 +569,7 @@ class TileActor extends worker.Actor {
                 reject(CANVAS_ERROR_MESSAGE);
                 return;
             }
-            const { tileBBOX, projection, imageId } = options;
+            const { tileBBOX, projection, imageId, filter, opacity, gaussianBlurRadius, returnBlobURL } = options;
             if (!tileBBOX) {
                 reject(createParamsValidateError('getImageTile error:tileBBOX is null'));
                 return;
@@ -588,7 +588,19 @@ class TileActor extends worker.Actor {
             }
             const imageInfo = imageMap[imageId];
             const image = imageTile(imageInfo, options);
-            resolve(image);
+            if (filter || opacity || gaussianBlurRadius || returnBlobURL) {
+                (options as any).image = image;
+                const buffers = checkBuffers(image);
+                this.send(Object.assign({}, options, { _type: 'tileImageToBlobURL' }), buffers, (error, image) => {
+                    if (error || (promise as any).canceled) {
+                        reject(error || FetchCancelError);
+                    } else {
+                        resolve(image);
+                    }
+                });
+            } else {
+                resolve(image);
+            }
         });
         wrapPromise(promise, options);
         return promise;

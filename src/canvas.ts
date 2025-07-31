@@ -121,7 +121,7 @@ export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap,
     return bitImage;
 }
 
-export function toBlobURL(imagebitmap: ImageBitmap) {
+function toBlobURL(imagebitmap: ImageBitmap) {
     const canvas = getCanvas();
     resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
     const ctx = getCanvasContext(canvas);

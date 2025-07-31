@@ -112,5 +112,4 @@ export type getImageTileOptions = {
     imageId: string;
     projection: string;
     tileSize?: number;
-
-}
+} & postProcessingOptions & returnResultType;

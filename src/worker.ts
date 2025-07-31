@@ -1,6 +1,6 @@
-import { createImageBlobURL, postProcessingImage, toBlobURL } from './canvas';
+import { createImageBlobURL, postProcessingImage } from './canvas';
 import { imageSlicing, imageToBlobURL } from './imageslice';
-import { fetchImage } from './imagetile';
+import { imagetTileFetch, tileImageToBlobURL } from './imagetile';
 import { clip, injectMask, removeMask, tileBBOXIntersectMask } from './tileclip';
 import { cancelFetch, colorsTerrainTile, encodeTerrainTile, getTile, getTileWithMaxZoom, layout_Tiles } from './tileget';
 import { tileTransform } from './tiletranasform';
@@ -130,15 +130,23 @@ export const onmessage = function (message, postResponse) {
         })
         return;
     }
-    if (type === 'fetchImage') {
-        fetchImage(data).then(image => {
+    if (type === 'imagetTileFetch') {
+        imagetTileFetch(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
             postResponse(error);
         })
         return;
     }
-    const errorMessage = 'not support message type:' + type;
+    if (type === 'tileImageToBlobURL') {
+        tileImageToBlobURL(data).then(image => {
+            postResponse(null, image, checkBuffers(image));
+        }).catch(error => {
+            postResponse(error);
+        })
+        return;
+    }
+    const errorMessage = 'worker message:not support message type:' + type;
     console.error(errorMessage);
     postResponse(createInnerError(errorMessage));
 };
