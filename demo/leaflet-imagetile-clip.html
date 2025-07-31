@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Interactions - Draw tool to draw geometries</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+</style>
+<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.css' />
+<script type='text/javascript' src='https://cdn.jsdelivr.net/npm/maptalks-gl/dist/maptalks-gl.js'></script>
+<script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
+<link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
+
+<body>
+    <div id="map" class="container"></div>
+    <script>
+
+        const tileActor = maptalks.getTileActor();
+        const imageId = '青浦区';
+
+        var map = L.map('map').setView([120.66017675, 31.21768636].reverse(), 11);
+
+        const baseLayer = L.tileLayer('https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        });
+
+        // https://github.com/Leaflet/Leaflet/blob/142f94a9ba5757f7e7180ffa6cbed2b3a9bc73c9/src/layer/tile/TileLayer.js#L257
+        baseLayer._removeTile = function (key) {
+            const tile = this._tiles[key];
+            if (!tile) { return; }
+
+            // Cancels any pending http requests associated with the tile
+            const Util = L.Util;
+            const GridLayer = L.GridLayer;
+            const url = tile.el.getAttribute('src');
+            tile.el.setAttribute('src', Util.emptyImageUrl);
+            if (url && url.indexOf('blob:') > -1) {
+                URL.revokeObjectURL(url);
+                // console.log('remove blob url:', url);
+            }
+
+            return GridLayer.prototype._removeTile.call(this, key);
+        }
+
+        // https://github.com/Leaflet/Leaflet/blob/142f94a9ba5757f7e7180ffa6cbed2b3a9bc73c9/src/layer/tile/TileLayer.js#L145
+        baseLayer.createTile = function (coords, done) {
+            const tile = document.createElement('img');
+            const DomEvent = L.DomEvent;
+
+            DomEvent.on(tile, 'load', this._tileOnLoad.bind(this, done, tile));
+            DomEvent.on(tile, 'error', this._tileOnError.bind(this, done, tile));
+
+            if (this.options.crossOrigin || this.options.crossOrigin === '') {
+                tile.crossOrigin = this.options.crossOrigin === true ? '' : this.options.crossOrigin;
+            }
+
+            // for this new option we follow the documented behavior
+            // more closely by only setting the property when string
+            if (typeof this.options.referrerPolicy === 'string') {
+                tile.referrerPolicy = this.options.referrerPolicy;
+            }
+
+            // The alt attribute is set to the empty string,
+            // allowing screen readers to ignore the decorative image tiles.
+            // https://www.w3.org/WAI/tutorials/images/decorative/
+            // https://www.w3.org/TR/html-aria/#el-img-empty-alt
+            tile.alt = '';
+            // tile.src = this.getTileUrl(coords);
+            const url = this.getTileUrl(coords);
+
+            const bounds = this._tileCoordsToBounds(coords);
+            const tileBBOX = bounds.toBBoxString().split(',').map(v => {
+                return parseFloat(v);
+            })
+
+            tileActor.getImageTile({
+                returnBlobURL: false,
+                tileBBOX,
+                imageId,
+                projection: map.options.crs.code,
+                // filter: 'sepia(100%) invert(90%)',
+                // gaussianBlurRadius: 4,
+            }).then(imagebitmap => {
+                tileActor.clipTile({
+                    tile: imagebitmap,
+                    tileBBOX,
+                    projection: map.options.crs.code,
+                    tileSize: baseLayer.getTileSize().x,
+                    maskId:imageId,
+                    returnBlobURL: true,
+                }).then(image => {
+                    tile.src = image;
+
+                }).catch(error => {
+                    console.error(error);
+                })
+
+            }).catch(error => {
+                //do some things
+                console.error(error);
+            })
+
+            return tile;
+        }
+
+        const bbox = [119.91090091793043, 30.703884814134464, 121.39236135292139, 32.154240573785215];
+        fetch('./suzhou.geojson').then(res => res.json()).then(geojson => {
+
+            const c1 = new L.LatLng(bbox[1], bbox[0]);
+            const c2 = new L.LatLng(bbox[3], bbox[2]);
+            const m1 = map.options.crs.projection.project(c1)
+            const m2 = map.options.crs.projection.project(c2)
+
+            const imageBBOX = [m1.x, m1.y, m2.x, m2.y];
+
+
+            tileActor.injectImage({
+                imageId,
+                url: './unnamed.jpg',
+                imageBBOX
+            }).then(data => {
+                tileActor.injectMask(imageId, geojson.features[0]).then(data => {
+                    baseLayer.addTo(map);
+                }).catch(error => {
+                    console.error(error);
+                })
+            }).catch(error => {
+                console.error(error);
+            })
+        })
+
+
+    </script>
+</body>
+
+</html>

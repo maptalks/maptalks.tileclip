@@ -67,7 +67,8 @@
 * [terrain-tiles-blendmode shadow](https://maptalks.github.io/maptalks.tileclip/demo/terrain-tiles-blendmode-shadow.html)
 * [leaflet clip demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet.html)
 * [leaflet gettile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-simple.html)
-* [leaflet transform tile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-transform.html)
+* [leaflet transform tile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-transform.html)  
+* [leaflet-imagetile-clip demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-imagetile-clip.html)  
 
 ## Install
 
