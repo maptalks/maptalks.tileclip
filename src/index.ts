@@ -1,7 +1,8 @@
 import { registerWorkerAdapter, worker, Util } from 'maptalks';
 //@ts-ignore
 import WORKERCODE from './worker/worker.bundle.js';
-import { createParamsValidateError, FetchCancelError, isNumber, uuid, CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon, checkBuffers, createNetWorkError, disposeImage } from './util.js';
+import { createParamsValidateError, FetchCancelError, isNumber, uuid, CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon, 
+    checkBuffers, TaskCancelError, disposeImage } from './util.js';
 import { getCanvas } from './canvas';
 import {
     privateOptions, getTileOptions, layoutTilesOptions, getTileWithMaxZoomOptions,
@@ -241,7 +242,7 @@ class TileActor extends worker.Actor {
             }
             this.send(options, buffers, (error, image) => {
                 if (isErrorOrCancel(error, promise)) {
-                    reject(error || FetchCancelError);
+                    reject(error || TaskCancelError);
                 } else {
                     resolve(image);
                 }
@@ -272,7 +273,7 @@ class TileActor extends worker.Actor {
             const buffers: ArrayBuffer[] = [];
             this.send(options, buffers, (error, result) => {
                 if (isErrorOrCancel(error, promise)) {
-                    reject(error || FetchCancelError);
+                    reject(error || TaskCancelError);
                 } else {
                     resolve(result);
                 }
@@ -302,7 +303,7 @@ class TileActor extends worker.Actor {
                 _type: 'injectMask'
             }, [], (error, data) => {
                 if (isErrorOrCancel(error, promise)) {
-                    reject(error || FetchCancelError);
+                    reject(error || TaskCancelError);
                     return;
                 }
                 resolve(null);
@@ -324,7 +325,7 @@ class TileActor extends worker.Actor {
                 _type: 'removeMask'
             }, [], (error, data) => {
                 if (isErrorOrCancel(error, promise)) {
-                    reject(error || FetchCancelError);
+                    reject(error || TaskCancelError);
                     return;
                 }
                 resolve(null);
@@ -488,7 +489,7 @@ class TileActor extends worker.Actor {
             const buffers = checkBuffers(tile);
             this.send(Object.assign({}, options), buffers, (error, image) => {
                 if (isErrorOrCancel(error, promise)) {
-                    reject(error || FetchCancelError);
+                    reject(error || TaskCancelError);
                 } else {
                     resolve(image);
                 }
@@ -549,7 +550,7 @@ class TileActor extends worker.Actor {
                 return;
             }
             if (isErrorOrCancel(null, promise)) {
-                reject(FetchCancelError);
+                reject(TaskCancelError);
                 return;
             }
             const imageInfo = imageMap[imageId] || {};
@@ -601,14 +602,14 @@ class TileActor extends worker.Actor {
                 const buffers = checkBuffers(image);
                 this.send(Object.assign({}, options, { _type: 'tileImageToBlobURL' }), buffers, (error, image) => {
                     if (isErrorOrCancel(error, promise)) {
-                        reject(error || FetchCancelError);
+                        reject(error || TaskCancelError);
                     } else {
                         resolve(image);
                     }
                 });
             } else {
                 if (isErrorOrCancel(null, promise)) {
-                    reject(FetchCancelError);
+                    reject(TaskCancelError);
                     return;
                 }
                 resolve(image);

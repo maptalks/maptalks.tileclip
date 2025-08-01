@@ -25,6 +25,7 @@ function createError(message: string, code: number): Error {
 export const CANVAS_ERROR_MESSAGE = createError('not find canvas.The current environment does not support OffscreenCanvas', -4);
 export const FetchCancelError = createError('fetch tile data cancel', 499);
 export const FetchTimeoutError = createError('fetch tile data timeout', 408);
+export const TaskCancelError = createError('the task is cancel', -6);
 
 export function createNetWorkError(url: string) {
     return createError(`fetch NetWork error, the url is ${url}`, -5);
