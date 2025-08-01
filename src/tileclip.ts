@@ -13,9 +13,9 @@ export function injectMask(maskId: string, geojson: GeoJSONPolygon | GeoJSONMult
     if (!isPolygon(geojson)) {
         return createParamsValidateError('geojson.feature is not Polygon');
     }
-    if (GeoJSONCache[maskId]) {
-        return createParamsValidateError('the' + maskId + ' geojson Already exists');
-    }
+    // if (GeoJSONCache[maskId]) {
+    //     return createParamsValidateError('the' + maskId + ' geojson Already exists');
+    // }
     GeoJSONCache[maskId] = geojson;
     checkGeoJSONFeatureBBOX(geojson);
     return geojson;

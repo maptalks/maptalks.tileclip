@@ -23,7 +23,7 @@ const imageMap = {};
 const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
 const TerrainTypes = ['mapzen', 'tianditu', 'cesium', 'arcgis', 'qgis-gray'];
 
-function checkOptions(options, type) {
+function checkOptions(options, type: string) {
     return Object.assign(
         {
             referrer: document.location.href,
@@ -38,12 +38,16 @@ function checkOptions(options, type) {
 }
 
 function getTaskId(options: Record<string, any>) {
-    const workerId = options.__workerId;
-    const taskId = options.__taskId;
+    const workerId = options.__workerId as number;
+    const taskId = options.__taskId as number;
     return {
         workerId,
         taskId
     }
+}
+
+function isErrorOrCancel(error: Error, promise) {
+    return (error || (promise && promise.canceled));
 }
 
 
@@ -80,7 +84,7 @@ class TileActor extends worker.Actor {
             }
             const buffers = checkBuffers(url);
             this.send(options, buffers, (error, image) => {
-                if (error || (promise as any).canceled) {
+                if (isErrorOrCancel(error, promise)) {
                     reject(error || FetchCancelError);
                 } else {
                     resolve(image);
@@ -110,7 +114,7 @@ class TileActor extends worker.Actor {
             }
             const buffers = [];
             this.send(options, buffers, (error, image) => {
-                if (error || (promise as any).canceled) {
+                if (isErrorOrCancel(error, promise)) {
                     reject(error || FetchCancelError);
                 } else {
                     resolve(image);
@@ -144,7 +148,7 @@ class TileActor extends worker.Actor {
                 return;
             }
             this.send(options, [], (error, image) => {
-                if (error || (promise as any).canceled) {
+                if (isErrorOrCancel(error, promise)) {
                     reject(error || FetchCancelError);
                 } else {
                     resolve(image);
@@ -186,7 +190,7 @@ class TileActor extends worker.Actor {
                 return;
             }
             this.send(options, [], (error, image) => {
-                if (error || (promise as any).canceled) {
+                if (isErrorOrCancel(error, promise)) {
                     reject(error || FetchCancelError);
                 } else {
                     resolve(image);
@@ -236,7 +240,7 @@ class TileActor extends worker.Actor {
                 buffers.push(options.tile as unknown as ArrayBuffer);
             }
             this.send(options, buffers, (error, image) => {
-                if (error || (promise as any).canceled) {
+                if (isErrorOrCancel(error, promise)) {
                     reject(error || FetchCancelError);
                 } else {
                     resolve(image);
@@ -267,7 +271,7 @@ class TileActor extends worker.Actor {
             }
             const buffers: ArrayBuffer[] = [];
             this.send(options, buffers, (error, result) => {
-                if (error || (promise as any).canceled) {
+                if (isErrorOrCancel(error, promise)) {
                     reject(error || FetchCancelError);
                 } else {
                     resolve(result);
@@ -297,8 +301,8 @@ class TileActor extends worker.Actor {
                 geojsonFeature,
                 _type: 'injectMask'
             }, [], (error, data) => {
-                if (error) {
-                    reject(error);
+                if (isErrorOrCancel(error, promise)) {
+                    reject(error || FetchCancelError);
                     return;
                 }
                 resolve(null);
@@ -319,8 +323,8 @@ class TileActor extends worker.Actor {
                 maskId,
                 _type: 'removeMask'
             }, [], (error, data) => {
-                if (error) {
-                    reject(error);
+                if (isErrorOrCancel(error, promise)) {
+                    reject(error || FetchCancelError);
                     return;
                 }
                 resolve(null);
@@ -354,7 +358,7 @@ class TileActor extends worker.Actor {
             }
             const buffers = checkBuffers(url);
             this.send(options, buffers, (error, result) => {
-                if (error || (promise as any).canceled) {
+                if (isErrorOrCancel(error, promise)) {
                     reject(error || FetchCancelError);
                 } else {
                     const returnBlobURL = options.returnBlobURL;
@@ -405,8 +409,8 @@ class TileActor extends worker.Actor {
                             (opts as any)._workerId = workerId;
                             const buffers = subItems.map(item => item.image as ArrayBuffer);
                             this.send(opts, buffers, (error, resultItems) => {
-                                if (error) {
-                                    reject(error);
+                                if (isErrorOrCancel(error, promise)) {
+                                    reject(error || FetchCancelError);
                                     return;
                                 } else {
                                     temp = temp.concat(resultItems);
@@ -453,7 +457,7 @@ class TileActor extends worker.Actor {
                 }
             }
             this.send(Object.assign({ terrainWidth: 65, tileSize: 256 }, options), [], (error, image) => {
-                if (error || (promise as any).canceled) {
+                if (isErrorOrCancel(error, promise)) {
                     reject(error || FetchCancelError);
                 } else {
                     resolve(image);
@@ -483,7 +487,7 @@ class TileActor extends worker.Actor {
             }
             const buffers = checkBuffers(tile);
             this.send(Object.assign({}, options), buffers, (error, image) => {
-                if (error || (promise as any).canceled) {
+                if (isErrorOrCancel(error, promise)) {
                     reject(error || FetchCancelError);
                 } else {
                     resolve(image);
@@ -522,7 +526,7 @@ class TileActor extends worker.Actor {
             options.url = Util.getAbsoluteURL(url);
 
             this.send(Object.assign({}, options, { _type: 'imagetTileFetch' }), [], (error, image) => {
-                if (error || (promise as any).canceled) {
+                if (isErrorOrCancel(error, promise)) {
                     reject(error || FetchCancelError);
                 } else {
                     imageMap[imageId] = {
@@ -542,6 +546,10 @@ class TileActor extends worker.Actor {
         const promise = new Promise((resolve, reject) => {
             if (!imageId) {
                 reject(createParamsValidateError('removeImage error:imageId is null'));
+                return;
+            }
+            if (isErrorOrCancel(null, promise)) {
+                reject(FetchCancelError);
                 return;
             }
             const imageInfo = imageMap[imageId] || {};
@@ -592,13 +600,17 @@ class TileActor extends worker.Actor {
                 (options as any).image = image;
                 const buffers = checkBuffers(image);
                 this.send(Object.assign({}, options, { _type: 'tileImageToBlobURL' }), buffers, (error, image) => {
-                    if (error || (promise as any).canceled) {
+                    if (isErrorOrCancel(error, promise)) {
                         reject(error || FetchCancelError);
                     } else {
                         resolve(image);
                     }
                 });
             } else {
+                if (isErrorOrCancel(null, promise)) {
+                    reject(FetchCancelError);
+                    return;
+                }
                 resolve(image);
             }
         });
