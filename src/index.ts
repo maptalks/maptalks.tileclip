@@ -1,8 +1,10 @@
 import { registerWorkerAdapter, worker, Util } from 'maptalks';
 //@ts-ignore
 import WORKERCODE from './worker/worker.bundle.js';
-import { createParamsValidateError, FetchCancelError, isNumber, uuid, CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon, 
-    checkBuffers, TaskCancelError, disposeImage } from './util.js';
+import {
+    createParamsValidateError, FetchCancelError, isNumber, uuid, CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon,
+    checkBuffers, TaskCancelError, disposeImage
+} from './util.js';
 import { getCanvas } from './canvas';
 import {
     privateOptions, getTileOptions, layoutTilesOptions, getTileWithMaxZoomOptions,
@@ -49,6 +51,10 @@ function getTaskId(options: Record<string, any>) {
 
 function isErrorOrCancel(error: Error, promise) {
     return (error || (promise && promise.canceled));
+}
+
+function removeTimeOut(id: number) {
+    clearTimeout(id);
 }
 
 
@@ -549,15 +555,19 @@ class TileActor extends worker.Actor {
                 reject(createParamsValidateError('removeImage error:imageId is null'));
                 return;
             }
-            if (isErrorOrCancel(null, promise)) {
-                reject(TaskCancelError);
-                return;
-            }
-            const imageInfo = imageMap[imageId] || {};
-            delete imageMap[imageId];
-            const image = imageInfo.image;
-            disposeImage(image);
-            resolve(null);
+            const tid = setTimeout(() => {
+                if (isErrorOrCancel(null, promise)) {
+                    reject(TaskCancelError);
+                    return;
+                }
+                const imageInfo = imageMap[imageId] || {};
+                delete imageMap[imageId];
+                const image = imageInfo.image;
+                disposeImage(image);
+                removeTimeOut(tid);
+                resolve(null);
+            }, 1);
+
         });
         wrapPromise(promise, {});
         return promise;
@@ -608,11 +618,14 @@ class TileActor extends worker.Actor {
                     }
                 });
             } else {
-                if (isErrorOrCancel(null, promise)) {
-                    reject(TaskCancelError);
-                    return;
-                }
-                resolve(image);
+                const tid = setTimeout(() => {
+                    if (isErrorOrCancel(null, promise)) {
+                        reject(TaskCancelError);
+                        return;
+                    }
+                    removeTimeOut(tid);
+                    resolve(image);
+                }, 1);
             }
         });
         wrapPromise(promise, options);
