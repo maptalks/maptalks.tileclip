@@ -11,7 +11,7 @@ export const initialize = function () {
 
 export const onmessage = function (message, postResponse) {
     const data = message.data || {};
-    const type = data._type;
+    const type = data.__type;
     if (type === 'getTile') {
         const { url } = data;
         getTile(url, data).then(image => {

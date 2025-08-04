@@ -1,8 +1,9 @@
-import { registerWorkerAdapter, worker, Util } from 'maptalks';
+import { registerWorkerAdapter, worker, Util, Tile } from 'maptalks';
 //@ts-ignore
 import WORKERCODE from './worker/worker.bundle.js';
 import {
-    createParamsValidateError, FetchCancelError, isNumber, uuid, CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon,
+    createParamsValidateError, FetchCancelError, isNumber, uuid,
+    CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon,
     checkBuffers, TaskCancelError, disposeImage
 } from './util.js';
 import { getCanvas } from './canvas';
@@ -34,7 +35,7 @@ function checkOptions(options, type: string) {
         },
         options,
         {
-            _type: type,
+            __type: type,
             __taskId: uuid(),
             __workerId: getWorkerId()
         });
@@ -49,7 +50,7 @@ function getTaskId(options: Record<string, any>) {
     }
 }
 
-function isErrorOrCancel(error: Error, promise) {
+function isErrorOrCancel(error: Error, promise): boolean {
     return (error || (promise && promise.canceled));
 }
 
@@ -66,7 +67,7 @@ class TileActor extends worker.Actor {
             return;
         }
         if (taskId) {
-            this.send({ _type: 'cancelFetch', __taskId: taskId }, [], (error, image) => {
+            this.send({ __type: 'cancelFetch', __taskId: taskId }, [], (error, image) => {
                 // if (error) {
                 //     reject(error);
                 // } else {
@@ -80,10 +81,6 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'getTile');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
-            if (!getCanvas()) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
             const { url } = options;
             if (!url) {
                 reject(createParamsValidateError('getTile error:url is null'));
@@ -106,10 +103,6 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'layoutTiles');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
-            if (!getCanvas()) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
             const { urlTemplate, tiles } = options;
             if (!urlTemplate) {
                 reject(createParamsValidateError('layoutTiles error:urlTemplate is null'));
@@ -136,10 +129,6 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'getTileWithMaxZoom');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
-            if (!getCanvas()) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
             const { urlTemplate, maxAvailableZoom, x, y, z } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!maxZoomEnable) {
@@ -170,10 +159,6 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'transformTile');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
-            if (!getCanvas()) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
             const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog, debug, returnBlobURL } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!projection) {
@@ -213,10 +198,6 @@ class TileActor extends worker.Actor {
         delete (options as unknown as privateOptions).__taskId;
         delete (options as unknown as privateOptions).__workerId;
         const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
-            if (!getCanvas()) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
             const { tile, tileBBOX, projection, tileSize, maskId } = options;
             if (!tile) {
                 reject(createParamsValidateError('clipTile error:tile is null.It should be a ImageBitmap'));
@@ -306,7 +287,7 @@ class TileActor extends worker.Actor {
             this.broadcast({
                 maskId,
                 geojsonFeature,
-                _type: 'injectMask'
+                __type: 'injectMask'
             }, [], (error, data) => {
                 if (isErrorOrCancel(error, promise)) {
                     reject(error || TaskCancelError);
@@ -328,7 +309,7 @@ class TileActor extends worker.Actor {
             }
             this.broadcast({
                 maskId,
-                _type: 'removeMask'
+                __type: 'removeMask'
             }, [], (error, data) => {
                 if (isErrorOrCancel(error, promise)) {
                     reject(error || TaskCancelError);
@@ -354,10 +335,6 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'imageSlicing');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
-            if (!getCanvas()) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
             const { url } = options;
             if (!url) {
                 reject(createParamsValidateError('url is null'));
@@ -411,7 +388,7 @@ class TileActor extends worker.Actor {
                                 continue;
                             }
                             const opts = Object.assign({}, options);
-                            (opts as any)._type = 'imageToBlobURL';
+                            (opts as any).__type = 'imageToBlobURL';
                             (opts as any).items = subItems;
                             (opts as any)._workerId = workerId;
                             const buffers = subItems.map(item => item.image as ArrayBuffer);
@@ -439,10 +416,6 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'encodeTerrainTile');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
-            if (!getCanvas()) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
             const { url, terrainType, minHeight, maxHeight } = options;
             if (!url) {
                 reject(createParamsValidateError('encodeTerrainTile error:url is null'));
@@ -478,10 +451,6 @@ class TileActor extends worker.Actor {
     colorTerrainTile(options: colorTerrainTileOptions) {
         options = checkOptions(options, 'colorTerrainTile');
         const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
-            if (!getCanvas()) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
             const { tile, colors } = options;
             if (!tile || !isImageBitmap(tile)) {
                 reject(createParamsValidateError('colorTerrainTile error:tile is not ImageBitMap'));
@@ -508,10 +477,6 @@ class TileActor extends worker.Actor {
     injectImage(options: injectImageOptions) {
         options = checkOptions(options, 'injectImage');
         const promise = new Promise((resolve, reject) => {
-            if (!getCanvas()) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
             const { imageId, url, imageBBOX } = options;
             if (!imageId) {
                 reject(createParamsValidateError('injectImage error:imageId is null'));
@@ -532,7 +497,7 @@ class TileActor extends worker.Actor {
 
             options.url = Util.getAbsoluteURL(url);
 
-            this.send(Object.assign({}, options, { _type: 'imagetTileFetch' }), [], (error, image) => {
+            this.send(Object.assign({}, options, { __type: 'imagetTileFetch' }), [], (error, image) => {
                 if (isErrorOrCancel(error, promise)) {
                     reject(error || FetchCancelError);
                 } else {
@@ -584,10 +549,6 @@ class TileActor extends worker.Actor {
     getImageTile(options: getImageTileOptions) {
         options = checkOptions(options, 'getImageTile');
         const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
-            if (!getCanvas()) {
-                reject(CANVAS_ERROR_MESSAGE);
-                return;
-            }
             const { tileBBOX, projection, imageId, filter, opacity, gaussianBlurRadius, returnBlobURL } = options;
             if (!tileBBOX) {
                 reject(createParamsValidateError('getImageTile error:tileBBOX is null'));
@@ -610,7 +571,7 @@ class TileActor extends worker.Actor {
             if (filter || opacity || gaussianBlurRadius || returnBlobURL) {
                 (options as any).image = image;
                 const buffers = checkBuffers(image);
-                this.send(Object.assign({}, options, { _type: 'tileImageToBlobURL' }), buffers, (error, image) => {
+                this.send(Object.assign({}, options, { __type: 'tileImageToBlobURL' }), buffers, (error, image) => {
                     if (isErrorOrCancel(error, promise)) {
                         reject(error || TaskCancelError);
                     } else {
@@ -635,8 +596,16 @@ class TileActor extends worker.Actor {
 }
 
 let actor: TileActor;
+let logger = false;
 
-export function getTileActor() {
+export function getTileActor(): TileActor | null {
+    if (!getCanvas()) {
+        if (!logger) {
+            console.error(CANVAS_ERROR_MESSAGE);
+            logger = true;
+        }
+        return null;
+    }
     if (!actor) {
         actor = new TileActor(WORKERNAME);
     }
