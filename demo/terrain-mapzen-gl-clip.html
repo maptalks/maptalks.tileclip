@@ -25,6 +25,7 @@
     <script>
 
         const tileActor = maptalks.getTileActor();
+        const maskId = 'china';
 
         const map = new maptalks.Map("map", {
             // "center": [119.09557457, 30.14442343, 339.73126220703125], "zoom": 11.856275713521464, "pitch": 61.80000000000011, "bearing": -64.07337236948052,
@@ -36,6 +37,40 @@
             //     urlTemplate: "https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
             //     subdomains: ["a", "b", "c", "d"],
             // })
+        });
+
+        const baseLayer = new maptalks.TileLayer('base', {
+            // debug: true,
+            urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
+            urlTemplate: "https://wtb.maptiles.arcgis.com/arcgis/rest/services/World_Topo_Base/MapServer/tile/{z}/{y}/{x}",
+            urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
+            subdomains: ["a", "b", "c", "d"],
+            // bufferPixel: 1
+        })
+
+        baseLayer.on('renderercreate', function (e) {
+            //load tile image
+            //   img(Image): an Image object
+            //   url(String): the url of the tile
+            e.renderer.loadTileBitmap = function (url, tile, callback) {
+                tileActor.getTile({ url: maptalks.Util.getAbsoluteURL(url) }).then(imagebitmap => {
+                    tileActor.clipTile({
+                        tile: imagebitmap,
+                        tileBBOX: baseLayer._getTileBBox(tile),
+                        projection: baseLayer.getProjection().code,
+                        tileSize: baseLayer.getTileSize().width,
+                        maskId,
+                    }).then(image => {
+                        callback(image);
+                    }).catch(error => {
+                        //do some things
+                        console.error(error);
+                    })
+                }).catch(error => {
+                    //do some things
+                    console.error(error);
+                })
+            };
         });
 
 
@@ -78,14 +113,14 @@
         const group = new maptalks.GroupGLLayer('group', [], {
             terrain
         });
-    
+
 
         // map.setView({
         //     "center": [120.06864866, 30.12911788, 430.3062438964844], "zoom": 12.814714048170666, "pitch": 56.45000000000009, "bearing": 2.7148818684635216
         // })
 
         map.setView({
-            "center": [118.25079334, 30.1210681, 430.3062438964844], "zoom": 11.892086520379873, "pitch": 66.64999999999992, "bearing": 112.90705084326646
+            "center": [118.74768124, 29.59980087, 878.7249755859375], "zoom": 11.134561502830032, "pitch": 61.25000000000021, "bearing": -9.147987838501535
         })
 
         group.on('terrainlayercreated', e => {
@@ -93,13 +128,23 @@
             console.log(terrainLayer);
 
             terrainLayer.getRenderer().loadTileBitmap = function (url, tile, callback, options) {
-                console.log(url);
                 tileActor.encodeTerrainTile({
                     url: maptalks.Util.getAbsoluteURL(url),
                     terrainType: 'mapzen',
                     // timeout: 5000
                 }).then(imagebitmap => {
-                    callback(null, imagebitmap)
+                    tileActor.clipTile({
+                        tile: imagebitmap,
+                        tileBBOX: terrainLayer._getTileBBox(tile),
+                        projection: terrainLayer.getProjection().code,
+                        tileSize: terrainLayer.getTileSize().width,
+                        maskId,
+                    }).then(image => {
+                        callback(null, image);
+                    }).catch(error => {
+                        //do some things
+                        console.error(error);
+                    })
 
 
                 }).catch(error => {
@@ -108,7 +153,19 @@
                 })
             };
         })
-        group.addTo(map);
+
+        fetch('./terrainmask.geojson').then(res => res.json()).then(geojson => {
+            // const polygons = maptalks.GeoJSON.toGeometry(geojson, (geo => {
+            //     geo.setSymbol(symbol);
+            // }));
+            // layer.addGeometry(polygons);
+
+            tileActor.injectMask(maskId, geojson.features[0]).then(data => {
+                group.addTo(map);
+            }).catch(error => {
+                console.error(error);
+            })
+        });
 
 
 
