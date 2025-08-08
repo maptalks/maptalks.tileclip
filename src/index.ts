@@ -549,7 +549,7 @@ class TileActor extends worker.Actor {
     getImageTile(options: getImageTileOptions) {
         options = checkOptions(options, 'getImageTile');
         const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
-            const { tileBBOX, projection, imageId, filter, opacity, gaussianBlurRadius, returnBlobURL } = options;
+            const { tileBBOX, projection, imageId, filter, opacity, gaussianBlurRadius, returnBlobURL, mosaicSize } = options;
             if (!tileBBOX) {
                 reject(createParamsValidateError('getImageTile error:tileBBOX is null'));
                 return;
@@ -568,7 +568,7 @@ class TileActor extends worker.Actor {
             }
             const imageInfo = imageMap[imageId];
             const image = imageTile(imageInfo, options);
-            if (filter || opacity || gaussianBlurRadius || returnBlobURL) {
+            if (filter || opacity || gaussianBlurRadius || returnBlobURL || mosaicSize) {
                 (options as any).image = image;
                 const buffers = checkBuffers(image);
                 this.send(Object.assign({}, options, { __type: 'tileImageToBlobURL' }), buffers, (error, image) => {

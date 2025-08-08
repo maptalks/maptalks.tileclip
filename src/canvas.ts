@@ -232,13 +232,89 @@ export function layoutTiles(tiles, debug: boolean) {
     return canvas.transferToImageBitmap();
 }
 
+function pixelImageData(image: ImageBitmap, mosaicSize?: number) {
+    if (!isNumber(mosaicSize)) {
+        return image;
+    }
+    mosaicSize = Math.ceil(mosaicSize);
+    if (mosaicSize < 2) {
+        return image;
+    }
+    const { width, height } = image;
+    const canvas = getCanvas(width);
+    const ctx = getCanvasContext(canvas);
+    ctx.drawImage(image, 0, 0);
+    const imgData = ctx.getImageData(0, 0, width, height);
+    const data = imgData.data;
+    const blur = Math.min(mosaicSize, width, height);
+    const cols = Math.ceil(width / blur);
+    const rows = Math.ceil(height / blur);
+
+
+    let col = 1;
+    let row = 1;
+    const rects = [];
+    let idx = -1;
+    while (col <= cols) {
+        while (row <= rows) {
+            const x1 = (col - 1) * blur + 1;
+            const y1 = (row - 1) * blur + 1;
+            const x2 = Math.min(x1 + blur - 1, width);
+            const y2 = Math.min(y1 + blur - 1, height);
+            rects[++idx] = [x1, y1, x2, y2];
+            row++;
+        }
+        row = 1;
+        col++;
+    }
+    for (let i = 0, len = rects.length; i < len; i++) {
+        const rect = rects[i];
+        const [x1, y1, x2, y2] = rect;
+        const idxList = [];
+        let index = -1;
+        let r = 0, g = 0, b = 0, a = 0;
+        for (let y = y1; y <= y2; y++) {
+            for (let x = x1; x <= x2; x++) {
+                const idx = (y - 1) * width * 4 + (x - 1) * 4;
+                idxList[++index] = idx;
+                const R = data[idx];
+                const G = data[idx + 1];
+                const B = data[idx + 2];
+                const A = data[idx + 3];
+                r += R;
+                g += G;
+                b += B;
+                a += A;
+            }
+        }
+        const len1 = idxList.length;
+        const ra = Math.round(r / len1);
+        const ga = Math.round(g / len1);
+        const ba = Math.round(b / len1);
+        const aa = Math.round(a / len1);
+        for (let j = 0; j < len1; j++) {
+            const idx = idxList[j];
+            data[idx] = ra;
+            data[idx + 1] = ga;
+            data[idx + 2] = ba;
+            data[idx + 3] = aa;
+
+        }
+    }
+    ctx.putImageData(imgData, 0, 0);
+    disposeImage(image);
+    return canvas.transferToImageBitmap();
+
+}
+
+
 export function postProcessingImage(image: ImageBitmap, options) {
     const canvas = getCanvas();
     const filterImage = imageFilter(canvas, image, options.filter);
     const blurImage = imageGaussianBlur(canvas, filterImage, options.gaussianBlurRadius);
-
     const opImage = imageOpacity(blurImage, options.opacity);
-    return opImage;
+    const pixelImage = pixelImageData(opImage, options.mosaicSize);
+    return pixelImage;
 }
 
 

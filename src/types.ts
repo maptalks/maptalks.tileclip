@@ -4,6 +4,7 @@ export type postProcessingOptions = {
     filter?: string;
     opacity?: number;
     gaussianBlurRadius?: number;
+    mosaicSize?: number;
 }
 
 export type fetchOptionsType = {
