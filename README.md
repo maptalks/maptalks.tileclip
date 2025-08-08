@@ -12,16 +12,14 @@
 
 ### Common
 
-* [simple get tile](https://maptalks.github.io/maptalks.tileclip/demo/tile.html)
+* [fetch tile](https://maptalks.github.io/maptalks.tileclip/demo/tile.html)
 * [merge tiles](https://maptalks.github.io/maptalks.tileclip/demo/tile-array.html)
-* [tiles filter by geojson mask(only load tiles in mask)](https://maptalks.github.io/maptalks.tileclip/demo/tile-mask-filter.html)
-* [css filter](https://maptalks.github.io/maptalks.tileclip/demo/cssfilter.html)
+* [tiles filter by  mask(only load tiles in mask)](https://maptalks.github.io/maptalks.tileclip/demo/tile-mask-filter.html) 
 * [clip by polygon](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip.html)
 * [clip by polygon with holes](https://maptalks.github.io/maptalks.tileclip/demo/polygon-hole-clip.html)
 * [clip by multipolygon](https://maptalks.github.io/maptalks.tileclip/demo/multipolygon-clip.html)
 * [clip by multipolygon with holes](https://maptalks.github.io/maptalks.tileclip/demo/multipolygon-hole-clip.html)
 * [clip reverse](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-reverse.html)
-* [tiles  globalCompositeOperation](https://maptalks.github.io/maptalks.tileclip/demo/tiles-globalCompositeOperation.html)
 
 * [maxAvailableZoom](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom.html)
 * [maxAvailableZoom tiles](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-array.html)
@@ -29,13 +27,11 @@
 * [maxAvailableZoom tiles polygon clip](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-polygon-clip-array.html)
 
 * [update mask](https://maptalks.github.io/maptalks.tileclip/demo/update-mask.html)
-* [mask remove or add](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-remve.html)
-* [gaussian Blur](https://maptalks.github.io/maptalks.tileclip/demo/gaussianBlurRadius.html)
-* [layout tiles](https://maptalks.github.io/maptalks.tileclip/demo/layouttiles.html)
+* [mask remove or add](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-remve.html) 
+* [layout tiles](https://maptalks.github.io/maptalks.tileclip/demo/layouttiles.html)  
 
 * [get tile from image](https://maptalks.github.io/maptalks.tileclip/demo/imagetile.html)  
 * [get tile and clip from image](https://maptalks.github.io/maptalks.tileclip/demo/imagetile-clip.html)  
-* [get tile with mosaic ](https://maptalks.github.io/maptalks.tileclip/demo/imagetile-mosaic.html)  
 
 * [big image slice](https://maptalks.github.io/maptalks.tileclip/demo/imageslicing.html)
 * [custom tile error](https://maptalks.github.io/maptalks.tileclip/demo/tile-custom-error.html)
@@ -59,6 +55,13 @@
 * [qgis gray terrain tile encode](https://maptalks.github.io/maptalks.tileclip/demo/terrain-qgis-gray.html)
 * [terrain encode with colors](https://maptalks.github.io/maptalks.tileclip/demo/terrain-colors.html)
 * [color terrain tile](https://maptalks.github.io/maptalks.tileclip/demo/color-terrain-tile.html)
+
+### postProcessing
+
+* [css filter](https://maptalks.github.io/maptalks.tileclip/demo/cssfilter.html)
+* [tiles  globalCompositeOperation](https://maptalks.github.io/maptalks.tileclip/demo/tiles-globalCompositeOperation.html)
+* [gaussian Blur](https://maptalks.github.io/maptalks.tileclip/demo/gaussianBlurRadius.html) 
+* [get tile with mosaic ](https://maptalks.github.io/maptalks.tileclip/demo/imagetile-mosaic.html)  
 
 ## Others
 
@@ -147,7 +150,7 @@ all methods return Promise with `cancel()` method
   + `options?.opacity`: tile opacity if need
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
   + `options?.globalCompositeOperation`: CanvasRenderingContext2D.globalCompositeOperation
-  + `options?.mosaicSize`:Mosaic pixel size 
+  + `options?.mosaicSize`: Mosaic pixel size 
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -199,7 +202,7 @@ promise.then((imagebitmap) => {
   + `options?.opacity`: tile opacity if need
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
   + `options?.globalCompositeOperation`: CanvasRenderingContext2D.globalCompositeOperation
-  + `options?.mosaicSize`:Mosaic pixel size 
+  + `options?.mosaicSize`: Mosaic pixel size 
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -259,7 +262,7 @@ promise.then((imagebitmap) => {
   + `options?.timeout`: fetch timeout
   + `options?.opacity`: tile opacity if need
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
-  + `options?.mosaicSize`:Mosaic pixel size 
+  + `options?.mosaicSize`: Mosaic pixel size 
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -315,7 +318,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                               `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                                `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -328,7 +331,7 @@ promise.then((imagebitmap) => {
   + `options?.opacity`: tile opacity if need
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
   + `options?.globalCompositeOperation`: CanvasRenderingContext2D.globalCompositeOperation
-  + `options?.mosaicSize`:Mosaic pixel size 
+  + `options?.mosaicSize`: Mosaic pixel size 
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -603,7 +606,7 @@ tileActor.injectMask(maskId, polygon).then(data => {
   + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
   + `options?.opacity`: tile opacity if need
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need 
-  + `options?.mosaicSize`:Mosaic pixel size 
+  + `options?.mosaicSize`: Mosaic pixel size 
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -654,7 +657,7 @@ tileActor.injectMask(maskId, polygon).then(data => {
   + `options?.timeout`: fetch timeout
   + `options?.opacity`: tile opacity if need
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
-  + `options?.mosaicSize`:Mosaic pixel size 
+  + `options?.mosaicSize`: Mosaic pixel size 
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -738,7 +741,7 @@ const result = tileActor.imageHasInjected(maskId);
   + `options?.timeout`: fetch timeout
   + `options?.opacity`: tile opacity if need
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
-  + `options?.mosaicSize`:Mosaic pixel size 
+  + `options?.mosaicSize`: Mosaic pixel size 
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
