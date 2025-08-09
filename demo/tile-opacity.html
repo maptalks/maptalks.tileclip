@@ -38,29 +38,11 @@
             //   img(Image): an Image object
             //   url(String): the url of the tile
             e.renderer.loadTileBitmap = function (url, tile, callback) {
-                const { x, y, z } = tile;
-                const urlTemplate = baseLayer.options.urlTemplate;
-                const maxAvailableZoom = 18;
-                tileActor.getTileWithMaxZoom({
-                    x,
-                    y,
-                    z,
-                    urlTemplate,
-                    maxAvailableZoom,
-                    // filter: 'sepia(100%) invert(90%)'
+                tileActor.getTile({
+                    url: maptalks.Util.getAbsoluteURL(url),
+                    opacity: 0.5
                 }).then(imagebitmap => {
-                    tileActor.clipTile({
-                        tile: imagebitmap,
-                        tileBBOX: baseLayer._getTileBBox(tile),
-                        projection: baseLayer.getProjection().code,
-                        tileSize: baseLayer.getTileSize().width,
-                        maskId,
-                    }).then(image => {
-                        callback(image);
-                    }).catch(error => {
-                        //do some things
-                        console.error(error);
-                    })
+                    callback(imagebitmap);
                 }).catch(error => {
                     //do some things
                     console.error(error);
@@ -69,7 +51,6 @@
         });
 
         var map = new maptalks.Map('map', {
-            zoomControl: true,
             "center": [121.65586045, 31.12453538], "zoom": 9.064897200334302, "pitch": 0, "bearing": 0,
         });
 
@@ -82,30 +63,7 @@
         const groupLayer = new maptalks.GroupGLLayer('group', [], { sceneConfig });
         groupLayer.addTo(map);
 
-        const layer = new maptalks.VectorLayer('layer').addTo(map);
-
-        const symbol = {
-            polygonOpacity: 0,
-            lineColor: 'red'
-        }
-
-
-        // baseLayer.addTo(groupLayer);
-
-        fetch('./青浦区-holes.geojson').then(res => res.json()).then(geojson => {
-            const polygons = maptalks.GeoJSON.toGeometry(geojson, (geo => {
-                geo.setSymbol(symbol);
-            }));
-            layer.addGeometry(polygons);
-            map.setView({
-                "center":[120.9813688,31.06587294],"zoom":19.516412543204773,"pitch":0,"bearing":0
-            })
-            tileActor.injectMask(maskId, geojson.features[0]).then(data => {
-                baseLayer.addTo(groupLayer);
-            }).catch(error => {
-                console.error(error);
-            })
-        })
+        baseLayer.addTo(groupLayer);
 
 
     </script>
