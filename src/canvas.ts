@@ -109,11 +109,12 @@ function drawPolygons(ctx, polygons) {
 
 
 
-export function imageClip(polygons, image: ImageBitmap, reverse: boolean, clipBufferOpts?: clipBufferOptions) {
-    const canvas = getCanvas(image.width);
+export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap, reverse: boolean, clipBufferOpts?: clipBufferOptions) {
     const ctx = getCanvasContext(canvas);
     const bufferPixels = [];
-    const { width, height } = image;
+    const { width, height } = canvas;
+    const imageWidth = image.width;
+    const imageHeight = image.height;
     if (clipBufferOpts) {
         const { polygons, bufferSize } = clipBufferOpts;
         ctx.save();
@@ -166,10 +167,18 @@ export function imageClip(polygons, image: ImageBitmap, reverse: boolean, clipBu
         }
         ctx.putImageData(imageData, 0, 0);
     }
-    const bitImage = canvas.transferToImageBitmap();
+    let bitImage = canvas.transferToImageBitmap();
     ctx.restore();
     disposeImage(image);
-    return bitImage;
+    if (canvas.width === imageWidth && canvas.height === imageHeight) {
+        return bitImage;
+    }
+
+    resizeCanvas(canvas, imageWidth, imageHeight);
+    const ctx1 = getCanvasContext(canvas);
+    ctx1.drawImage(bitImage, 0, 0, imageWidth, imageHeight);
+    disposeImage(bitImage);
+    return canvas.transferToImageBitmap();
 }
 
 function toBlobURL(imagebitmap: ImageBitmap) {
