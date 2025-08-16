@@ -19,15 +19,15 @@
 </style>
 <link rel='stylesheet' href='https://unpkg.com/maptalks/dist/maptalks.css' />
 <script type='text/javascript' src='https://unpkg.com/maptalks-gl/dist/maptalks-gl.js'></script>
-<script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
-<script type='text/javascript' src='./jsts.min.js'></script>
+<script type='text/javascript' src='../dist/maptalks.tileclip.js'></script>
+<!-- <script type='text/javascript' src='./jsts.min.js'></script> -->
 
 <body>
     <div id="map" class="container"></div>
     <script>
 
-        const geoJSONRender = new jsts.io.GeoJSONReader();
-        const geoJSONWriter = new jsts.io.GeoJSONWriter();
+        // const geoJSONRender = new jsts.io.GeoJSONReader();
+        // const geoJSONWriter = new jsts.io.GeoJSONWriter();
 
         const tileActor = maptalks.getTileActor();
         const maskId = 'shanxi';
@@ -71,7 +71,8 @@
                         tile: imagebitmap,
                         tileBBOX: baseLayer._getTileBBox(tile),
                         projection: baseLayer.getProjection().code,
-                        maskId: maskId + tile.z
+                        maskId,
+                        bufferSize: tile.z - 2
                     }).then(image => {
                         callback(image);
                     }).catch(error => {
@@ -127,9 +128,7 @@
         })
 
         group.on('terrainlayercreated', e => {
-
             const terrainLayer = group.getTerrainLayer();
-
             terrainLayer.getRenderer().loadTileBitmap = function (url, tile, callback, options) {
                 tileActor.encodeTerrainTile({
                     url: maptalks.Util.getAbsoluteURL(url),
@@ -141,9 +140,9 @@
                         tileBBOX: terrainLayer._getTileBBox(tile),
                         projection: terrainLayer.getProjection().code,
                         tileSize: terrainLayer.getTileSize().width,
-                        maskId: maskId + '0'
+                        maskId
                     }).then(image => {
-                        callback(null, (image));
+                        callback(null, image);
                     }).catch(error => {
                         //do some things
                         console.error(error);
@@ -158,22 +157,12 @@
 
         fetch('./shanxi.geojson').then(res => res.json()).then(geojson => {
             const mask = geojson.features[0];
-            const polygon = geoJSONRender.read(mask);
-            const masks = [mask];
-            for (let i = 1; i < 30; i++) {
-                const buffer = polygon.geometry.buffer(10000 / i / 111120);
-                const mask1 = {
-                    type: 'Feature',
-                    geometry: geoJSONWriter.write(buffer)
-                }
-                masks.push(mask1);
-            }
 
-            const promiseList = masks.map((mask, index) => {
-                return tileActor.injectMask(maskId + index, mask)
-            });
-            Promise.all(promiseList).then(() => {
+
+            tileActor.injectMask(maskId, mask).then(data => {
                 group.addTo(map);
+            }).catch(error => {
+                console.error(error);
             })
         });
 
