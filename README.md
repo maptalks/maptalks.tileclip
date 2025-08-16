@@ -19,7 +19,8 @@
 * [clip by polygon with holes](https://maptalks.github.io/maptalks.tileclip/demo/polygon-hole-clip.html)
 * [clip by multipolygon](https://maptalks.github.io/maptalks.tileclip/demo/multipolygon-clip.html)
 * [clip by multipolygon with holes](https://maptalks.github.io/maptalks.tileclip/demo/multipolygon-hole-clip.html)
-* [clip reverse](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-reverse.html)
+* [clip reverse](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-reverse.html) 
+* [clip buffer](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-buffer.html) 
 
 * [maxAvailableZoom](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom.html)
 * [maxAvailableZoom tiles](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-array.html)
@@ -425,9 +426,10 @@ const result = tileActor.maskHasInjected(maskId);
   + `options.tile`:tile [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap)  data
   + `options.tileBBOX`:tile BBOX `[minx,miny,maxx,maxy]`
   + `options.projection`: Projection code, such as : EPSG:3857
-  + `options.tileSize`:tile size 
   + `options.maskId`:mask key
-  + `options.reverse`:whether or not clip reverse
+  + `options?.tileSize`:tile size 
+  + `options?.reverse`:whether or not clip reverse 
+  + `options?.bufferSize`:Buffer contour pixel size
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
