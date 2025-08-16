@@ -91,8 +91,8 @@ npm i maptalks.tileclip
 ## CDN
 
 ```html
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/maptalks-gl/dist/maptalks-gl.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/maptalks.tileclip/dist/maptalks.tileclip.js"></script>
+<script type="text/javascript" src="https://unpkg.com/maptalks-gl/dist/maptalks-gl.js"></script>
+<script src="https://unpkg.com/maptalks.tileclip/dist/maptalks.tileclip.js"></script>
 ```
 
 ## API

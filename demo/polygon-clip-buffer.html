@@ -16,8 +16,8 @@
         height: 100%
     }
 </style>
-<link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/maptalks/dist/maptalks.min.css' />
-<script type='text/javascript' src='https://cdn.jsdelivr.net/npm/maptalks-gl/dist/maptalks-gl.js'></script>
+<link rel='stylesheet' href='https://unpkg.com/maptalks/dist/maptalks.css' />
+<script type='text/javascript' src='https://unpkg.com/maptalks-gl/dist/maptalks-gl.js'></script>
 <script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
 
 <body>
@@ -45,7 +45,7 @@
                         projection: baseLayer.getProjection().code,
                         tileSize: baseLayer.getTileSize().width,
                         maskId,
-                        bufferSize: 10
+                        bufferSize: tile.z
                     }).then(image => {
                         callback(image);
                     }).catch(error => {
@@ -79,7 +79,7 @@
             lineColor: 'red'
         }
 
-        fetch('./青浦区.json').then(res => res.json()).then(geojson => {
+         fetch('./青浦区-holes.geojson').then(res => res.json()).then(geojson => {
             const polygons = maptalks.GeoJSON.toGeometry(geojson, (geo => {
                 geo.setSymbol(symbol);
             }));
