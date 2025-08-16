@@ -120,7 +120,6 @@ export function clip(options: clipTileOptions) {
     return new Promise((resolve, reject) => {
         const { tile, tileBBOX, projection, tileSize, maskId, returnBlobURL, reverse, bufferSize } = options;
         const feature = GeoJSONCache[maskId];
-        const canvas = getCanvas(tileSize);
         const returnImage = (image) => {
             createImageBlobURL(image, returnBlobURL).then(url => {
                 resolve(url);
@@ -171,7 +170,7 @@ export function clip(options: clipTileOptions) {
             prjCoordinates = transformCoordinates(projection, polygons);
             const pixels = transformPixels(projection, tileBBOX, tileSize, prjCoordinates);
             transform();
-            const image = imageClip(canvas, pixels, tile, reverse, clipBufferOpts);
+            const image = imageClip(pixels, tile, reverse, clipBufferOpts);
             returnImage(image);
             return;
         }
@@ -187,7 +186,7 @@ export function clip(options: clipTileOptions) {
         prjCoordinates = transformCoordinates(projection, clipRings);
         const pixels = transformPixels(projection, tileBBOX, tileSize, prjCoordinates);
         transform();
-        const image = imageClip(canvas, pixels, tile, reverse, clipBufferOpts);
+        const image = imageClip(pixels, tile, reverse, clipBufferOpts);
         returnImage(image);
     });
 

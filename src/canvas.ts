@@ -109,9 +109,11 @@ function drawPolygons(ctx, polygons) {
 
 
 
-export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap, reverse: boolean, clipBufferOpts?: clipBufferOptions) {
+export function imageClip(polygons, image: ImageBitmap, reverse: boolean, clipBufferOpts?: clipBufferOptions) {
+    const canvas = getCanvas(image.width);
     const ctx = getCanvasContext(canvas);
     const bufferPixels = [];
+    const { width, height } = image;
     if (clipBufferOpts) {
         const { polygons, bufferSize } = clipBufferOpts;
         ctx.save();
@@ -124,7 +126,6 @@ export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap,
         drawPolygons(ctx, polygons);
         ctx.stroke();
         ctx.restore();
-        const { width, height } = image;
 
         const imageData = ctx.getImageData(0, 0, width, height);
         clearCanvas(ctx);
@@ -134,6 +135,7 @@ export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap,
         const imageData1 = ctx.getImageData(0, 0, width, height);
 
         let idx = -1;
+        //record black pixel
         const data = imageData1.data;
         for (let i = 0, len = imageData.data.length; i < len; i++) {
             const a = imageData.data[i + 3];
@@ -147,13 +149,13 @@ export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap,
     ctx.save();
     ctx.beginPath();
     if (reverse) {
-        ctx.rect(0, 0, canvas.width, canvas.height);
+        ctx.rect(0, 0, width, height);
     }
     drawPolygons(ctx, polygons);
     ctx.clip('evenodd');
-    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 0, 0, width, height);
     if (bufferPixels.length) {
-        const imageData = ctx.getImageData(0, 0, image.width, image.height);
+        const imageData = ctx.getImageData(0, 0, width, height);
         const data = imageData.data;
         for (let i = 0, len = bufferPixels.length; i < len; i++) {
             const [idx, R, G, B, A] = bufferPixels[i];
@@ -281,7 +283,7 @@ export function layoutTiles(tiles, debug: boolean) {
     return canvas.transferToImageBitmap();
 }
 
-function pixelImageData(image: ImageBitmap, mosaicSize?: number) {
+function imageMosaic(image: ImageBitmap, mosaicSize?: number) {
     if (!isNumber(mosaicSize)) {
         return image;
     }
@@ -362,8 +364,8 @@ export function postProcessingImage(image: ImageBitmap, options) {
     const filterImage = imageFilter(canvas, image, options.filter);
     const blurImage = imageGaussianBlur(canvas, filterImage, options.gaussianBlurRadius);
     const opImage = imageOpacity(blurImage, options.opacity);
-    const pixelImage = pixelImageData(opImage, options.mosaicSize);
-    return pixelImage;
+    const mosaicImage = imageMosaic(opImage, options.mosaicSize);
+    return mosaicImage;
 }
 
 
