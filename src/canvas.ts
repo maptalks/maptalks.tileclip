@@ -137,7 +137,7 @@ export function imageClip(polygons, image: ImageBitmap, reverse: boolean, clipBu
         let idx = -1;
         //record black pixel
         const data = imageData1.data;
-        for (let i = 0, len = imageData.data.length; i < len; i++) {
+        for (let i = 0, len = imageData.data.length; i < len; i += 4) {
             const a = imageData.data[i + 3];
             if (a > 0) {
                 const R = data[i], G = data[i + 1], B = data[i + 2], A = data[i + 3];
