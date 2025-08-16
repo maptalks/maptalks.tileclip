@@ -1,3 +1,4 @@
+import { clipBufferOptions } from "./types";
 import { createDataError, disposeImage, isImageBitmap, isNumber } from "./util";
 import glur from 'glur';
 
@@ -81,12 +82,7 @@ export function mergeTiles(images: Array<ImageBitmap>, globalCompositeOperation?
     return canvas.transferToImageBitmap();
 }
 
-
-
-export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap, reverse: boolean) {
-    const ctx = getCanvasContext(canvas);
-    ctx.save();
-
+function drawPolygons(ctx, polygons) {
     const drawPolygon = (rings) => {
         for (let i = 0, len = rings.length; i < len; i++) {
             const ring = rings[i];
@@ -106,15 +102,68 @@ export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap,
             }
         }
     };
+    polygons.forEach(polygon => {
+        drawPolygon(polygon);
+    });
+}
+
+
+
+export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap, reverse: boolean, clipBufferOpts?: clipBufferOptions) {
+    const ctx = getCanvasContext(canvas);
+    const bufferPixels = [];
+    if (clipBufferOpts) {
+        const { polygons, bufferSize } = clipBufferOpts;
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineWidth = bufferSize * 2;
+        ctx.lineJoin = "round";
+        ctx.strokeStyle = 'black';
+        //draw black border
+
+        drawPolygons(ctx, polygons);
+        ctx.stroke();
+        ctx.restore();
+        const { width, height } = image;
+
+        const imageData = ctx.getImageData(0, 0, width, height);
+        clearCanvas(ctx);
+
+        ctx.drawImage(image, 0, 0);
+
+        const imageData1 = ctx.getImageData(0, 0, width, height);
+
+        let idx = -1;
+        const data = imageData1.data;
+        for (let i = 0, len = imageData.data.length; i < len; i++) {
+            const a = imageData.data[i + 3];
+            if (a > 0) {
+                const R = data[i], G = data[i + 1], B = data[i + 2], A = data[i + 3];
+                bufferPixels[++idx] = [i, R, G, B, A];
+            }
+        }
+    }
+    clearCanvas(ctx);
+    ctx.save();
     ctx.beginPath();
     if (reverse) {
         ctx.rect(0, 0, canvas.width, canvas.height);
     }
-    polygons.forEach(polygon => {
-        drawPolygon(polygon);
-    });
+    drawPolygons(ctx, polygons);
     ctx.clip('evenodd');
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    if (bufferPixels.length) {
+        const imageData = ctx.getImageData(0, 0, image.width, image.height);
+        const data = imageData.data;
+        for (let i = 0, len = bufferPixels.length; i < len; i++) {
+            const [idx, R, G, B, A] = bufferPixels[i];
+            data[idx] = R;
+            data[idx + 1] = G;
+            data[idx + 2] = B;
+            data[idx + 3] = A;
+        }
+        ctx.putImageData(imageData, 0, 0);
+    }
     const bitImage = canvas.transferToImageBitmap();
     ctx.restore();
     disposeImage(image);

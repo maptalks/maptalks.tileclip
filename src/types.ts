@@ -57,6 +57,7 @@ export type clipTileOptions = {
     maskId: string;
     tileSize?: number;
     reverse?: boolean;
+    bufferSize?: number;
 } & returnResultType;
 
 export type tileIntersectMaskOptions = {
@@ -114,3 +115,8 @@ export type getImageTileOptions = {
     projection: string;
     tileSize?: number;
 } & postProcessingOptions & returnResultType;
+
+export type clipBufferOptions = {
+    bufferSize?: number;
+    polygons: number[][][][]
+}

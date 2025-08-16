@@ -2,8 +2,8 @@ import geojsonbbox from '@maptalks/geojson-bbox';
 import lineclip from 'lineclip';
 import { createImageBlobURL, getBlankTile, getCanvas, imageClip } from './canvas';
 import { bboxInBBOX, bboxIntersect, BBOXtype } from './bbox';
-import { clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon } from './types';
-import { lnglat2Mercator, isPolygon, isEPSG3857, createParamsValidateError } from './util';
+import { clipBufferOptions, clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon } from './types';
+import { lnglat2Mercator, isPolygon, isEPSG3857, createParamsValidateError, isNumber } from './util';
 
 const GeoJSONCache = {};
 
@@ -118,7 +118,7 @@ function clipPolygons(polygons, tileBBOX: BBOXtype) {
 
 export function clip(options: clipTileOptions) {
     return new Promise((resolve, reject) => {
-        const { tile, tileBBOX, projection, tileSize, maskId, returnBlobURL, reverse } = options;
+        const { tile, tileBBOX, projection, tileSize, maskId, returnBlobURL, reverse, bufferSize } = options;
         const feature = GeoJSONCache[maskId];
         const canvas = getCanvas(tileSize);
         const returnImage = (image) => {
@@ -155,11 +155,23 @@ export function clip(options: clipTileOptions) {
             polygons = [polygons];
         }
 
-        let newCoordinates;
+        let prjCoordinates, clipBufferOpts: clipBufferOptions;
+
+        const transform = () => {
+            if (isNumber(bufferSize) && bufferSize > 0) {
+                const prjCoordinates = transformCoordinates(projection, polygons);
+                const bufferPixels = transformPixels(projection, tileBBOX, tileSize, prjCoordinates);
+                clipBufferOpts = {
+                    bufferSize,
+                    polygons: bufferPixels
+                }
+            }
+        }
         if (bboxInBBOX(bbox, tileBBOX)) {
-            newCoordinates = transformCoordinates(projection, polygons);
-            const pixels = transformPixels(projection, tileBBOX, tileSize, newCoordinates);
-            const image = imageClip(canvas, pixels, tile, reverse);
+            prjCoordinates = transformCoordinates(projection, polygons);
+            const pixels = transformPixels(projection, tileBBOX, tileSize, prjCoordinates);
+            transform();
+            const image = imageClip(canvas, pixels, tile, reverse, clipBufferOpts);
             returnImage(image);
             return;
         }
@@ -172,9 +184,10 @@ export function clip(options: clipTileOptions) {
             return;
         }
 
-        newCoordinates = transformCoordinates(projection, clipRings);
-        const pixels = transformPixels(projection, tileBBOX, tileSize, newCoordinates);
-        const image = imageClip(canvas, pixels, tile, reverse);
+        prjCoordinates = transformCoordinates(projection, clipRings);
+        const pixels = transformPixels(projection, tileBBOX, tileSize, prjCoordinates);
+        transform();
+        const image = imageClip(canvas, pixels, tile, reverse, clipBufferOpts);
         returnImage(image);
     });
 
@@ -201,7 +214,7 @@ export function tileBBOXIntersectMask(tileBBOX: BBOXtype, maskId: string) {
             });
             return;
         };
-        
+
         const bbox = feature.bbox;
         if (!bbox) {
             notIntersect();
