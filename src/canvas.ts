@@ -82,10 +82,10 @@ export function mergeTiles(images: Array<ImageBitmap>, globalCompositeOperation?
     return canvas.transferToImageBitmap();
 }
 
-function drawPolygons(ctx, polygons) {
-    const drawPolygon = (rings) => {
-        for (let i = 0, len = rings.length; i < len; i++) {
-            const ring = rings[i];
+function drawPolygons(ctx: OffscreenCanvasRenderingContext2D, polygons: number[][][][]) {
+    const drawPolygon = (polygon: number[][][]) => {
+        for (let i = 0, len = polygon.length; i < len; i++) {
+            const ring = polygon[i];
             const first = ring[0], last = ring[ring.length - 1];
             const [x1, y1] = first;
             const [x2, y2] = last;
@@ -109,7 +109,8 @@ function drawPolygons(ctx, polygons) {
 
 
 
-export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap, reverse: boolean, clipBufferOpts?: clipBufferOptions) {
+export function imageClip(tileSize: number, polygons: number[][][][], image: ImageBitmap, reverse: boolean, clipBufferOpts?: clipBufferOptions) {
+    const canvas = getCanvas(tileSize);
     const ctx = getCanvasContext(canvas);
     const bufferPixels = [];
     const { width, height } = canvas;
@@ -181,60 +182,63 @@ export function imageClip(canvas: OffscreenCanvas, polygons, image: ImageBitmap,
     return canvas.transferToImageBitmap();
 }
 
-function toBlobURL(imagebitmap: ImageBitmap) {
+function toBlobURL(image: ImageBitmap) {
     const canvas = getCanvas();
-    resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
+    resizeCanvas(canvas, image.width, image.height);
     const ctx = getCanvasContext(canvas);
-    ctx.drawImage(imagebitmap, 0, 0);
-    disposeImage(imagebitmap);
+    ctx.drawImage(image, 0, 0);
+    disposeImage(image);
     return canvas.convertToBlob();
 }
 
-export function imageFilter(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, filter: string) {
+function imageFilter(image: ImageBitmap, filter: string) {
     if (!filter) {
-        return imagebitmap;
+        return image;
     }
-    resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
+    const canvas = getCanvas(image.width);
+    resizeCanvas(canvas, image.width, image.height);
     const ctx = getCanvasContext(canvas);
     ctx.save();
     ctx.filter = filter;
-    ctx.drawImage(imagebitmap, 0, 0);
+    ctx.drawImage(image, 0, 0);
     ctx.restore();
     const bitImage = canvas.transferToImageBitmap();
-    disposeImage(imagebitmap);
+    disposeImage(image);
     return bitImage;
 }
 
 
-export function imageGaussianBlur(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, radius: number) {
+function imageGaussianBlur(image: ImageBitmap, radius: number) {
     if (!isNumber(radius) || radius <= 0) {
-        return imagebitmap;
+        return image;
     }
-    resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
+    const canvas = getCanvas(image.width);
+    resizeCanvas(canvas, image.width, image.height);
     const ctx = getCanvasContext(canvas);
-    ctx.drawImage(imagebitmap, 0, 0);
+    ctx.drawImage(image, 0, 0);
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     glur(imageData.data, canvas.width, canvas.height, radius);
     ctx.putImageData(imageData, 0, 0);
     const bitImage = canvas.transferToImageBitmap();
-    disposeImage(imagebitmap);
+    disposeImage(image);
     return bitImage;
 }
 
-export function imageTileScale(canvas: OffscreenCanvas, imagebitmap: ImageBitmap, dx: number, dy: number, w: number, h: number) {
-    resizeCanvas(canvas, imagebitmap.width, imagebitmap.height);
+export function imageTileScale(image: ImageBitmap, dx: number, dy: number, w: number, h: number) {
+    const canvas = getCanvas(image.width);
+    resizeCanvas(canvas, image.width, image.height);
     const ctx = getCanvasContext(canvas);
     ctx.save();
 
     // console.log(dx,dy,w,h);
-    ctx.drawImage(imagebitmap, dx, dy, w, h, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, dx, dy, w, h, 0, 0, canvas.width, canvas.height);
     ctx.restore();
     const bitImage = canvas.transferToImageBitmap();
-    disposeImage(imagebitmap);
+    disposeImage(image);
     return bitImage;
 }
 
-export function imageOpacity(image: ImageBitmap, opacity = 1) {
+function imageOpacity(image: ImageBitmap, opacity = 1) {
     if (!isNumber(opacity) || opacity === 1 || opacity < 0 || opacity > 1) {
         return image;
     }
@@ -369,9 +373,8 @@ function imageMosaic(image: ImageBitmap, mosaicSize?: number) {
 
 
 export function postProcessingImage(image: ImageBitmap, options) {
-    const canvas = getCanvas();
-    const filterImage = imageFilter(canvas, image, options.filter);
-    const blurImage = imageGaussianBlur(canvas, filterImage, options.gaussianBlurRadius);
+    const filterImage = imageFilter(image, options.filter);
+    const blurImage = imageGaussianBlur(filterImage, options.gaussianBlurRadius);
     const opImage = imageOpacity(blurImage, options.opacity);
     const mosaicImage = imageMosaic(opImage, options.mosaicSize);
     return mosaicImage;

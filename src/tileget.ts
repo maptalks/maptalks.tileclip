@@ -248,7 +248,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
         })
 
         Promise.all(fetchTiles).then(imagebits => {
-            const canvas = getCanvas();
+            // const canvas = getCanvas();
             const image = mergeTiles(imagebits, globalCompositeOperation);
             if (image instanceof Error) {
                 reject(image);
@@ -264,7 +264,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
             } else {
                 const { width, height } = postImage;
                 const dx = width * dxScale, dy = height * dyScale, w = width * wScale, h = height * hScale;
-                sliceImage = imageTileScale(canvas, postImage, dx, dy, w, h);
+                sliceImage = imageTileScale(postImage, dx, dy, w, h);
                 // opImage = imageOpacity(imageBitMap, options.opacity);
             }
             createImageBlobURL(sliceImage, returnBlobURL).then(url => {
