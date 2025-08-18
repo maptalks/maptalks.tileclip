@@ -1,6 +1,7 @@
 import { clipBufferOptions } from "./types";
-import { createDataError, disposeImage, isImageBitmap, isNumber } from "./util";
+import { createDataError, disposeImage, isImageBitmap, isNumber, rgb2Height } from "./util";
 import glur from 'glur';
+import { ColorIn } from 'colorin';
 
 let globalCanvas: OffscreenCanvas;
 
@@ -394,4 +395,47 @@ export function createImageBlobURL(image: ImageBitmap, returnBlobURL: boolean) {
             });
         }
     })
+}
+
+const colorInCache = new Map();
+
+export function colorsTerrainTile(colors, image: ImageBitmap) {
+    if (!colors || !Array.isArray(colors) || colors.length < 2) {
+        return image;
+    }
+    const key = JSON.stringify(colors);
+    let ci = colorInCache.get(key);
+    if (!ci) {
+        ci = new ColorIn(colors);
+        colorInCache.set(key, ci);
+    }
+    const { width, height } = image;
+    const canvas = getCanvas();
+    resizeCanvas(canvas, width, height);
+    const ctx = getCanvasContext(canvas);
+    ctx.drawImage(image, 0, 0);
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+        const R = data[i];
+        const G = data[i + 1];
+        const B = data[i + 2];
+        const A = data[i + 3];
+        if (A === 0) {
+            data[i] = 0;
+            data[i + 1] = 0;
+            data[i + 2] = 0;
+        } else {
+            const height = rgb2Height(R, G, B);
+            const [r, g, b, a] = ci.getColor(height);
+            data[i] = r;
+            data[i + 1] = g;
+            data[i + 2] = b;
+            data[i + 3] = a;
+        }
+    }
+    ctx.putImageData(imageData, 0, 0);
+    disposeImage(image);
+    return canvas.transferToImageBitmap();
 }

@@ -1,8 +1,8 @@
-import { createImageBlobURL, postProcessingImage } from './canvas';
+import { createImageBlobURL, postProcessingImage, colorsTerrainTile } from './canvas';
 import { imageSlicing, imageToBlobURL } from './imageslice';
 import { imagetTileFetch, tileImageToBlobURL } from './imagetile';
 import { clip, injectMask, removeMask, tileBBOXIntersectMask } from './tileclip';
-import { cancelFetch, colorsTerrainTile, encodeTerrainTile, getTile, getTileWithMaxZoom, layout_Tiles } from './tileget';
+import { cancelFetch, encodeTerrainTile, getTile, getTileWithMaxZoom, layout_Tiles } from './tileget';
 import { tileTransform } from './tiletranasform';
 import { checkBuffers, createInnerError, isImageBitmap } from './util';
 

@@ -1,14 +1,13 @@
 import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions, layoutTilesOptions } from './types';
-import { createImageBlobURL, getCanvas, getCanvasContext, imageTileScale, layoutTiles, mergeTiles, postProcessingImage, resizeCanvas } from './canvas';
+import { colorsTerrainTile, createImageBlobURL, getCanvas, getCanvasContext, imageTileScale, layoutTiles, mergeTiles, postProcessingImage, resizeCanvas } from './canvas';
 import LRUCache from './LRUCache';
 import {
     isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createParamsValidateError, createInnerError, HEADERS, disposeImage,
-    isImageBitmap, rgb2Height, createDataError, validateSubdomains, getTileUrl,
+    isImageBitmap, createDataError, validateSubdomains, getTileUrl,
     createNetWorkError
 } from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
-import { ColorIn } from 'colorin';
 
 const LRUCount = 200;
 
@@ -57,6 +56,27 @@ function finishFetch(control: AbortController) {
 
 }
 
+function generateFetchOptions(headers, options) {
+    const fetchOptions = options.fetchOptions || {
+        headers,
+        referrer: options.referrer
+    };
+    const timeout = options.timeout || 0;
+    const control = new AbortController();
+    const signal = control.signal;
+    if (timeout && isNumber(timeout) && timeout > 0) {
+        setTimeout(() => {
+            control.abort(FetchTimeoutError);
+        }, timeout);
+    }
+    fetchOptions.signal = signal;
+    delete fetchOptions.timeout;
+    return {
+        fetchOptions,
+        control
+    }
+}
+
 export function fetchTile(url: string, headers = {}, options) {
     // console.log(abortControlCache);
     return new Promise((resolve: (image: ImageBitmap) => void, reject) => {
@@ -80,20 +100,7 @@ export function fetchTile(url: string, headers = {}, options) {
         if (image) {
             copyImageBitMap(image);
         } else {
-            const fetchOptions = options.fetchOptions || {
-                headers,
-                referrer: options.referrer
-            };
-            const timeout = options.timeout || 0;
-            const control = new AbortController();
-            const signal = control.signal;
-            if (timeout && isNumber(timeout) && timeout > 0) {
-                setTimeout(() => {
-                    control.abort(FetchTimeoutError);
-                }, timeout);
-            }
-            fetchOptions.signal = signal;
-            delete fetchOptions.timeout;
+            const { fetchOptions, control } = generateFetchOptions(headers, options);
             cacheFetch(taskId, control);
             fetch(url, fetchOptions).then(res => {
                 if (!res.ok) {
@@ -128,20 +135,7 @@ export function fetchTileBuffer(url: string, headers = {}, options) {
         if (buffer) {
             copyBuffer(buffer);
         } else {
-            const fetchOptions = options.fetchOptions || {
-                headers,
-                referrer: options.referrer
-            };
-            const timeout = options.timeout || 0;
-            const control = new AbortController();
-            const signal = control.signal;
-            if (timeout && isNumber(timeout) && timeout > 0) {
-                setTimeout(() => {
-                    control.abort(FetchTimeoutError);
-                }, timeout);
-            }
-            fetchOptions.signal = signal;
-            delete fetchOptions.timeout;
+            const { fetchOptions, control } = generateFetchOptions(headers, options);
             cacheFetch(taskId, control);
             fetch(url, fetchOptions).then(res => {
                 if (!res.ok) {
@@ -392,48 +386,4 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
         }
 
     });
-}
-
-
-const colorInCache = new Map();
-
-export function colorsTerrainTile(colors, image: ImageBitmap) {
-    if (!colors || !Array.isArray(colors) || colors.length < 2) {
-        return image;
-    }
-    const key = JSON.stringify(colors);
-    let ci = colorInCache.get(key);
-    if (!ci) {
-        ci = new ColorIn(colors);
-        colorInCache.set(key, ci);
-    }
-    const { width, height } = image;
-    const canvas = getCanvas();
-    resizeCanvas(canvas, width, height);
-    const ctx = getCanvasContext(canvas);
-    ctx.drawImage(image, 0, 0);
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
-
-    for (let i = 0; i < data.length; i += 4) {
-        const R = data[i];
-        const G = data[i + 1];
-        const B = data[i + 2];
-        const A = data[i + 3];
-        if (A === 0) {
-            data[i] = 0;
-            data[i + 1] = 0;
-            data[i + 2] = 0;
-        } else {
-            const height = rgb2Height(R, G, B);
-            const [r, g, b, a] = ci.getColor(height);
-            data[i] = r;
-            data[i + 1] = g;
-            data[i + 2] = b;
-            data[i + 3] = a;
-        }
-    }
-    ctx.putImageData(imageData, 0, 0);
-    disposeImage(image);
-    return canvas.transferToImageBitmap();
 }
