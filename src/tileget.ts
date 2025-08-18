@@ -15,6 +15,7 @@ const tileImageCache = new LRUCache<ImageBitmap>(LRUCount, (image) => {
     disposeImage(image as ImageBitmap);
 });
 const tileBufferCache = new LRUCache<ArrayBuffer>(LRUCount, (buffer) => {
+    buffer = null;
     // disposeImage(image);
 });
 
