@@ -62,8 +62,9 @@
 * [css filter](https://maptalks.github.io/maptalks.tileclip/demo/cssfilter.html) 
 * [tile opacity](https://maptalks.github.io/maptalks.tileclip/demo/tile-opacity.html) 
 * [tile mosaic](https://maptalks.github.io/maptalks.tileclip/demo/tile-mosaic.html) 
+* [tile old photo](https://maptalks.github.io/maptalks.tileclip/demo/tile-oldphoto.html)  
+* [gaussian Blur](https://maptalks.github.io/maptalks.tileclip/demo/gaussianBlurRadius.html)  
 * [tiles  globalCompositeOperation](https://maptalks.github.io/maptalks.tileclip/demo/tiles-globalCompositeOperation.html) 
-* [gaussian Blur](https://maptalks.github.io/maptalks.tileclip/demo/gaussianBlurRadius.html) 
 * [get tile with mosaic ](https://maptalks.github.io/maptalks.tileclip/demo/imagetile-mosaic.html)  
 
 ## Others
