@@ -154,6 +154,7 @@ all methods return Promise with `cancel()` method
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
   + `options?.globalCompositeOperation`: CanvasRenderingContext2D.globalCompositeOperation
   + `options?.mosaicSize`: Mosaic pixel size 
+  + `options?.oldPhoto`: Old photo effect 
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -206,6 +207,7 @@ promise.then((imagebitmap) => {
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
   + `options?.globalCompositeOperation`: CanvasRenderingContext2D.globalCompositeOperation
   + `options?.mosaicSize`: Mosaic pixel size 
+  + `options?.oldPhoto`: Old photo effect 
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -266,6 +268,7 @@ promise.then((imagebitmap) => {
   + `options?.opacity`: tile opacity if need
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
   + `options?.mosaicSize`: Mosaic pixel size 
+  + `options?.oldPhoto`: Old photo effect 
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -335,6 +338,7 @@ promise.then((imagebitmap) => {
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
   + `options?.globalCompositeOperation`: CanvasRenderingContext2D.globalCompositeOperation
   + `options?.mosaicSize`: Mosaic pixel size 
+  + `options?.oldPhoto`: Old photo effect 
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -611,6 +615,7 @@ tileActor.injectMask(maskId, polygon).then(data => {
   + `options?.opacity`: tile opacity if need
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need 
   + `options?.mosaicSize`: Mosaic pixel size 
+  + `options?.oldPhoto`: Old photo effect 
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -662,6 +667,7 @@ tileActor.injectMask(maskId, polygon).then(data => {
   + `options?.opacity`: tile opacity if need
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
   + `options?.mosaicSize`: Mosaic pixel size 
+  + `options?.oldPhoto`: Old photo effect 
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -746,6 +752,7 @@ const result = tileActor.imageHasInjected(maskId);
   + `options?.opacity`: tile opacity if need
   + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
   + `options?.mosaicSize`: Mosaic pixel size 
+  + `options?.oldPhoto`: Old photo effect 
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
