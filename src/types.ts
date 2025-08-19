@@ -5,6 +5,7 @@ export type postProcessingOptions = {
     opacity?: number;
     gaussianBlurRadius?: number;
     mosaicSize?: number;
+    oldPhoto?: boolean;
 }
 
 export type fetchOptionsType = {

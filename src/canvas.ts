@@ -372,12 +372,41 @@ function imageMosaic(image: ImageBitmap, mosaicSize?: number) {
 
 }
 
+function imageOldPhoto(image: ImageBitmap, oldPhoto: boolean) {
+    if (!oldPhoto) {
+        return image;
+    }
+    const { width, height } = image;
+    const canvas = getCanvas();
+    resizeCanvas(canvas, width, height);
+    const ctx = getCanvasContext(canvas);
+    ctx.drawImage(image, 0, 0);
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data
+
+    for (var i = 0; i < data.length; i += 4) {
+        const r = data[i + 0]
+        const g = data[i + 1]
+        const b = data[i + 2]
+
+        data[i + 0] = r * 0.28 + g * 0.72 + b * 0.22
+        data[i + 1] = r * 0.25 + g * 0.63 + b * 0.13
+        data[i + 2] = r * 0.17 + g * 0.66 + b * 0.13
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    const bitImage = canvas.transferToImageBitmap();
+    disposeImage(image);
+    return bitImage;
+}
+
 
 export function postProcessingImage(image: ImageBitmap, options) {
     const filterImage = imageFilter(image, options.filter);
     const blurImage = imageGaussianBlur(filterImage, options.gaussianBlurRadius);
     const opImage = imageOpacity(blurImage, options.opacity);
-    const mosaicImage = imageMosaic(opImage, options.mosaicSize);
+    const oldImage = imageOldPhoto(opImage, options.oldPhoto);
+    const mosaicImage = imageMosaic(oldImage, options.mosaicSize);
     return mosaicImage;
 }
 
