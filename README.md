@@ -104,7 +104,9 @@ return `TileActor` instance
 
 ```js
 import {
-    getTileActor
+    getTileActor,
+    getBlankTile,
+    get404Tile
 } from 'maptalks.tileclip'
 
 const tileActor = getTileActor();
