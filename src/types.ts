@@ -13,6 +13,7 @@ export type fetchOptionsType = {
     headers?: Record<string, string>;
     fetchOptions?: Record<string, any>;
     timeout?: number;
+    indexedDBCache?: boolean;
 }
 
 export type returnResultType = {

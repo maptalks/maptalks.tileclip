@@ -8,6 +8,7 @@ import {
 } from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
+import { getStoreTile, storeTile } from './store';
 
 const LRUCount = 200;
 
@@ -92,33 +93,54 @@ export function fetchTile(url: string, headers = {}, options) {
             copyImageBitMap(url as unknown as ImageBitmap);
             return;
         }
-        const taskId = options.__taskId;
-        if (!taskId) {
-            reject(createInnerError('taskId is null'));
+        const { indexedDBCache } = options;
+
+        const fetchTileData = () => {
+            const taskId = options.__taskId;
+            if (!taskId) {
+                reject(createInnerError('taskId is null'));
+                return;
+            }
+            const image = tileImageCache.get(url);
+            if (image) {
+                copyImageBitMap(image);
+            } else {
+                const { fetchOptions, control } = generateFetchOptions(headers, options);
+                cacheFetch(taskId, control);
+                fetch(url, fetchOptions).then(res => {
+                    if (!res.ok) {
+                        reject(createNetWorkError(url))
+                    }
+                    return res.blob();
+                }).then(blob => createImageBitmap(blob)).then(image => {
+                    if (options.disableCache !== true) {
+                        tileImageCache.add(url, image);
+                    }
+                    if (indexedDBCache) {
+                        storeTile(url, image);
+                    }
+                    finishFetch(control);
+                    copyImageBitMap(image);
+                }).catch(error => {
+                    finishFetch(control);
+                    reject(error);
+                });
+            }
+        }
+        if (!indexedDBCache) {
+            fetchTileData();
             return;
         }
-        const image = tileImageCache.get(url);
-        if (image) {
-            copyImageBitMap(image);
-        } else {
-            const { fetchOptions, control } = generateFetchOptions(headers, options);
-            cacheFetch(taskId, control);
-            fetch(url, fetchOptions).then(res => {
-                if (!res.ok) {
-                    reject(createNetWorkError(url))
-                }
-                return res.blob();
-            }).then(blob => createImageBitmap(blob)).then(image => {
-                if (options.disableCache !== true) {
-                    tileImageCache.add(url, image);
-                }
-                finishFetch(control);
-                copyImageBitMap(image);
-            }).catch(error => {
-                finishFetch(control);
-                reject(error);
-            });
-        }
+        getStoreTile(url).then(image => {
+            if (image && indexedDBCache) {
+                copyImageBitMap(image as ImageBitmap);
+            } else {
+                fetchTileData();
+            }
+        }).catch(() => {
+
+        });
+
     });
 }
 
@@ -136,22 +158,42 @@ export function fetchTileBuffer(url: string, headers = {}, options) {
         if (buffer) {
             copyBuffer(buffer);
         } else {
-            const { fetchOptions, control } = generateFetchOptions(headers, options);
-            cacheFetch(taskId, control);
-            fetch(url, fetchOptions).then(res => {
-                if (!res.ok) {
-                    reject(createNetWorkError(url))
+            const { indexedDBCache } = options;
+            const fetchTileData = () => {
+                const { fetchOptions, control } = generateFetchOptions(headers, options);
+                cacheFetch(taskId, control);
+                fetch(url, fetchOptions).then(res => {
+                    if (!res.ok) {
+                        reject(createNetWorkError(url))
+                    }
+                    return res.arrayBuffer();
+                }).then(buffer => {
+                    if (options.disableCache !== true) {
+                        tileBufferCache.add(url, buffer);
+                    }
+                    finishFetch(control);
+                    if (indexedDBCache) {
+                        storeTile(url, buffer);
+                    }
+                    copyBuffer(buffer);
+                }).catch(error => {
+                    finishFetch(control);
+                    reject(error);
+                });
+            }
+            if(!indexedDBCache){
+                fetchTileData();
+                return;
+            }
+
+            getStoreTile(url).then(buffer => {
+                if (buffer && indexedDBCache) {
+                    copyBuffer(buffer as ArrayBuffer);
+                } else {
+                    fetchTileData();
                 }
-                return res.arrayBuffer();
-            }).then(buffer => {
-                if (options.disableCache !== true) {
-                    tileBufferCache.add(url, buffer);
-                }
-                finishFetch(control);
-                copyBuffer(buffer);
-            }).catch(error => {
-                finishFetch(control);
-                reject(error);
+            }).catch(() => {
+
             });
         }
     });

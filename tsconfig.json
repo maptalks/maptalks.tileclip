@@ -7,7 +7,7 @@
         "alwaysStrict": true,
         // "noImplicitAny": true,
         "declaration": true,
-        "allowJs": true,
+        "allowJs": false,
         "module": "ES2015",
         "target": "es6",
         "sourceMap": true,
