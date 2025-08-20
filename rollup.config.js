@@ -6,6 +6,7 @@ import json from '@rollup/plugin-json';
 import { terser } from 'rollup-plugin-terser';
 import typescript from '@rollup/plugin-typescript';
 import babel from '@rollup/plugin-babel';
+import copy from 'rollup-plugin-copy';
 import mtkWorkerPlugin from './worker-plugin';
 
 import pkg from './package.json';
@@ -28,6 +29,16 @@ const plugins = [
     nodeResolve(),
     commonjs()
 
+];
+
+const productionPlugins = [
+    ...plugins,
+    terser(),
+    copy({
+        targets: [
+            { src: 'src/*', dest: 'dist/' }
+        ]
+    })
 ];
 
 const babelPlugin = babel({
@@ -70,7 +81,7 @@ const bundles = [
     {
         input: getEntry(),
         external: external,
-        plugins: plugins.concat([terser()]),
+        plugins: productionPlugins,
         output: {
             'format': 'umd',
             'name': 'maptalks',
