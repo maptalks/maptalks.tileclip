@@ -139,6 +139,7 @@ const tileActor = getTileActor();
 | tileIntersectMask(options)              | Does tile intersect with mask                            |
 | encodeTerrainTile(options)              | Encode other terrain tiles into mapbox terrain service format       |
 | colorTerrainTile(options)               | Terrain tile color matching      |
+| terrainTileFixBoundary(options)         | Reset the skirt edge of the terrain tile using neighbor tiles      |
 | imageSlicing(options)                   | Cut a large image into multiple small images                        |
 | injectImage(options)                    | inject image source for    getImageTile                  |
 | removeImage(imageId)                    | remove image source                     |
@@ -330,7 +331,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                                `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                                     `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -440,7 +441,7 @@ const result = tileActor.maskHasInjected(maskId);
   + `options.maskId`:mask key
   + `options?.tileSize`:tile size 
   + `options?.reverse`:whether or not clip reverse 
-  + `options?.bufferSize`:Buffer contour pixel size
+  + `options?.bufferSize`: Buffer contour pixel size
   + `options?.returnBlobURL`: to return 
   [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 
@@ -664,6 +665,42 @@ tileActor.injectMask(maskId, polygon).then(data => {
            })
        };
    });
+```
+
+* `terrainTileFixBoundary(options)` Reset the skirt edge of the terrain tile using neighbor tiles , return `Promise`
+  + `options.tiles`:tiles collection 
+  + `options?.returnUint32Buffer`: to Unit32 ArrayBuffer 
+  + `options?.returnBlobURL`: to return 
+  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+
+```js
+const tile = {
+    x,
+    y,
+    z,
+    image: ...
+};
+const tileRight = {
+    x: x + 1,
+    y,
+    z: image: ...
+}
+const tileBottom = {
+    x,
+    y: y + 1,
+    z,
+    image: ...
+}
+tileActor.terrainTileFixBoundary({
+    tiles: [tile, tileRight, tileBottom],
+    returnUint32Buffer: true
+}).then(imagebitmap => {
+
+}).catch(error => {
+    //do some things
+    // console.error(error);
+    callback(maptalks.get404Tile())
+})
 ```
 
 * `imageSlicing(options)` slice big image  in worker, return `Promise`
