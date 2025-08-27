@@ -459,11 +459,6 @@ class TileActor extends worker.Actor {
                 reject(createParamsValidateError('terrainTileFixBoundary error:tiles is null'));
                 return;
             }
-
-            if (tiles.length < 3) {
-                reject(createParamsValidateError('terrainTileFixBoundary error:tiles.length should>3 is'));
-                return;
-            }
             const z = tiles[0].z;
             let tileSize = 256;
             for (let i = 0, len = tiles.length; i < len; i++) {
@@ -497,26 +492,18 @@ class TileActor extends worker.Actor {
                 }
             }
             const currentTile = findTile(minX, minY);
-
-            const right = findTile(minX + 1, minY);
-            if (!right) {
-                reject(createParamsValidateError(`terrainTileFixBoundary error:not find right neighbor`));
-                console.error('currentTile:', currentTile);
-                return;
-            }
-            const bottom = findTile(minX, minY + 1);
-            if (!bottom) {
-                reject(createParamsValidateError(`terrainTileFixBoundary error:not find bottom neighbor`));
-                console.error('currentTile:', currentTile);
-                return;
-            }
-
+            const rightTile = findTile(minX + 1, minY);
+            const bottomTile = findTile(minX, minY + 1);
             const canvas = getCanvas(tileSize);
             resizeCanvas(canvas, tileSize, tileSize);
             const ctx = getCanvasContext(canvas);
             ctx.drawImage(currentTile.image, 0, 0, tileSize, tileSize);
-            ctx.drawImage(right.image, 0, 0, 1, tileSize, tileSize - 1, 0, 1, tileSize);
-            ctx.drawImage(bottom.image, 0, 0, tileSize, 1, 0, tileSize - 1, tileSize, 1);
+            if (rightTile) {
+                ctx.drawImage(rightTile.image, 0, 0, 1, tileSize, tileSize - 1, 0, 1, tileSize);
+            }
+            if (bottomTile) {
+                ctx.drawImage(bottomTile.image, 0, 0, tileSize, 1, 0, tileSize - 1, tileSize, 1);
+            }
             const image = canvas.transferToImageBitmap();
             if (returnBlobURL || returnUint32Buffer) {
                 this.send(Object.assign({ __type: 'tileImageToBlobURL' }, { returnBlobURL, returnUint32Buffer, image }), [], (error, url) => {
