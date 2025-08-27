@@ -127,7 +127,7 @@ export function checkBuffers(image: any) {
     const images = checkTileUrl(image);
     const buffers = [];
     images.forEach(item => {
-        if (isImageBitmap(item)) {
+        if (isImageBitmap(item) || (item && (item as unknown as ArrayBuffer instanceof ArrayBuffer))) {
             buffers.push(item);
         }
     });

@@ -6,14 +6,15 @@ import {
     CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon,
     checkBuffers, TaskCancelError, disposeImage
 } from './util.js';
-import { getCanvas } from './canvas';
+import { getCanvas, getCanvasContext, resizeCanvas } from './canvas';
 import {
     privateOptions, getTileOptions, layoutTilesOptions, getTileWithMaxZoomOptions,
     transformTileOptions, clipTileOptions, GeoJSONPolygon, GeoJSONMultiPolygon,
     encodeTerrainTileOptions, colorTerrainTileOptions,
     tileIntersectMaskOptions,
     injectImageOptions,
-    getImageTileOptions
+    getImageTileOptions,
+    terrainTileFixBoundaryOptions
 } from './types.js';
 import { imageTile } from './imagetile.js';
 export { getBlankTile, get404Tile } from './canvas';
@@ -412,6 +413,7 @@ class TileActor extends worker.Actor {
         return promise;
     }
 
+
     encodeTerrainTile(options: encodeTerrainTileOptions) {
         options = checkOptions(options, 'encodeTerrainTile');
         const { workerId } = getTaskId(options);
@@ -443,6 +445,97 @@ class TileActor extends worker.Actor {
                     resolve(image);
                 }
             }, workerId);
+        });
+        wrapPromise(promise, options);
+        return promise;
+    }
+
+    terrainTileFixBoundary(options: terrainTileFixBoundaryOptions) {
+        options = checkOptions(options, 'terrainTileFixBoundary');
+        const { workerId } = getTaskId(options);
+        const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+            const { tiles, returnBlobURL, returnUint32Buffer } = options;
+            if (!tiles || tiles.length === 0) {
+                reject(createParamsValidateError('terrainTileFixBoundary error:tiles is null'));
+                return;
+            }
+
+            if (tiles.length < 3) {
+                reject(createParamsValidateError('terrainTileFixBoundary error:tiles.length should>3 is'));
+                return;
+            }
+            const z = tiles[0].z;
+            let tileSize = 256;
+            for (let i = 0, len = tiles.length; i < len; i++) {
+                const zoom = tiles[i].z;
+                const image = tiles[i].image;
+                if (!image) {
+                    reject(createParamsValidateError('terrainTileFixBoundary error:not find tile.image'));
+                    console.error(tiles);
+                    return;
+                }
+                tileSize = image.width;
+                if (zoom !== z) {
+                    reject(createParamsValidateError('terrainTileFixBoundary error:All tiles should be on the same level'));
+                    console.error(tiles);
+                    return;
+                }
+            }
+            let minX = Infinity, minY = Infinity;
+            for (let i = 0, len = tiles.length; i < len; i++) {
+                const { x, y } = tiles[i];
+                minX = Math.min(x, minX);
+                minY = Math.min(y, minY);
+            }
+
+            const findTile = (tileX: number, tileY: number) => {
+                for (let i = 0, len = tiles.length; i < len; i++) {
+                    const { x, y } = tiles[i];
+                    if (x === tileX && y === tileY) {
+                        return tiles[i];
+                    }
+                }
+            }
+            const currentTile = findTile(minX, minY);
+
+            const right = findTile(minX + 1, minY);
+            if (!right) {
+                reject(createParamsValidateError(`terrainTileFixBoundary error:not find right neighbor`));
+                console.error('currentTile:', currentTile);
+                return;
+            }
+            const bottom = findTile(minX, minY + 1);
+            if (!bottom) {
+                reject(createParamsValidateError(`terrainTileFixBoundary error:not find bottom neighbor`));
+                console.error('currentTile:', currentTile);
+                return;
+            }
+
+            const canvas = getCanvas(tileSize);
+            resizeCanvas(canvas, tileSize, tileSize);
+            const ctx = getCanvasContext(canvas);
+            ctx.drawImage(currentTile.image, 0, 0, tileSize, tileSize);
+            ctx.drawImage(right.image, 0, 0, 1, tileSize, tileSize - 1, 0, 1, tileSize);
+            ctx.drawImage(bottom.image, 0, 0, tileSize, 1, 0, tileSize - 1, tileSize, 1);
+            const image = canvas.transferToImageBitmap();
+            if (returnBlobURL || returnUint32Buffer) {
+                this.send(Object.assign({ __type: 'tileImageToBlobURL' }, { returnBlobURL, returnUint32Buffer, image }), [], (error, url) => {
+                    if (isErrorOrCancel(error, promise)) {
+                        reject(error || FetchCancelError);
+                    } else {
+                        resolve(url);
+                    }
+                }, workerId);
+            } else {
+                const tid = setTimeout(() => {
+                    if (isErrorOrCancel(null, promise)) {
+                        reject(TaskCancelError);
+                        return;
+                    }
+                    removeTimeOut(tid);
+                    resolve(image);
+                }, 1);
+            }
         });
         wrapPromise(promise, options);
         return promise;
@@ -571,11 +664,11 @@ class TileActor extends worker.Actor {
             if (filter || opacity || gaussianBlurRadius || returnBlobURL || mosaicSize || oldPhoto) {
                 (options as any).image = image;
                 const buffers = checkBuffers(image);
-                this.send(Object.assign({}, options, { __type: 'tileImageToBlobURL' }), buffers, (error, image) => {
+                this.send(Object.assign({}, options, { __type: 'tileImageToBlobURL' }), buffers, (error, url) => {
                     if (isErrorOrCancel(error, promise)) {
                         reject(error || TaskCancelError);
                     } else {
-                        resolve(image);
+                        resolve(url);
                     }
                 });
             } else {

@@ -1,6 +1,6 @@
-import { createImageBlobURL, postProcessingImage, colorsTerrainTile } from './canvas';
+import { createImageBlobURL, postProcessingImage, colorsTerrainTile, tileImageToBlobURL } from './canvas';
 import { imageSlicing, imageToBlobURL } from './imageslice';
-import { imagetTileFetch, tileImageToBlobURL } from './imagetile';
+import { imagetTileFetch } from './imagetile';
 import { clip, injectMask, removeMask, tileBBOXIntersectMask } from './tileclip';
 import { cancelFetch, encodeTerrainTile, getTile, getTileWithMaxZoom, layout_Tiles } from './tileget';
 import { tileTransform } from './tiletransform';

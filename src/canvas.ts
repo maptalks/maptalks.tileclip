@@ -468,3 +468,31 @@ export function colorsTerrainTile(colors, image: ImageBitmap) {
     disposeImage(image);
     return canvas.transferToImageBitmap();
 }
+
+
+export function tileImageToBlobURL(options) {
+    return new Promise((resolve, reject) => {
+        const image = options.image;
+        const postImage = postProcessingImage(image, options);
+        const { returnBlobURL, returnUint32Buffer } = options || {};
+        if (returnUint32Buffer) {
+            const canvas = getCanvas(image.width);
+            resizeCanvas(canvas, image.width, image.height);
+            const ctx = getCanvasContext(canvas);
+            ctx.drawImage(image, 0, 0);
+            const imageData = ctx.getImageData(0, 0, image.width, image.height);
+            const array = new Uint32Array(imageData.data);
+            disposeImage(image);
+            resolve(array.buffer);
+            return;
+        }
+
+        createImageBlobURL(postImage, returnBlobURL).then(url => {
+            resolve(url);
+        }).catch(error => {
+            reject(error);
+        })
+    });
+
+
+}

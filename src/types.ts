@@ -118,6 +118,11 @@ export type getImageTileOptions = {
     tileSize?: number;
 } & postProcessingOptions & returnResultType;
 
+export type terrainTileFixBoundaryOptions = {
+    tiles: Array<{ x: number, y: number, z: number, image: ImageBitmap | HTMLImageElement | HTMLCanvasElement }>;
+    returnUint32Buffer?: boolean;
+} & returnResultType;
+
 export type clipBufferOptions = {
     bufferSize?: number;
     polygons: number[][][][]
