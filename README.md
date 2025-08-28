@@ -167,6 +167,7 @@ export type fetchOptionsType = {
 }
 
 export type returnResultType = {
+    returnUint32Buffer?:boolean;// to Unit32 ArrayBuffer 
     returnBlobURL?: boolean;// to return [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
 }
 
@@ -332,7 +333,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                                            `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                                             `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -651,7 +652,6 @@ tileActor.injectMask(maskId, polygon).then(data => {
 
 * `terrainTileFixBoundary(options)` Reset the skirt edge of the terrain tile using neighbor tiles , return `Promise`
   + `options.tiles`:tiles collection 
-  + `options?.returnUint32Buffer`: to Unit32 ArrayBuffer 
   + `...returnResultType` returnResultType params 
 
 ```js
