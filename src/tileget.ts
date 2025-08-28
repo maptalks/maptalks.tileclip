@@ -207,7 +207,7 @@ export function getTile(url, options: getTileOptions) {
         const fetchTiles = urls.map(tileUrl => {
             return fetchTile(tileUrl, headers, options)
         });
-        const { returnBlobURL, returnUint32Buffer, globalCompositeOperation } = options;
+        const { globalCompositeOperation } = options;
         Promise.all(fetchTiles).then(imagebits => {
             const canvas = getCanvas();
             const image = mergeTiles(imagebits, globalCompositeOperation);
@@ -217,7 +217,7 @@ export function getTile(url, options: getTileOptions) {
             }
             // const filter = options.filter;
             const postImage = postProcessingImage(image, options);
-            createImageBlobURL(canvas, postImage, returnBlobURL, returnUint32Buffer).then(url => {
+            createImageBlobURL(canvas, postImage, options).then(url => {
                 resolve(url);
             }).catch(error => {
                 reject(error);
@@ -229,7 +229,7 @@ export function getTile(url, options: getTileOptions) {
 }
 
 export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
-    const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, returnBlobURL, returnUint32Buffer, globalCompositeOperation } = options;
+    const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, globalCompositeOperation } = options;
     return new Promise((resolve, reject) => {
         const urlTemplates = checkTileUrl(urlTemplate);
         for (let i = 0, len = urlTemplates.length; i < len; i++) {
@@ -304,7 +304,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
                 sliceImage = imageTileScale(postImage, dx, dy, w, h);
                 // opImage = imageOpacity(imageBitMap, options.opacity);
             }
-            createImageBlobURL(getCanvas(), sliceImage, returnBlobURL, returnUint32Buffer).then(url => {
+            createImageBlobURL(getCanvas(), sliceImage, options).then(url => {
                 resolve(url);
             }).catch(error => {
                 reject(error);
@@ -316,7 +316,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
 
 }
 export function layout_Tiles(options: layoutTilesOptions) {
-    const { urlTemplate, tiles, subdomains, returnBlobURL, returnUint32Buffer, debug } = options;
+    const { urlTemplate, tiles, subdomains, debug } = options;
     return new Promise((resolve, reject) => {
         if (!validateSubdomains(urlTemplate, subdomains)) {
             reject(createParamsValidateError('not find subdomains'));
@@ -339,7 +339,7 @@ export function layout_Tiles(options: layoutTilesOptions) {
             });
             const bigImage = layoutTiles(tiles, debug);
             const postImage = postProcessingImage(bigImage, options);
-            createImageBlobURL(getCanvas(), postImage, returnBlobURL, returnUint32Buffer).then(url => {
+            createImageBlobURL(getCanvas(), postImage, options).then(url => {
                 resolve(url);
             }).catch(error => {
                 reject(error);
@@ -356,9 +356,9 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
 
         const urls = checkTileUrl(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
-        const { returnBlobURL, returnUint32Buffer, terrainWidth, tileSize, terrainType, minHeight, maxHeight, terrainColors } = options;
+        const { terrainWidth, tileSize, terrainType, minHeight, maxHeight, terrainColors } = options;
         const returnImage = (terrainImage: ImageBitmap) => {
-            createImageBlobURL(getCanvas(), terrainImage, returnBlobURL, returnUint32Buffer).then(url => {
+            createImageBlobURL(getCanvas(), terrainImage, options).then(url => {
                 resolve(url);
             }).catch(error => {
                 reject(error);

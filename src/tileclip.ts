@@ -118,11 +118,11 @@ function clipPolygons(polygons, tileBBOX: BBOXtype) {
 
 export function clip(options: clipTileOptions) {
     return new Promise((resolve, reject) => {
-        const { tile, tileBBOX, projection, tileSize, maskId, returnBlobURL, returnUint32Buffer, reverse, bufferSize } = options;
+        const { tile, tileBBOX, projection, tileSize, maskId, reverse, bufferSize } = options;
         const feature = GeoJSONCache[maskId];
         // const canvas = getCanvas(tileSize);
         const returnImage = (image) => {
-            createImageBlobURL(getCanvas(), image, returnBlobURL, returnUint32Buffer).then(url => {
+            createImageBlobURL(getCanvas(), image, options).then(url => {
                 resolve(url);
             }).catch(error => {
                 reject(error);

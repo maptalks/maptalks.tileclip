@@ -119,10 +119,10 @@ export const onmessage = function (message, postResponse) {
         return;
     }
     if (type === 'colorTerrainTile') {
-        const { tile, colors, returnBlobURL, returnUint32Buffer } = data;
+        const { tile, colors } = data;
         const image = colorsTerrainTile(colors, tile);
         const postImage = postProcessingImage(image, data);
-        createImageBlobURL(getCanvas(), postImage, returnBlobURL, returnUint32Buffer).then(url => {
+        createImageBlobURL(getCanvas(), postImage, data).then(url => {
             postResponse(null, url, checkBuffers(url));
         }).catch(error => {
             postResponse(error);
@@ -138,9 +138,9 @@ export const onmessage = function (message, postResponse) {
         return;
     }
     if (type === 'tilePostAndToBlobURL') {
-        const { image, returnBlobURL, returnUint32Buffer } = data;
+        const { image } = data;
         const postImage = postProcessingImage(image, data);
-        createImageBlobURL(getCanvas(), postImage, returnBlobURL, returnUint32Buffer).then(image => {
+        createImageBlobURL(getCanvas(), postImage, data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
             postResponse(error);

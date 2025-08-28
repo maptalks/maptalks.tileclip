@@ -37,10 +37,6 @@ export function imageSlicing(options: getTileOptions) {
                     ctx.drawImage(image, x1, y1, w, h, 0, 0, canvas.width, canvas.height);
                     const tempImage = canvas.transferToImageBitmap();
                     const postImage = postProcessingImage(tempImage, options);
-                    // const filterImage = imageFilter(canvas, tempImage, options.filter);
-                    // const blurImage = imageGaussianBlur(canvas, filterImage, options.gaussianBlurRadius);
-
-                    // const opImage = imageOpacity(blurImage, options.opacity);
                     items.push({
                         id: uuid(),
                         x: x1,
@@ -75,7 +71,6 @@ export function imageToBlobURL(options) {
         const debug = options.debug;
         const items = options.items;
         const workerId = options._workerId;
-        const { returnBlobURL, returnUint32Buffer } = options;
         const temp = [];
         const isEnd = () => {
             return temp.length === items.length;
@@ -87,7 +82,7 @@ export function imageToBlobURL(options) {
             if (debug) {
                 console.log('workerId:' + workerId + ',image to blob url :' + (index + 1) + '/' + items.length);
             }
-            createImageBlobURL(canvas, item.image, returnBlobURL, returnUint32Buffer).then(url => {
+            createImageBlobURL(canvas, item.image, options).then(url => {
                 item.url = url;
                 temp.push(1);
                 delete item.image;

@@ -411,8 +411,9 @@ export function postProcessingImage(image: ImageBitmap, options) {
 }
 
 
-export function createImageBlobURL(canvas: OffscreenCanvas, image: ImageBitmap, returnBlobURL: boolean, returnUint32Buffer: boolean) {
+export function createImageBlobURL(canvas: OffscreenCanvas, image: ImageBitmap, options) {
     return new Promise((resolve: (image: ImageBitmap | string | ArrayBuffer) => void, reject) => {
+        const { returnBlobURL, returnUint32Buffer } = options || {};
         if (!returnBlobURL && !returnUint32Buffer) {
             resolve(image);
             return;
