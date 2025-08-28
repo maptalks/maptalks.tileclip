@@ -1,6 +1,6 @@
 import { BBOXtype } from "./bbox";
 
-export type postProcessingOptions = {
+export type postProcessingOptionsType = {
     filter?: string;
     opacity?: number;
     gaussianBlurRadius?: number;
@@ -23,7 +23,7 @@ export type returnResultType = {
 export type getTileOptions = {
     url: string | ImageBitmap | Array<string | ImageBitmap>;
     globalCompositeOperation?: GlobalCompositeOperation;
-} & postProcessingOptions & fetchOptionsType & returnResultType;
+} & postProcessingOptionsType & fetchOptionsType & returnResultType;
 
 
 export type layoutTilesOptions = {
@@ -31,7 +31,7 @@ export type layoutTilesOptions = {
     tiles: Array<[number, number, number]>;
     subdomains?: Array<string>;
     debug?: boolean;
-} & postProcessingOptions & fetchOptionsType & returnResultType;
+} & postProcessingOptionsType & fetchOptionsType & returnResultType;
 
 export type encodeTerrainTileOptions = {
     url: string;
@@ -77,7 +77,7 @@ export type transformTileOptions = getTileWithMaxZoomOptions & {
 export type colorTerrainTileOptions = {
     tile: ImageBitmap;
     colors: Array<[number, string]>;
-} & postProcessingOptions & returnResultType;
+} & postProcessingOptionsType & returnResultType;
 
 export type privateOptions = getTileOptions & {
     __taskId?: number;
@@ -116,7 +116,7 @@ export type getImageTileOptions = {
     imageId: string;
     projection: string;
     tileSize?: number;
-} & postProcessingOptions & returnResultType;
+} & postProcessingOptionsType & returnResultType;
 
 export type terrainTileFixBoundaryOptions = {
     tiles: Array<{ x: number, y: number, z: number, image: ImageBitmap | HTMLImageElement | HTMLCanvasElement }>;

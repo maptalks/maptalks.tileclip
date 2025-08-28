@@ -150,7 +150,7 @@ const tileActor = getTileActor();
 
 ```ts
 
-export type postProcessingOptions = {
+export type postProcessingOptionsType = {
     filter?: string; //[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
     opacity?: number;//tile opacity if need
     gaussianBlurRadius?: number;// gaussian Blur Radius if need
@@ -177,7 +177,7 @@ all methods return Promise with `cancel()` method
 * `getTile(options)` get tile [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap) by fetch in worker, return `Promise`
   + `options.url`:tile url or tiles urls
   + `...fetchOptionsType` fetchOptionsType params
-  + `...postProcessingOptions` postProcessingOptions params
+  + `...postProcessingOptionsType` postProcessingOptions params
   + `...returnResultType` returnResultType params 
 
 ```js
@@ -223,7 +223,7 @@ promise.then((imagebitmap) => {
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
   + `...fetchOptionsType` fetchOptionsType params
-  + `...postProcessingOptions` postProcessingOptions params
+  + `...postProcessingOptionsType` postProcessingOptions params
   + `...returnResultType` returnResultType params 
 
 ```js
@@ -277,7 +277,7 @@ promise.then((imagebitmap) => {
   + `options.tiles` : tile Data set
   + `options?.subdomains` :subdomains, such as [1, 2, 3, 4, 5]
   + `...fetchOptionsType` fetchOptionsType params
-  + `...postProcessingOptions` postProcessingOptions params
+  + `...postProcessingOptionsType` postProcessingOptions params
   + `...returnResultType` returnResultType params 
 
 ```js
@@ -339,7 +339,7 @@ promise.then((imagebitmap) => {
   + `options?.isGCJ02`: Is it the isGCJ02 coordinate system
   + `options?.errorLog`: Is there a printing error
   + `...fetchOptionsType` fetchOptionsType params
-  + `...postProcessingOptions` postProcessingOptions params
+  + `...postProcessingOptionsType` postProcessingOptions params
   + `...returnResultType` returnResultType params 
 
 ```js
@@ -607,7 +607,7 @@ tileActor.injectMask(maskId, polygon).then(data => {
 * `colorTerrainTile(options)` Terrain tile color matching, return `Promise`
   + `options.tile`:tile data, is ImageBitMap
   + `options.colors`: Color Mapping Table
-  + `...postProcessingOptions` postProcessingOptions params
+  + `...postProcessingOptionsType` postProcessingOptions params
   + `...returnResultType` returnResultType params 
 
 ```js
@@ -687,7 +687,7 @@ tileActor.terrainTileFixBoundary({
 * `imageSlicing(options)` slice big image  in worker, return `Promise`
   + `options.url`:image url or images urls
   + `...fetchOptionsType` fetchOptionsType params
-  + `...postProcessingOptions` postProcessingOptions params
+  + `...postProcessingOptionsType` postProcessingOptions params
   + `...returnResultType` returnResultType params 
 
 ```js
@@ -763,7 +763,7 @@ const result = tileActor.imageHasInjected(maskId);
   + `options.projection`: Projection code, such as : EPSG:3857
   + `options.imageId`:mask key
   + `options?.tileSize`:tile size 
-  + `...postProcessingOptions` postProcessingOptions params
+  + `...postProcessingOptionsType` postProcessingOptions params
   + `...returnResultType` returnResultType params 
   
 
