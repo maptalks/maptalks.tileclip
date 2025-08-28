@@ -146,22 +146,39 @@ const tileActor = getTileActor();
 | imageHasInjected(imageId)               | Has the image data been injected                         |
 | getImageTile(options)                   | get tile data from    injectImage                |
 
+#### Types
+
+```ts
+
+export type postProcessingOptions = {
+    filter?: string; //[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
+    opacity?: number;//tile opacity if need
+    gaussianBlurRadius?: number;// gaussian Blur Radius if need
+    mosaicSize?: number;//Mosaic pixel size 
+    oldPhoto?: boolean;//Old photo effect
+}
+
+export type fetchOptionsType = {
+    referrer?: string;//fetch referrer
+    headers?: Record<string, string>;// fetch headers params. if need
+    fetchOptions?: Record<string, any>;//fetch options. if need, If it exists, headers will be ignored
+    timeout?: number;//fetch timeout 
+    indexedDBCache?: boolean;//cache tile data by IndexedDB 
+}
+
+export type returnResultType = {
+    returnBlobURL?: boolean;// to return [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+}
+
+```
+
 all methods return Promise with `cancel()` method
 
 * `getTile(options)` get tile [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap) by fetch in worker, return `Promise`
   + `options.url`:tile url or tiles urls
-  + `options?.headers`:fetch headers params. if need
-  + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
-  + `options?.timeout`: fetch timeout 
-  + `options?.indexedDBCache`: cache tile data by IndexedDB 
-  + `options?.opacity`: tile opacity if need
-  + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
-  + `options?.globalCompositeOperation`: CanvasRenderingContext2D.globalCompositeOperation
-  + `options?.mosaicSize`: Mosaic pixel size 
-  + `options?.oldPhoto`: Old photo effect 
-  + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter) 
-  + `options?.returnBlobURL`: to return 
-  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+  + `...fetchOptionsType` fetchOptionsType params
+  + `...postProcessingOptions` postProcessingOptions params
+  + `...returnResultType` returnResultType params 
 
 ```js
 tileActor.getTile({
@@ -173,7 +190,8 @@ tileActor.getTile({
             ...
         }
         ...
-    }
+    },
+    oldPhoto: true,
 }).then(imagebitmap => {
     consle.log(imagebitmap);
 }).catch(error => {
@@ -204,18 +222,9 @@ promise.then((imagebitmap) => {
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
-  + `options?.headers`:fetch headers params. if need
-  + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
-  + `options?.timeout`: fetch timeout 
-  + `options?.indexedDBCache`: cache tile data by IndexedDB 
-  + `options?.opacity`: tile opacity if need
-  + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
-  + `options?.globalCompositeOperation`: CanvasRenderingContext2D.globalCompositeOperation
-  + `options?.mosaicSize`: Mosaic pixel size 
-  + `options?.oldPhoto`: Old photo effect 
-  + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter) 
-  + `options?.returnBlobURL`: to return 
-  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+  + `...fetchOptionsType` fetchOptionsType params
+  + `...postProcessingOptions` postProcessingOptions params
+  + `...returnResultType` returnResultType params 
 
 ```js
 const {
@@ -263,21 +272,13 @@ promise.then((imagebitmap) => {
 })
 ```
 
-* `layoutTile(options)` layout tiles [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap) by fetch in worker, return `Promise`.
-  + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x}
-  + `options.tiles`: tile Data set
-  + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
-  + `options?.headers`:fetch headers params. if need
-  + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
-  + `options?.timeout`: fetch timeout 
-  + `options?.indexedDBCache`: cache tile data by IndexedDB 
-  + `options?.opacity`: tile opacity if need
-  + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
-  + `options?.mosaicSize`: Mosaic pixel size 
-  + `options?.oldPhoto`: Old photo effect 
-  + `options?.returnBlobURL`: to return 
-  + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter) 
-  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+* `layoutTile(options)` layout tiles [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap) by fetch in worker, return `Promise` .
+  + `options.urlTemplate` :tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x}
+  + `options.tiles` : tile Data set
+  + `options?.subdomains` :subdomains, such as [1, 2, 3, 4, 5]
+  + `...fetchOptionsType` fetchOptionsType params
+  + `...postProcessingOptions` postProcessingOptions params
+  + `...returnResultType` returnResultType params 
 
 ```js
 const {
@@ -331,24 +332,15 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                                     `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                                            `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
   + `options?.isGCJ02`: Is it the isGCJ02 coordinate system
-  + `options?.errorog`: Is there a printing error
-  + `options?.headers`:fetch headers params. if need
-  + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
-  + `options?.timeout`: fetch timeout 
-  + `options?.indexedDBCache`: cache tile data by IndexedDB 
-  + `options?.opacity`: tile opacity if need
-  + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
-  + `options?.globalCompositeOperation`: CanvasRenderingContext2D.globalCompositeOperation
-  + `options?.mosaicSize`: Mosaic pixel size 
-  + `options?.oldPhoto`: Old photo effect 
-  + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter) 
-  + `options?.returnBlobURL`: to return 
-  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+  + `options?.errorLog`: Is there a printing error
+  + `...fetchOptionsType` fetchOptionsType params
+  + `...postProcessingOptions` postProcessingOptions params
+  + `...returnResultType` returnResultType params 
 
 ```js
 const {
@@ -442,8 +434,7 @@ const result = tileActor.maskHasInjected(maskId);
   + `options?.tileSize`:tile size 
   + `options?.reverse`:whether or not clip reverse 
   + `options?.bufferSize`: Buffer contour pixel size
-  + `options?.returnBlobURL`: to return 
-  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+  + `...returnResultType` returnResultType params 
 
 ```js
 import * as maptalks from 'maptalks-gl';
@@ -588,12 +579,8 @@ tileActor.injectMask(maskId, polygon).then(data => {
   + `options?.maxHeight` max height when terrainType is 'qgis-gray'
   + `options?.tileSize` default value is 256
   + `options?.terrainColors` Colored terrain tiles. Color interpolation based on altitude
-  + `options?.headers`:fetch headers params. if need
-  + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
-  + `options?.timeout`: fetch timeout 
-  + `options?.indexedDBCache`: cache tile data by IndexedDB 
-  + `options?.returnBlobURL`: to return 
-  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+  + `...fetchOptionsType` fetchOptionsType params
+  + `...returnResultType` returnResultType params 
 
 ```js
   baseLayer.on('renderercreate', function(e) {
@@ -620,13 +607,8 @@ tileActor.injectMask(maskId, polygon).then(data => {
 * `colorTerrainTile(options)` Terrain tile color matching, return `Promise`
   + `options.tile`:tile data, is ImageBitMap
   + `options.colors`: Color Mapping Table
-  + `options?.opacity`: tile opacity if need
-  + `options?.gaussianBlurRadius`: gaussian Blur Radius if need 
-  + `options?.mosaicSize`: Mosaic pixel size 
-  + `options?.oldPhoto`: Old photo effect 
-  + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter) 
-  + `options?.returnBlobURL`: to return 
-  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+  + `...postProcessingOptions` postProcessingOptions params
+  + `...returnResultType` returnResultType params 
 
 ```js
    const colors = [
@@ -670,8 +652,7 @@ tileActor.injectMask(maskId, polygon).then(data => {
 * `terrainTileFixBoundary(options)` Reset the skirt edge of the terrain tile using neighbor tiles , return `Promise`
   + `options.tiles`:tiles collection 
   + `options?.returnUint32Buffer`: to Unit32 ArrayBuffer 
-  + `options?.returnBlobURL`: to return 
-  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+  + `...returnResultType` returnResultType params 
 
 ```js
 const tile = {
@@ -705,17 +686,9 @@ tileActor.terrainTileFixBoundary({
 
 * `imageSlicing(options)` slice big image  in worker, return `Promise`
   + `options.url`:image url or images urls
-  + `options?.headers`:fetch headers params. if need
-  + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
-  + `options?.timeout`: fetch timeout 
-  + `options?.indexedDBCache`: cache tile data by IndexedDB 
-  + `options?.opacity`: tile opacity if need
-  + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
-  + `options?.mosaicSize`: Mosaic pixel size 
-  + `options?.oldPhoto`: Old photo effect 
-  + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter) 
-  + `options?.returnBlobURL`: to return 
-  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+  + `...fetchOptionsType` fetchOptionsType params
+  + `...postProcessingOptions` postProcessingOptions params
+  + `...returnResultType` returnResultType params 
 
 ```js
 tileActor.imageSlicing({
@@ -746,8 +719,7 @@ tileActor.imageSlicing({
   + `options.url`:image url
   + `options.imageBBOX`:image BBOX  `[minx,miny,maxx,maxy]`. Note that the coordinates of the bounding box should be consistent with the projected image
   + `options.imageId`:image url
-  + `options?.headers`:fetch headers params. if need
-  + `options?.fetchOptions`:fetch options. if need, If it exists, headers will be ignored
+  + `...fetchOptionsType` fetchOptionsType params
 
 ```js
 const imageId = 'china';
@@ -791,14 +763,8 @@ const result = tileActor.imageHasInjected(maskId);
   + `options.projection`: Projection code, such as : EPSG:3857
   + `options.imageId`:mask key
   + `options?.tileSize`:tile size 
-  + `options?.opacity`: tile opacity if need
-  + `options?.gaussianBlurRadius`: gaussian Blur Radius if need
-  + `options?.mosaicSize`: Mosaic pixel size 
-  + `options?.oldPhoto`: Old photo effect 
-  + `options?.filter`:[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter) 
-  + `options?.returnBlobURL`: to return 
-  [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
-
+  + `...postProcessingOptions` postProcessingOptions params
+  + `...returnResultType` returnResultType params 
   
 
 ```js
