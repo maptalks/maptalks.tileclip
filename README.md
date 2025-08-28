@@ -124,7 +124,7 @@ import {
 const tileActor = getTileActor();
 ```
 
-#### methods
+#### Methods
 
 | method                                  | describe                                                            |
 | --------------------------------------- | ------------------------------------------------------------------- |
@@ -172,6 +172,8 @@ export type returnResultType = {
 }
 
 ```
+
+#### Method Details 
 
 all methods return Promise with `cancel()` method
 
