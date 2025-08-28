@@ -18,6 +18,7 @@ export type fetchOptionsType = {
 
 export type returnResultType = {
     returnBlobURL?: boolean;
+    returnUint32Buffer?: boolean;
 }
 
 export type getTileOptions = {
@@ -120,7 +121,6 @@ export type getImageTileOptions = {
 
 export type terrainTileFixBoundaryOptions = {
     tiles: Array<{ x: number, y: number, z: number, image: ImageBitmap | HTMLImageElement | HTMLCanvasElement }>;
-    returnUint32Buffer?: boolean;
 } & returnResultType;
 
 export type clipBufferOptions = {

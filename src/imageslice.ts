@@ -1,4 +1,4 @@
-import { getCanvas, getCanvasContext, mergeTiles, postProcessingImage, resizeCanvas } from "./canvas";
+import { createImageBlobURL, getCanvas, getCanvasContext, mergeTiles, postProcessingImage, resizeCanvas } from "./canvas";
 import { getTileOptions } from "./types";
 import { fetchTile } from "./tileget";
 import { checkTileUrl, HEADERS, uuid, disposeImage } from "./util";
@@ -75,22 +75,21 @@ export function imageToBlobURL(options) {
         const debug = options.debug;
         const items = options.items;
         const workerId = options._workerId;
+        const { returnBlobURL, returnUint32Buffer } = options;
         const temp = [];
         const isEnd = () => {
             return temp.length === items.length;
         }
         items.forEach((item, index) => {
             const canvas = new OffscreenCanvas(item.width, item.height);
-            const ctx = getCanvasContext(canvas);
-            ctx.drawImage(item.image, 0, 0);
+            // const ctx = getCanvasContext(canvas);
+            // ctx.drawImage(item.image, 0, 0);
             if (debug) {
                 console.log('workerId:' + workerId + ',image to blob url :' + (index + 1) + '/' + items.length);
             }
-            canvas.convertToBlob().then(blob => {
-                const url = URL.createObjectURL(blob);
+            createImageBlobURL(canvas, item.image, returnBlobURL, returnUint32Buffer).then(url => {
                 item.url = url;
                 temp.push(1);
-                disposeImage(item.image);
                 delete item.image;
                 if (isEnd()) {
                     resolve(items);

@@ -183,14 +183,14 @@ export function imageClip(tileSize: number, polygons: number[][][][], image: Ima
     return canvas.transferToImageBitmap();
 }
 
-function toBlobURL(image: ImageBitmap) {
-    const canvas = getCanvas();
-    resizeCanvas(canvas, image.width, image.height);
-    const ctx = getCanvasContext(canvas);
-    ctx.drawImage(image, 0, 0);
-    disposeImage(image);
-    return canvas.convertToBlob();
-}
+// function toBlobURL(image: ImageBitmap) {
+//     const canvas = getCanvas();
+//     resizeCanvas(canvas, image.width, image.height);
+//     const ctx = getCanvasContext(canvas);
+//     ctx.drawImage(image, 0, 0);
+//     disposeImage(image);
+//     return canvas.convertToBlob();
+// }
 
 function imageFilter(image: ImageBitmap, filter: string) {
     if (!filter) {
@@ -411,18 +411,29 @@ export function postProcessingImage(image: ImageBitmap, options) {
 }
 
 
-export function createImageBlobURL(image: ImageBitmap, returnBlobURL: boolean) {
-    return new Promise((resolve: (image: ImageBitmap | string) => void, reject) => {
-        if (!returnBlobURL) {
+export function createImageBlobURL(canvas: OffscreenCanvas, image: ImageBitmap, returnBlobURL: boolean, returnUint32Buffer: boolean) {
+    return new Promise((resolve: (image: ImageBitmap | string | ArrayBuffer) => void, reject) => {
+        if (!returnBlobURL || !returnUint32Buffer) {
             resolve(image);
-        } else {
-            toBlobURL(image).then(blob => {
-                const url = URL.createObjectURL(blob);
-                resolve(url);
-            }).catch(error => {
-                reject(error);
-            });
         }
+        resizeCanvas(canvas, image.width, image.height);
+        const ctx = getCanvasContext(canvas);
+        ctx.drawImage(image, 0, 0);
+        disposeImage(image);
+
+        if (returnUint32Buffer) {
+            const imageData = ctx.getImageData(0, 0, image.width, image.height);
+            const array = new Uint32Array(imageData.data);
+            resolve(array.buffer);
+            return;
+        }
+
+        canvas.convertToBlob().then(blob => {
+            const url = URL.createObjectURL(blob);
+            resolve(url);
+        }).catch(error => {
+            reject(error);
+        });
     })
 }
 
@@ -467,32 +478,4 @@ export function colorsTerrainTile(colors, image: ImageBitmap) {
     ctx.putImageData(imageData, 0, 0);
     disposeImage(image);
     return canvas.transferToImageBitmap();
-}
-
-
-export function tileImageToBlobURL(options) {
-    return new Promise((resolve, reject) => {
-        const image = options.image;
-        const postImage = postProcessingImage(image, options);
-        const { returnBlobURL, returnUint32Buffer } = options || {};
-        if (returnUint32Buffer) {
-            const canvas = getCanvas(image.width);
-            resizeCanvas(canvas, image.width, image.height);
-            const ctx = getCanvasContext(canvas);
-            ctx.drawImage(image, 0, 0);
-            const imageData = ctx.getImageData(0, 0, image.width, image.height);
-            const array = new Uint32Array(imageData.data);
-            disposeImage(image);
-            resolve(array.buffer);
-            return;
-        }
-
-        createImageBlobURL(postImage, returnBlobURL).then(url => {
-            resolve(url);
-        }).catch(error => {
-            reject(error);
-        })
-    });
-
-
 }
