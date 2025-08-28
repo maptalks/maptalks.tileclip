@@ -137,7 +137,7 @@ export const onmessage = function (message, postResponse) {
         })
         return;
     }
-    if (type === 'tileImageToBlobURL') {
+    if (type === 'tilePostAndToBlobURL') {
         const { image, returnBlobURL, returnUint32Buffer } = data;
         const postImage = postProcessingImage(image, data);
         createImageBlobURL(getCanvas(), postImage, returnBlobURL, returnUint32Buffer).then(image => {

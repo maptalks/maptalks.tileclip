@@ -506,7 +506,7 @@ class TileActor extends worker.Actor {
             }
             const image = canvas.transferToImageBitmap();
             if (returnBlobURL || returnUint32Buffer) {
-                this.send(Object.assign({ __type: 'tileImageToBlobURL' }, { returnBlobURL, returnUint32Buffer, image }), [], (error, url) => {
+                this.send(Object.assign({ __type: 'tilePostAndToBlobURL' }, { returnBlobURL, returnUint32Buffer, image }), [], (error, url) => {
                     if (isErrorOrCancel(error, promise)) {
                         reject(error || FetchCancelError);
                     } else {
@@ -651,7 +651,7 @@ class TileActor extends worker.Actor {
             if (filter || opacity || gaussianBlurRadius || returnBlobURL || returnUint32Buffer || mosaicSize || oldPhoto) {
                 (options as any).image = image;
                 const buffers = checkBuffers(image);
-                this.send(Object.assign({}, options, { __type: 'tileImageToBlobURL' }), buffers, (error, url) => {
+                this.send(Object.assign({}, options, { __type: 'tilePostAndToBlobURL' }), buffers, (error, url) => {
                     if (isErrorOrCancel(error, promise)) {
                         reject(error || TaskCancelError);
                     } else {
