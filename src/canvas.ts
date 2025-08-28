@@ -413,27 +413,26 @@ export function postProcessingImage(image: ImageBitmap, options) {
 
 export function createImageBlobURL(canvas: OffscreenCanvas, image: ImageBitmap, returnBlobURL: boolean, returnUint32Buffer: boolean) {
     return new Promise((resolve: (image: ImageBitmap | string | ArrayBuffer) => void, reject) => {
-        if (!returnBlobURL || !returnUint32Buffer) {
+        if (!returnBlobURL && !returnUint32Buffer) {
             resolve(image);
+            return;
         }
         resizeCanvas(canvas, image.width, image.height);
         const ctx = getCanvasContext(canvas);
         ctx.drawImage(image, 0, 0);
         disposeImage(image);
-
         if (returnUint32Buffer) {
             const imageData = ctx.getImageData(0, 0, image.width, image.height);
             const array = new Uint32Array(imageData.data);
             resolve(array.buffer);
-            return;
+        } else {
+            canvas.convertToBlob().then(blob => {
+                const url = URL.createObjectURL(blob);
+                resolve(url);
+            }).catch(error => {
+                reject(error);
+            });
         }
-
-        canvas.convertToBlob().then(blob => {
-            const url = URL.createObjectURL(blob);
-            resolve(url);
-        }).catch(error => {
-            reject(error);
-        });
     })
 }
 
