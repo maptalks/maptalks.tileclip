@@ -162,13 +162,13 @@ export type fetchOptionsType = {
     referrer?: string;//fetch referrer
     headers?: Record<string, string>;// fetch headers params. if need
     fetchOptions?: Record<string, any>;//fetch options. if need, If it exists, headers will be ignored
-    timeout?: number;//fetch timeout 
+    timeout?: number;//fetch timeout if need
     indexedDBCache?: boolean;//cache tile data by IndexedDB 
 }
 
 export type returnResultType = {
-    returnUint32Buffer?:boolean;// to Unit32 ArrayBuffer 
-    returnBlobURL?: boolean;// to return [Blob URL by createObjectURL() ](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/createObjectURL_static)? **When the blob URL is no longer in use, be sure to destroy its value** [revokeObjectURL()](https://developer.mozilla.org/zh-CN/docs/Web/API/URL/revokeObjectURL_static)
+    returnUint32Buffer?:boolean;//return to Unit32 ArrayBuffer 
+    returnBlobURL?: boolean;// to return Blob URL by createObjectURL() When the blob URL is no longer in use, be sure to destroy its value revokeObjectURL() 
 }
 
 ```
@@ -178,7 +178,7 @@ all methods return Promise with `cancel()` method
 * `getTile(options)` get tile [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap) by fetch in worker, return `Promise`
   + `options.url`:tile url or tiles urls
   + `...fetchOptionsType` fetchOptionsType params
-  + `...postProcessingOptionsType` postProcessingOptions params
+  + `...postProcessingOptionsType` postProcessingOptionsType params
   + `...returnResultType` returnResultType params 
 
 ```js
@@ -224,7 +224,7 @@ promise.then((imagebitmap) => {
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
   + `...fetchOptionsType` fetchOptionsType params
-  + `...postProcessingOptionsType` postProcessingOptions params
+  + `...postProcessingOptionsType` postProcessingOptionsType params
   + `...returnResultType` returnResultType params 
 
 ```js
@@ -278,7 +278,7 @@ promise.then((imagebitmap) => {
   + `options.tiles` : tile Data set
   + `options?.subdomains` :subdomains, such as [1, 2, 3, 4, 5]
   + `...fetchOptionsType` fetchOptionsType params
-  + `...postProcessingOptionsType` postProcessingOptions params
+  + `...postProcessingOptionsType` postProcessingOptionsType params
   + `...returnResultType` returnResultType params 
 
 ```js
@@ -340,7 +340,7 @@ promise.then((imagebitmap) => {
   + `options?.isGCJ02`: Is it the isGCJ02 coordinate system
   + `options?.errorLog`: Is there a printing error
   + `...fetchOptionsType` fetchOptionsType params
-  + `...postProcessingOptionsType` postProcessingOptions params
+  + `...postProcessingOptionsType` postProcessingOptionsType params
   + `...returnResultType` returnResultType params 
 
 ```js
@@ -608,7 +608,7 @@ tileActor.injectMask(maskId, polygon).then(data => {
 * `colorTerrainTile(options)` Terrain tile color matching, return `Promise`
   + `options.tile`:tile data, is ImageBitMap
   + `options.colors`: Color Mapping Table
-  + `...postProcessingOptionsType` postProcessingOptions params
+  + `...postProcessingOptionsType` postProcessingOptionsType params
   + `...returnResultType` returnResultType params 
 
 ```js
@@ -763,7 +763,7 @@ const result = tileActor.imageHasInjected(maskId);
   + `options.projection`: Projection code, such as : EPSG:3857
   + `options.imageId`:mask key
   + `options?.tileSize`:tile size 
-  + `...postProcessingOptionsType` postProcessingOptions params
+  + `...postProcessingOptionsType` postProcessingOptionsType params
   + `...returnResultType` returnResultType params 
   
 
