@@ -166,9 +166,11 @@ export type fetchOptionsType = {
     indexedDBCache?: boolean;//cache tile data by IndexedDB 
 }
 
+//tile default return ImageBitMap
 export type returnResultType = {
     returnUint32Buffer?:boolean;//return to Unit32 ArrayBuffer 
     returnBlobURL?: boolean;// to return Blob URL by createObjectURL() When the blob URL is no longer in use, be sure to destroy its value revokeObjectURL() 
+    returnBase64?: boolean;// return base64 
 }
 
 ```
