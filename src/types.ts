@@ -141,3 +141,14 @@ export type sliceImageItemType = {
     col: number;
     image: ImageBitmap | string | ArrayBuffer;
 }
+
+export type sliceImageResultType = {
+    rows: number;
+    cols: number;
+    rowWidth: number;
+    colHeight: number;
+    width: number;
+    height: number;
+    items: Array<sliceImageItemType>;
+
+}

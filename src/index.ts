@@ -17,7 +17,7 @@ import {
     terrainTileFixBoundaryOptions,
     resolveResultType,
     rejectResultType,
-    sliceImageItemType
+    sliceImageResultType
 } from './types.js';
 import { imageTile } from './imagetile.js';
 export { getBlankTile, get404Tile } from './canvas';
@@ -338,7 +338,7 @@ class TileActor extends worker.Actor {
     imageSlicing(options: getTileOptions) {
         options = checkOptions(options, 'imageSlicing');
         const { workerId } = getTaskId(options);
-        const promise = new Promise((resolve: (data: Array<sliceImageItemType>) => void, reject: rejectResultType) => {
+        const promise = new Promise((resolve: (data: sliceImageResultType) => void, reject: rejectResultType) => {
             const { url } = options;
             if (!url) {
                 reject(createParamsValidateError('url is null'));

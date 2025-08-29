@@ -1,5 +1,5 @@
 import { createImageBlobURL, getCanvas, getCanvasContext, mergeTiles, postProcessingImage, resizeCanvas } from "./canvas";
-import { getTileOptions } from "./types";
+import { getTileOptions, sliceImageItemType, sliceImageResultType } from "./types";
 import { fetchTile } from "./tileget";
 import { checkTileUrl, HEADERS, uuid, disposeImage } from "./util";
 
@@ -24,7 +24,7 @@ export function imageSlicing(options: getTileOptions) {
             const { width, height } = image;
             const rows = Math.ceil(height / SIZE);
             const cols = Math.ceil(width / SIZE);
-            const items = [];
+            const items: Array<sliceImageItemType> = [];
             for (let row = 1; row <= rows; row++) {
                 const y1 = (row - 1) * SIZE;
                 const y2 = Math.min(height, row * SIZE);
@@ -49,11 +49,11 @@ export function imageSlicing(options: getTileOptions) {
                     })
                 }
             }
-            const result = {
+            const result: sliceImageResultType = {
                 rows,
                 cols,
                 rowWidth: SIZE,
-                colsHeight: SIZE,
+                colHeight: SIZE,
                 width,
                 height,
                 items
