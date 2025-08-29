@@ -127,3 +127,16 @@ export type clipBufferOptions = {
     bufferSize?: number;
     polygons: number[][][][]
 }
+
+export type resolveResultType = (image: ImageBitmap | string | ArrayBuffer) => void;
+export type rejectResultType = (error: Error) => void;
+export type sliceImageItemType = {
+    x: number;
+    y: number;
+    id: number;
+    width: number;
+    height: number;
+    row: number;
+    col: number;
+    image: ImageBitmap | string | ArrayBuffer;
+}

@@ -14,7 +14,10 @@ import {
     tileIntersectMaskOptions,
     injectImageOptions,
     getImageTileOptions,
-    terrainTileFixBoundaryOptions
+    terrainTileFixBoundaryOptions,
+    resolveResultType,
+    rejectResultType,
+    sliceImageItemType
 } from './types.js';
 import { imageTile } from './imagetile.js';
 export { getBlankTile, get404Tile } from './canvas';
@@ -81,7 +84,7 @@ class TileActor extends worker.Actor {
     getTile(options: getTileOptions) {
         options = checkOptions(options, 'getTile');
         const { workerId } = getTaskId(options);
-        const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+        const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { url } = options;
             if (!url) {
                 reject(createParamsValidateError('getTile error:url is null'));
@@ -103,7 +106,7 @@ class TileActor extends worker.Actor {
     layoutTiles(options: layoutTilesOptions) {
         options = checkOptions(options, 'layoutTiles');
         const { workerId } = getTaskId(options);
-        const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+        const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { urlTemplate, tiles } = options;
             if (!urlTemplate) {
                 reject(createParamsValidateError('layoutTiles error:urlTemplate is null'));
@@ -129,7 +132,7 @@ class TileActor extends worker.Actor {
     getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
         options = checkOptions(options, 'getTileWithMaxZoom');
         const { workerId } = getTaskId(options);
-        const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+        const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { urlTemplate, maxAvailableZoom, x, y, z } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!maxZoomEnable) {
@@ -159,7 +162,7 @@ class TileActor extends worker.Actor {
     transformTile(options: transformTileOptions) {
         options = checkOptions(options, 'transformTile');
         const { workerId } = getTaskId(options);
-        const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+        const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog, debug, returnBlobURL } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!projection) {
@@ -198,7 +201,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'clipTile');
         delete (options as unknown as privateOptions).__taskId;
         delete (options as unknown as privateOptions).__workerId;
-        const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
+        const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { tile, tileBBOX, projection, tileSize, maskId } = options;
             if (!tile) {
                 reject(createParamsValidateError('clipTile error:tile is null.It should be a ImageBitmap'));
@@ -244,7 +247,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'tileIntersectMask');
         delete (options as unknown as privateOptions).__taskId;
         delete (options as unknown as privateOptions).__workerId;
-        const promise = new Promise((resolve: (result: { intersect: boolean }) => void, reject: (error: Error) => void) => {
+        const promise = new Promise((resolve: (result: { intersect: boolean }) => void, reject: rejectResultType) => {
             const { tileBBOX, maskId } = options;
             if (!tileBBOX) {
                 reject(createParamsValidateError('tileIntersectMask error:tileBBOX is null'));
@@ -272,7 +275,7 @@ class TileActor extends worker.Actor {
     }
 
     injectMask(maskId: string, geojsonFeature: GeoJSONPolygon | GeoJSONMultiPolygon) {
-        const promise = new Promise((resolve, reject) => {
+        const promise = new Promise((resolve, reject: rejectResultType) => {
             if (!maskId) {
                 reject(createParamsValidateError('injectMask error:maskId is null'));
                 return;
@@ -303,7 +306,7 @@ class TileActor extends worker.Actor {
     }
 
     removeMask(maskId: string) {
-        const promise = new Promise((resolve, reject) => {
+        const promise = new Promise((resolve, reject: rejectResultType) => {
             if (!maskId) {
                 reject(createParamsValidateError('removeMask error:maskId is null'));
                 return;
@@ -335,7 +338,7 @@ class TileActor extends worker.Actor {
     imageSlicing(options: getTileOptions) {
         options = checkOptions(options, 'imageSlicing');
         const { workerId } = getTaskId(options);
-        const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
+        const promise = new Promise((resolve: (data: Array<sliceImageItemType>) => void, reject: rejectResultType) => {
             const { url } = options;
             if (!url) {
                 reject(createParamsValidateError('url is null'));
@@ -417,7 +420,7 @@ class TileActor extends worker.Actor {
     encodeTerrainTile(options: encodeTerrainTileOptions) {
         options = checkOptions(options, 'encodeTerrainTile');
         const { workerId } = getTaskId(options);
-        const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+        const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { url, terrainType, minHeight, maxHeight } = options;
             if (!url) {
                 reject(createParamsValidateError('encodeTerrainTile error:url is null'));
@@ -453,7 +456,7 @@ class TileActor extends worker.Actor {
     terrainTileFixBoundary(options: terrainTileFixBoundaryOptions) {
         options = checkOptions(options, 'terrainTileFixBoundary');
         const { workerId } = getTaskId(options);
-        const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+        const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { tiles, returnBlobURL, returnUint32Buffer } = options;
             if (!tiles || tiles.length === 0) {
                 reject(createParamsValidateError('terrainTileFixBoundary error:tiles is null'));
@@ -530,7 +533,7 @@ class TileActor extends worker.Actor {
 
     colorTerrainTile(options: colorTerrainTileOptions) {
         options = checkOptions(options, 'colorTerrainTile');
-        const promise = new Promise((resolve: (image: ImageBitmap) => void, reject: (error: Error) => void) => {
+        const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { tile, colors } = options;
             if (!tile || !isImageBitmap(tile)) {
                 reject(createParamsValidateError('colorTerrainTile error:tile is not ImageBitMap'));
@@ -556,7 +559,7 @@ class TileActor extends worker.Actor {
 
     injectImage(options: injectImageOptions) {
         options = checkOptions(options, 'injectImage');
-        const promise = new Promise((resolve, reject) => {
+        const promise = new Promise((resolve: (data: any) => void, reject: rejectResultType) => {
             const { imageId, url, imageBBOX } = options;
             if (!imageId) {
                 reject(createParamsValidateError('injectImage error:imageId is null'));
@@ -595,7 +598,7 @@ class TileActor extends worker.Actor {
     }
 
     removeImage(imageId: string) {
-        const promise = new Promise((resolve, reject) => {
+        const promise = new Promise((resolve: (data: any) => void, reject: rejectResultType) => {
             if (!imageId) {
                 reject(createParamsValidateError('removeImage error:imageId is null'));
                 return;
@@ -628,7 +631,7 @@ class TileActor extends worker.Actor {
 
     getImageTile(options: getImageTileOptions) {
         options = checkOptions(options, 'getImageTile');
-        const promise = new Promise((resolve: (image: ImageBitmap | string) => void, reject: (error: Error) => void) => {
+        const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { tileBBOX, projection, imageId, filter, opacity, gaussianBlurRadius, returnBlobURL, returnUint32Buffer, mosaicSize, oldPhoto } = options;
             if (!tileBBOX) {
                 reject(createParamsValidateError('getImageTile error:tileBBOX is null'));
