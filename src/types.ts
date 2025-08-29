@@ -19,6 +19,7 @@ export type fetchOptionsType = {
 export type returnResultType = {
     returnBlobURL?: boolean;
     returnUint32Buffer?: boolean;
+    returnBase64?: boolean;
 }
 
 export type getTileOptions = {

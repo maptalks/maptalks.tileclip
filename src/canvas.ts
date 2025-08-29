@@ -1,4 +1,4 @@
-import { clipBufferOptions } from "./types";
+import { clipBufferOptions, returnResultType } from "./types";
 import { createDataError, disposeImage, isImageBitmap, isNumber, rgb2Height } from "./util";
 import glur from 'glur';
 import { ColorIn } from 'colorin';
@@ -411,10 +411,10 @@ export function postProcessingImage(image: ImageBitmap, options) {
 }
 
 
-export function createImageBlobURL(canvas: OffscreenCanvas, image: ImageBitmap, options) {
+export function createImageBlobURL(canvas: OffscreenCanvas, image: ImageBitmap, options: returnResultType) {
     return new Promise((resolve: (image: ImageBitmap | string | ArrayBuffer) => void, reject) => {
-        const { returnBlobURL, returnUint32Buffer } = options || {};
-        if (!returnBlobURL && !returnUint32Buffer) {
+        const { returnBlobURL, returnUint32Buffer, returnBase64 } = options || {};
+        if (!returnBlobURL && !returnUint32Buffer && !returnBase64) {
             resolve(image);
             return;
         }
@@ -426,10 +426,20 @@ export function createImageBlobURL(canvas: OffscreenCanvas, image: ImageBitmap, 
             const imageData = ctx.getImageData(0, 0, image.width, image.height);
             const array = new Uint32Array(imageData.data);
             resolve(array.buffer);
-        } else {
+        } else if (returnBlobURL) {
             canvas.convertToBlob().then(blob => {
                 const url = URL.createObjectURL(blob);
                 resolve(url);
+            }).catch(error => {
+                reject(error);
+            });
+        } else {
+            canvas.convertToBlob().then(blob => {
+                const fileReader = new FileReader();
+                fileReader.onload = () => {
+                    resolve(fileReader.result);
+                };
+                fileReader.readAsDataURL(blob);
             }).catch(error => {
                 reject(error);
             });

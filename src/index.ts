@@ -163,7 +163,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'transformTile');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { urlTemplate, x, y, z, maxAvailableZoom, projection, zoomOffset, errorLog, debug, returnBlobURL } = options;
+            const { urlTemplate, x, y, z, maxAvailableZoom, projection } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!projection) {
                 reject(createParamsValidateError('transformTile error:not find projection'));
@@ -349,8 +349,8 @@ class TileActor extends worker.Actor {
                 if (isErrorOrCancel(error, promise)) {
                     reject(error || FetchCancelError);
                 } else {
-                    const { returnBlobURL, returnUint32Buffer } = options;
-                    if (!returnBlobURL && !returnUint32Buffer) {
+                    const { returnBlobURL, returnUint32Buffer, returnBase64 } = options;
+                    if (!returnBlobURL && !returnUint32Buffer && !returnBase64) {
                         resolve(result);
                     } else {
                         const items = result.items || [];
@@ -632,7 +632,7 @@ class TileActor extends worker.Actor {
     getImageTile(options: getImageTileOptions) {
         options = checkOptions(options, 'getImageTile');
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { tileBBOX, projection, imageId, filter, opacity, gaussianBlurRadius, returnBlobURL, returnUint32Buffer, mosaicSize, oldPhoto } = options;
+            const { tileBBOX, projection, imageId, filter, opacity, gaussianBlurRadius, returnBlobURL, returnUint32Buffer, returnBase64, mosaicSize, oldPhoto } = options;
             if (!tileBBOX) {
                 reject(createParamsValidateError('getImageTile error:tileBBOX is null'));
                 return;
@@ -651,7 +651,7 @@ class TileActor extends worker.Actor {
             }
             const imageInfo = imageMap[imageId];
             const image = imageTile(imageInfo, options);
-            if (filter || opacity || gaussianBlurRadius || returnBlobURL || returnUint32Buffer || mosaicSize || oldPhoto) {
+            if (filter || opacity || gaussianBlurRadius || returnBlobURL || returnUint32Buffer || returnBase64 || mosaicSize || oldPhoto) {
                 (options as any).image = image;
                 const buffers = checkBuffers(image);
                 this.send(Object.assign({}, options, { __type: 'tilePostAndToBlobURL' }), buffers, (error, url) => {
