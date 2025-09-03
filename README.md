@@ -145,6 +145,7 @@ const tileActor = getTileActor();
 | removeImage(imageId)                    | remove image source                     |
 | imageHasInjected(imageId)               | Has the image data been injected                         |
 | getImageTile(options)                   | get tile data from    injectImage                |
+| getVTTile(options)                      | get VT tile, support merge vt data            |
 
 #### Types
 
@@ -337,7 +338,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                                             `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                                                 `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -816,4 +817,43 @@ tileActor.injectImage({
 }).catch(error => {
     console.error(error);
 })
+```
+
+* `getVTTile(options)` get vt tile arraybuffer by fetch in worker, return `Promise`
+  + `options.url`:tile url or tiles urls
+  + `...fetchOptionsType` fetchOptionsType params
+
+```js
+const layer = new maptalks.VectorTileLayer("geo", {
+    style,
+    debugTileData: true,
+    version: 1,
+    // urlTemplate: './../assets/data/suzhou_line/{z}/{x}/{y}.pbf'
+    urlTemplate: 'xxx'
+});
+
+const roadTileUrl = 'xxx';
+
+layer.on('renderercreate', function(e) {
+    e.renderer.loadTileArrayBuffer = function(url, tile, callback, options) {
+        console.log(options.command);
+        const {
+            x,
+            y,
+            z
+        } = tile;
+        const url1 = roadTileUrl.replace("{x}", x).replace('{y}', y).replace('{z}', z);
+        tileActor.getVTTile({
+            //will merge mvt data
+            url: [url, url1],
+            indexedDBCache: true
+        }).then(buffer => {
+            callback(null, buffer);
+
+        }).catch(error => {
+            console.log(error);
+            callback(error);
+        })
+    };
+});
 ```
