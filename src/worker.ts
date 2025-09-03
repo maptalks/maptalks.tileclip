@@ -2,7 +2,7 @@ import { createImageBlobURL, postProcessingImage, colorsTerrainTile, getCanvas }
 import { imageSlicing, imageToBlobURL } from './imageslice';
 import { imagetTileFetch } from './imagetile';
 import { clip, injectMask, removeMask, tileBBOXIntersectMask } from './tileclip';
-import { cancelFetch, encodeTerrainTile, getTile, getTileWithMaxZoom, layout_Tiles } from './tileget';
+import { cancelFetch, encodeTerrainTile, getTile, getTileWithMaxZoom, getVTTile, layout_Tiles } from './tileget';
 import { tileTransform } from './tiletransform';
 import { checkBuffers, createInnerError, isImageBitmap } from './util';
 
@@ -145,6 +145,15 @@ export const onmessage = function (message, postResponse) {
         }).catch(error => {
             postResponse(error);
         })
+        return;
+    }
+    if (type === 'getVTTile') {
+        const { url } = data;
+        getVTTile(url, data).then(buffer => {
+            postResponse(null, buffer, checkBuffers(buffer));
+        }).catch(error => {
+            postResponse(error);
+        });
         return;
     }
     const errorMessage = 'worker message:not support message type:' + type;

@@ -12,6 +12,7 @@ export default function WorkerPlugin() {
         renderChunk(code, chunk) {
             code = code.replace('define([\'exports\'],', '');
             code = code.replace('define(["exports"],', '');
+            code = code.replaceAll("doesn\\'t", 'does not');
             code = code.substring(0, code.length - 2);
             return 'export default `' + code + '`';
         }

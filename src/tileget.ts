@@ -1,4 +1,4 @@
-import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions, layoutTilesOptions } from './types';
+import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions, getVTTileOptions, layoutTilesOptions } from './types';
 import { colorsTerrainTile, createImageBlobURL, getCanvas, getCanvasContext, imageTileScale, layoutTiles, mergeTiles, postProcessingImage, resizeCanvas } from './canvas';
 import LRUCache from './LRUCache';
 import {
@@ -9,6 +9,10 @@ import {
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
 import { getStoreTile, storeTile } from './store';
+
+import { VectorTile } from '@mapbox/vector-tile';
+import Protobuf from 'pbf';
+import vtpbf from 'vt-pbf';
 
 const LRUCount = 200;
 
@@ -428,5 +432,43 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
             reject(createParamsValidateError('not support terrainType:' + terrainType));
         }
 
+    });
+}
+
+function copyBuffer(buffer: ArrayBuffer) {
+    const array = new Uint8Array(buffer);
+    return new Uint8Array(array).buffer;
+}
+
+export function getVTTile(url, options: getVTTileOptions) {
+    return new Promise((resolve, reject) => {
+        const urls = checkTileUrl(url);
+        const headers = Object.assign({}, HEADERS, options.headers || {});
+        const fetchTiles = urls.map(tileUrl => {
+            return fetchTileBuffer(tileUrl, headers, options)
+        });
+        Promise.all(fetchTiles).then(buffers => {
+            buffers = buffers.filter(buffer => {
+                return !!buffer;
+            });
+            if (!buffers || buffers.length === 0) {
+                reject(createDataError('buffers is null'));
+                return;
+            }
+            if (buffers.length === 1) {
+                resolve(copyBuffer(buffers[0]));
+            } else {
+                const mergeTile = new VectorTile(new Protobuf(buffers[0]));
+                buffers.slice(1, Infinity).forEach(buffer => {
+                    const tile = new VectorTile(new Protobuf(buffer));
+                    Object.assign(mergeTile.layers, tile.layers);
+                })
+                const data = vtpbf(mergeTile);
+                resolve(data.buffer);
+            }
+
+        }).catch(error => {
+            reject(error);
+        })
     });
 }

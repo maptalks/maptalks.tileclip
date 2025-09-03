@@ -17,7 +17,8 @@ import {
     terrainTileFixBoundaryOptions,
     resolveResultType,
     rejectResultType,
-    sliceImageResultType
+    sliceImageResultType,
+    getVTTileOptions
 } from './types.js';
 import { imageTile } from './imagetile.js';
 export { getBlankTile, get404Tile } from './canvas';
@@ -675,6 +676,29 @@ class TileActor extends worker.Actor {
         wrapPromise(promise, options);
         return promise;
     }
+
+    getVTTile(options: getVTTileOptions) {
+        options = checkOptions(options, 'getVTTile');
+        const { workerId } = getTaskId(options);
+        const promise = new Promise((resolve: (buffer: ArrayBuffer) => void, reject: rejectResultType) => {
+            const { url } = options;
+            if (!url) {
+                reject(createParamsValidateError('getVTTile error:url is null'));
+                return;
+            }
+            const buffers = checkBuffers(url);
+            this.send(options, buffers, (error, buffer) => {
+                if (isErrorOrCancel(error, promise)) {
+                    reject(error || FetchCancelError);
+                } else {
+                    resolve(buffer);
+                }
+            }, workerId);
+        });
+        wrapPromise(promise, options);
+        return promise;
+    }
+
 
 }
 

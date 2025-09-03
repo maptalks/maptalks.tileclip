@@ -152,3 +152,7 @@ export type sliceImageResultType = {
     items: Array<sliceImageItemType>;
 
 }
+
+export type getVTTileOptions = {
+    url: string | Array<string>
+} & fetchOptionsType;
