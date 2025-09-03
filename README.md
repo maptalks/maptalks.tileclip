@@ -37,6 +37,9 @@
 * [big image slice](https://maptalks.github.io/maptalks.tileclip/demo/imageslicing.html)
 * [custom tile error](https://maptalks.github.io/maptalks.tileclip/demo/tile-custom-error.html)
 
+* [vt tile](https://maptalks.github.io/maptalks.tileclip/demo/tile-vt.html)  
+* [vt tiles will merge mvt data](https://maptalks.github.io/maptalks.tileclip/demo/tile-vts.html) 
+
 ### Clip By Custom Prj
 
 * [EPSG:4326](https://maptalks.github.io/maptalks.tileclip/demo/4326.html)
