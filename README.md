@@ -161,6 +161,7 @@ export type postProcessingOptionsType = {
     gaussianBlurRadius?: number;// gaussian Blur Radius if need
     mosaicSize?: number;//Mosaic pixel size 
     oldPhoto?: boolean;//Old photo effect
+    invertColor?:boolean;// invert Color
 }
 
 export type fetchOptionsType = {
@@ -342,7 +343,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                                                 `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                                                  `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
