@@ -6,6 +6,7 @@ export type postProcessingOptionsType = {
     gaussianBlurRadius?: number;
     mosaicSize?: number;
     oldPhoto?: boolean;
+    invertColor?: boolean;
 }
 
 export type fetchOptionsType = {

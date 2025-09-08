@@ -192,38 +192,6 @@ export function imageClip(tileSize: number, polygons: number[][][][], image: Ima
 //     return canvas.convertToBlob();
 // }
 
-function imageFilter(image: ImageBitmap, filter: string) {
-    if (!filter) {
-        return image;
-    }
-    const canvas = getCanvas(image.width);
-    resizeCanvas(canvas, image.width, image.height);
-    const ctx = getCanvasContext(canvas);
-    ctx.save();
-    ctx.filter = filter;
-    ctx.drawImage(image, 0, 0);
-    ctx.restore();
-    const bitImage = canvas.transferToImageBitmap();
-    disposeImage(image);
-    return bitImage;
-}
-
-
-function imageGaussianBlur(image: ImageBitmap, radius: number) {
-    if (!isNumber(radius) || radius <= 0) {
-        return image;
-    }
-    const canvas = getCanvas(image.width);
-    resizeCanvas(canvas, image.width, image.height);
-    const ctx = getCanvasContext(canvas);
-    ctx.drawImage(image, 0, 0);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    glur(imageData.data, canvas.width, canvas.height, radius);
-    ctx.putImageData(imageData, 0, 0);
-    const bitImage = canvas.transferToImageBitmap();
-    disposeImage(image);
-    return bitImage;
-}
 
 export function imageTileScale(image: ImageBitmap, dx: number, dy: number, w: number, h: number) {
     const canvas = getCanvas(image.width);
@@ -235,21 +203,6 @@ export function imageTileScale(image: ImageBitmap, dx: number, dy: number, w: nu
     ctx.drawImage(image, dx, dy, w, h, 0, 0, canvas.width, canvas.height);
     ctx.restore();
     const bitImage = canvas.transferToImageBitmap();
-    disposeImage(image);
-    return bitImage;
-}
-
-function imageOpacity(image: ImageBitmap, opacity = 1) {
-    if (!isNumber(opacity) || opacity === 1 || opacity < 0 || opacity > 1) {
-        return image;
-    }
-    const canvas = getCanvas();
-    resizeCanvas(canvas, image.width, image.height);
-    const ctx = getCanvasContext(canvas);
-    ctx.globalAlpha = opacity;
-    ctx.drawImage(image, 0, 0);
-    const bitImage = canvas.transferToImageBitmap();
-    ctx.globalAlpha = 1;
     disposeImage(image);
     return bitImage;
 }
@@ -296,6 +249,56 @@ export function layoutTiles(tiles, debug: boolean) {
     }))
     return canvas.transferToImageBitmap();
 }
+
+
+function imageFilter(image: ImageBitmap, filter: string) {
+    if (!filter) {
+        return image;
+    }
+    const canvas = getCanvas(image.width);
+    resizeCanvas(canvas, image.width, image.height);
+    const ctx = getCanvasContext(canvas);
+    ctx.save();
+    ctx.filter = filter;
+    ctx.drawImage(image, 0, 0);
+    ctx.restore();
+    const bitImage = canvas.transferToImageBitmap();
+    disposeImage(image);
+    return bitImage;
+}
+
+
+function imageGaussianBlur(image: ImageBitmap, radius: number) {
+    if (!isNumber(radius) || radius <= 0) {
+        return image;
+    }
+    const canvas = getCanvas(image.width);
+    resizeCanvas(canvas, image.width, image.height);
+    const ctx = getCanvasContext(canvas);
+    ctx.drawImage(image, 0, 0);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    glur(imageData.data, canvas.width, canvas.height, radius);
+    ctx.putImageData(imageData, 0, 0);
+    const bitImage = canvas.transferToImageBitmap();
+    disposeImage(image);
+    return bitImage;
+}
+
+function imageOpacity(image: ImageBitmap, opacity = 1) {
+    if (!isNumber(opacity) || opacity === 1 || opacity < 0 || opacity > 1) {
+        return image;
+    }
+    const canvas = getCanvas();
+    resizeCanvas(canvas, image.width, image.height);
+    const ctx = getCanvasContext(canvas);
+    ctx.globalAlpha = opacity;
+    ctx.drawImage(image, 0, 0);
+    const bitImage = canvas.transferToImageBitmap();
+    ctx.globalAlpha = 1;
+    disposeImage(image);
+    return bitImage;
+}
+
 
 function imageMosaic(image: ImageBitmap, mosaicSize?: number) {
     if (!isNumber(mosaicSize)) {
@@ -400,13 +403,43 @@ function imageOldPhoto(image: ImageBitmap, oldPhoto: boolean) {
     return bitImage;
 }
 
+function imageInvertColor(image: ImageBitmap, invertColor: boolean) {
+    if (!invertColor) {
+        return image;
+    }
+    const { width, height } = image;
+    const canvas = getCanvas();
+    resizeCanvas(canvas, width, height);
+    const ctx = getCanvasContext(canvas);
+    ctx.drawImage(image, 0, 0);
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data
+
+    for (var i = 0; i < data.length; i += 4) {
+        const r = data[i + 0]
+        const g = data[i + 1]
+        const b = data[i + 2]
+
+        data[i + 0] = 255 - r;
+        data[i + 1] = 255 - g;
+        data[i + 2] = 255 - b;
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    const bitImage = canvas.transferToImageBitmap();
+    disposeImage(image);
+    return bitImage;
+}
+
+
 
 export function postProcessingImage(image: ImageBitmap, options) {
     const filterImage = imageFilter(image, options.filter);
     const blurImage = imageGaussianBlur(filterImage, options.gaussianBlurRadius);
     const opImage = imageOpacity(blurImage, options.opacity);
     const oldImage = imageOldPhoto(opImage, options.oldPhoto);
-    const mosaicImage = imageMosaic(oldImage, options.mosaicSize);
+    const invertColorImage = imageInvertColor(oldImage, options.invertColor);
+    const mosaicImage = imageMosaic(invertColorImage, options.mosaicSize);
     return mosaicImage;
 }
 
