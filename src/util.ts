@@ -164,3 +164,12 @@ export function validateSubdomains(urlTemplate: string, subdomains: string[]) {
     }
     return true;
 }
+
+export function getBlankVTTile() {
+    return new Uint8Array(0).buffer;
+}
+
+export function copyArrayBuffer(buffer: ArrayBuffer) {
+    const array = new Uint8Array(buffer);
+    return new Uint8Array(array).buffer;
+}

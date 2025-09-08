@@ -4,7 +4,8 @@ import LRUCache from './LRUCache';
 import {
     isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createParamsValidateError, createInnerError, HEADERS, disposeImage,
     isImageBitmap, createDataError, validateSubdomains, getTileUrl,
-    createNetWorkError
+    createNetWorkError,
+    copyArrayBuffer
 } from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
@@ -435,10 +436,6 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
     });
 }
 
-function copyBuffer(buffer: ArrayBuffer) {
-    const array = new Uint8Array(buffer);
-    return new Uint8Array(array).buffer;
-}
 
 export function getVTTile(url, options: getVTTileOptions) {
     return new Promise((resolve, reject) => {
@@ -456,7 +453,7 @@ export function getVTTile(url, options: getVTTileOptions) {
                 return;
             }
             if (buffers.length === 1) {
-                resolve(copyBuffer(buffers[0]));
+                resolve(copyArrayBuffer(buffers[0]));
             } else {
                 const mergeTile = new VectorTile(new Protobuf(buffers[0]));
                 buffers.slice(1, Infinity).forEach(buffer => {

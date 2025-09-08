@@ -1,5 +1,5 @@
 import { getCanvas, getCanvasContext, resizeCanvas } from './canvas.js';
-import { encodeMapBox } from './util.js';
+import { encodeMapBox } from './util';
 import './zlib.min.js';
 import { vec2, vec3 } from 'gl-matrix';
 

@@ -5,7 +5,7 @@ import {
     createParamsValidateError, FetchCancelError, isNumber, uuid,
     CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon,
     checkBuffers, TaskCancelError, disposeImage
-} from './util.js';
+} from './util';
 import { getCanvas, getCanvasContext, resizeCanvas } from './canvas';
 import {
     privateOptions, getTileOptions, layoutTilesOptions, getTileWithMaxZoomOptions,
@@ -22,6 +22,7 @@ import {
 } from './types.js';
 import { imageTile } from './imagetile.js';
 export { getBlankTile, get404Tile } from './canvas';
+export { getBlankVTTile } from './util'
 
 const WORKERNAME = '__maptalks.tileclip__';
 
