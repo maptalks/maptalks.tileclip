@@ -4,7 +4,9 @@ import WORKERCODE from './worker/worker.bundle.js';
 import {
     createParamsValidateError, FetchCancelError, isNumber, uuid,
     CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon,
-    checkBuffers, TaskCancelError, disposeImage
+    checkBuffers, TaskCancelError, disposeImage,
+    needFormatImageType,
+    needPostProcessingImage
 } from './util';
 import { getCanvas, getCanvasContext, resizeCanvas } from './canvas';
 import {
@@ -351,8 +353,7 @@ class TileActor extends worker.Actor {
                 if (isErrorOrCancel(error, promise)) {
                     reject(error || FetchCancelError);
                 } else {
-                    const { returnBlobURL, returnUint32Buffer, returnBase64 } = options;
-                    if (!returnBlobURL && !returnUint32Buffer && !returnBase64) {
+                    if (!needFormatImageType(options)) {
                         resolve(result);
                     } else {
                         const items = result.items || [];
@@ -459,7 +460,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'terrainTileFixBoundary');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { tiles, returnBlobURL, returnUint32Buffer, returnBase64 } = options;
+            const { tiles } = options;
             if (!tiles || tiles.length === 0) {
                 reject(createParamsValidateError('terrainTileFixBoundary error:tiles is null'));
                 return;
@@ -510,8 +511,10 @@ class TileActor extends worker.Actor {
                 ctx.drawImage(bottomTile.image, 0, 0, tileSize, 1, 0, tileSize - 1, tileSize, 1);
             }
             const image = canvas.transferToImageBitmap();
-            if (returnBlobURL || returnUint32Buffer || returnBase64) {
-                this.send(Object.assign({ __type: 'tilePostAndToBlobURL' }, { returnBlobURL, returnUint32Buffer, returnBase64, image }), [], (error, url) => {
+            if (needFormatImageType(options)) {
+                const buffers = checkBuffers(image);
+                const { returnBlobURL, returnUint32Buffer, returnBase64 } = options;
+                this.send(Object.assign({ __type: 'tilePostAndToBlobURL' }, { returnBlobURL, returnUint32Buffer, returnBase64, image }), buffers, (error, url) => {
                     if (isErrorOrCancel(error, promise)) {
                         reject(error || FetchCancelError);
                     } else {
@@ -634,7 +637,7 @@ class TileActor extends worker.Actor {
     getImageTile(options: getImageTileOptions) {
         options = checkOptions(options, 'getImageTile');
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { tileBBOX, projection, imageId, filter, opacity, gaussianBlurRadius, returnBlobURL, returnUint32Buffer, returnBase64, mosaicSize, oldPhoto } = options;
+            const { tileBBOX, projection, imageId } = options;
             if (!tileBBOX) {
                 reject(createParamsValidateError('getImageTile error:tileBBOX is null'));
                 return;
@@ -653,7 +656,7 @@ class TileActor extends worker.Actor {
             }
             const imageInfo = imageMap[imageId];
             const image = imageTile(imageInfo, options);
-            if (filter || opacity || gaussianBlurRadius || returnBlobURL || returnUint32Buffer || returnBase64 || mosaicSize || oldPhoto) {
+            if (needPostProcessingImage(options) || needFormatImageType(options)) {
                 (options as any).image = image;
                 const buffers = checkBuffers(image);
                 this.send(Object.assign({}, options, { __type: 'tilePostAndToBlobURL' }), buffers, (error, url) => {

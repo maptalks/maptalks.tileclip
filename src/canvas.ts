@@ -1,5 +1,5 @@
 import { clipBufferOptions, returnResultType } from "./types";
-import { createDataError, disposeImage, isImageBitmap, isNumber, rgb2Height } from "./util";
+import { createDataError, disposeImage, isImageBitmap, isNumber, needFormatImageType, rgb2Height } from "./util";
 import glur from 'glur';
 import { ColorIn } from 'colorin';
 
@@ -446,8 +446,8 @@ export function postProcessingImage(image: ImageBitmap, options) {
 
 export function createImageTypeResult(canvas: OffscreenCanvas, image: ImageBitmap, options: returnResultType) {
     return new Promise((resolve: (image: ImageBitmap | string | ArrayBuffer) => void, reject) => {
-        const { returnBlobURL, returnUint32Buffer, returnBase64 } = options || {};
-        if (!returnBlobURL && !returnUint32Buffer && !returnBase64) {
+        const { returnBlobURL, returnUint32Buffer } = options || {};
+        if (!needFormatImageType(options)) {
             resolve(image);
             return;
         }

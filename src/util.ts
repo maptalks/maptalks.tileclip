@@ -1,4 +1,4 @@
-import { GeoJSONMultiPolygon, GeoJSONPolygon } from './types';
+import { GeoJSONMultiPolygon, GeoJSONPolygon, postProcessingOptionsType, returnResultType } from './types';
 
 class CustomError extends Error {
     public code: number;
@@ -172,4 +172,14 @@ export function getBlankVTTile() {
 export function copyArrayBuffer(buffer: ArrayBuffer) {
     const array = new Uint8Array(buffer);
     return new Uint8Array(array).buffer;
+}
+
+export function needFormatImageType(options: returnResultType) {
+    const { returnBase64, returnBlobURL, returnUint32Buffer } = options;
+    return (returnBase64 || returnBlobURL || returnUint32Buffer);
+}
+
+export function needPostProcessingImage(options: postProcessingOptionsType) {
+    const { filter, opacity, gaussianBlurRadius, mosaicSize, oldPhoto } = options;
+    return (filter || opacity || gaussianBlurRadius || mosaicSize || oldPhoto);
 }

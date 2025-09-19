@@ -459,7 +459,7 @@ function checkBoundaryBlank(ctx: OffscreenCanvasRenderingContext2D) {
 
 export function tileTransform(options) {
     return new Promise((resolve, reject) => {
-        const { x, y, z, projection, zoomOffset, errorLog, debug, returnBlobURL, returnUint32Buffer, isGCJ02 } = options;
+        const { x, y, z, projection, zoomOffset, errorLog, debug, isGCJ02 } = options;
         const returnImage = (opImage) => {
             createImageTypeResult(getCanvas(), opImage, options).then(url => {
                 resolve(url);
