@@ -1,6 +1,6 @@
 import geojsonbbox from '@maptalks/geojson-bbox';
 import lineclip from 'lineclip';
-import { createImageBlobURL, getBlankTile, getCanvas, imageClip } from './canvas';
+import { createImageTypeResult, getBlankTile, getCanvas, imageClip } from './canvas';
 import { bboxInBBOX, bboxIntersect, BBOXtype } from './bbox';
 import { clipBufferOptions, clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon } from './types';
 import { lnglat2Mercator, isPolygon, isEPSG3857, createParamsValidateError, isNumber } from './util';
@@ -122,7 +122,7 @@ export function clip(options: clipTileOptions) {
         const feature = GeoJSONCache[maskId];
         // const canvas = getCanvas(tileSize);
         const returnImage = (image) => {
-            createImageBlobURL(getCanvas(), image, options).then(url => {
+            createImageTypeResult(getCanvas(), image, options).then(url => {
                 resolve(url);
             }).catch(error => {
                 reject(error);

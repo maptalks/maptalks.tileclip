@@ -459,7 +459,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'terrainTileFixBoundary');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { tiles, returnBlobURL, returnUint32Buffer } = options;
+            const { tiles, returnBlobURL, returnUint32Buffer, returnBase64 } = options;
             if (!tiles || tiles.length === 0) {
                 reject(createParamsValidateError('terrainTileFixBoundary error:tiles is null'));
                 return;
@@ -510,8 +510,8 @@ class TileActor extends worker.Actor {
                 ctx.drawImage(bottomTile.image, 0, 0, tileSize, 1, 0, tileSize - 1, tileSize, 1);
             }
             const image = canvas.transferToImageBitmap();
-            if (returnBlobURL || returnUint32Buffer) {
-                this.send(Object.assign({ __type: 'tilePostAndToBlobURL' }, { returnBlobURL, returnUint32Buffer, image }), [], (error, url) => {
+            if (returnBlobURL || returnUint32Buffer || returnBase64) {
+                this.send(Object.assign({ __type: 'tilePostAndToBlobURL' }, { returnBlobURL, returnUint32Buffer, returnBase64, image }), [], (error, url) => {
                     if (isErrorOrCancel(error, promise)) {
                         reject(error || FetchCancelError);
                     } else {

@@ -1,5 +1,5 @@
 import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions, getVTTileOptions, layoutTilesOptions } from './types';
-import { colorsTerrainTile, createImageBlobURL, getCanvas, getCanvasContext, imageTileScale, layoutTiles, mergeTiles, postProcessingImage, resizeCanvas } from './canvas';
+import { colorsTerrainTile, createImageTypeResult, getCanvas, getCanvasContext, imageTileScale, layoutTiles, mergeTiles, postProcessingImage, resizeCanvas } from './canvas';
 import LRUCache from './LRUCache';
 import {
     isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createParamsValidateError, createInnerError, HEADERS, disposeImage,
@@ -222,7 +222,7 @@ export function getTile(url, options: getTileOptions) {
             }
             // const filter = options.filter;
             const postImage = postProcessingImage(image, options);
-            createImageBlobURL(canvas, postImage, options).then(url => {
+            createImageTypeResult(canvas, postImage, options).then(url => {
                 resolve(url);
             }).catch(error => {
                 reject(error);
@@ -309,7 +309,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
                 sliceImage = imageTileScale(postImage, dx, dy, w, h);
                 // opImage = imageOpacity(imageBitMap, options.opacity);
             }
-            createImageBlobURL(getCanvas(), sliceImage, options).then(url => {
+            createImageTypeResult(getCanvas(), sliceImage, options).then(url => {
                 resolve(url);
             }).catch(error => {
                 reject(error);
@@ -344,7 +344,7 @@ export function layout_Tiles(options: layoutTilesOptions) {
             });
             const bigImage = layoutTiles(tiles, debug);
             const postImage = postProcessingImage(bigImage, options);
-            createImageBlobURL(getCanvas(), postImage, options).then(url => {
+            createImageTypeResult(getCanvas(), postImage, options).then(url => {
                 resolve(url);
             }).catch(error => {
                 reject(error);
@@ -363,7 +363,7 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
         const headers = Object.assign({}, HEADERS, options.headers || {});
         const { terrainWidth, tileSize, terrainType, minHeight, maxHeight, terrainColors } = options;
         const returnImage = (terrainImage: ImageBitmap) => {
-            createImageBlobURL(getCanvas(), terrainImage, options).then(url => {
+            createImageTypeResult(getCanvas(), terrainImage, options).then(url => {
                 resolve(url);
             }).catch(error => {
                 reject(error);

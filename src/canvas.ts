@@ -444,19 +444,20 @@ export function postProcessingImage(image: ImageBitmap, options) {
 }
 
 
-export function createImageBlobURL(canvas: OffscreenCanvas, image: ImageBitmap, options: returnResultType) {
+export function createImageTypeResult(canvas: OffscreenCanvas, image: ImageBitmap, options: returnResultType) {
     return new Promise((resolve: (image: ImageBitmap | string | ArrayBuffer) => void, reject) => {
         const { returnBlobURL, returnUint32Buffer, returnBase64 } = options || {};
         if (!returnBlobURL && !returnUint32Buffer && !returnBase64) {
             resolve(image);
             return;
         }
-        resizeCanvas(canvas, image.width, image.height);
+        const { width, height } = image;
+        resizeCanvas(canvas, width, height);
         const ctx = getCanvasContext(canvas);
         ctx.drawImage(image, 0, 0);
         disposeImage(image);
         if (returnUint32Buffer) {
-            const imageData = ctx.getImageData(0, 0, image.width, image.height);
+            const imageData = ctx.getImageData(0, 0, width, height);
             const array = new Uint32Array(imageData.data);
             resolve(array.buffer);
         } else if (returnBlobURL) {

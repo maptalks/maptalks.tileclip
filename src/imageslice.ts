@@ -1,4 +1,4 @@
-import { createImageBlobURL, getCanvas, getCanvasContext, mergeTiles, postProcessingImage, resizeCanvas } from "./canvas";
+import { createImageTypeResult, getCanvas, getCanvasContext, mergeTiles, postProcessingImage, resizeCanvas } from "./canvas";
 import { getTileOptions, sliceImageItemType, sliceImageResultType } from "./types";
 import { fetchTile } from "./tileget";
 import { checkTileUrl, HEADERS, uuid, disposeImage } from "./util";
@@ -82,7 +82,7 @@ export function imageToBlobURL(options) {
             if (debug) {
                 console.log('workerId:' + workerId + ',image to blob url :' + (index + 1) + '/' + items.length);
             }
-            createImageBlobURL(canvas, item.image, options).then(url => {
+            createImageTypeResult(canvas, item.image, options).then(url => {
                 item.url = url;
                 temp.push(1);
                 delete item.image;

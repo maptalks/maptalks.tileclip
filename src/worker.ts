@@ -1,4 +1,4 @@
-import { createImageBlobURL, postProcessingImage, colorsTerrainTile, getCanvas } from './canvas';
+import { createImageTypeResult, postProcessingImage, colorsTerrainTile, getCanvas } from './canvas';
 import { imageSlicing, imageToBlobURL } from './imageslice';
 import { imagetTileFetch } from './imagetile';
 import { clip, injectMask, removeMask, tileBBOXIntersectMask } from './tileclip';
@@ -122,7 +122,7 @@ export const onmessage = function (message, postResponse) {
         const { tile, colors } = data;
         const image = colorsTerrainTile(colors, tile);
         const postImage = postProcessingImage(image, data);
-        createImageBlobURL(getCanvas(), postImage, data).then(url => {
+        createImageTypeResult(getCanvas(), postImage, data).then(url => {
             postResponse(null, url, checkBuffers(url));
         }).catch(error => {
             postResponse(error);
@@ -140,7 +140,7 @@ export const onmessage = function (message, postResponse) {
     if (type === 'tilePostAndToBlobURL') {
         const { image } = data;
         const postImage = postProcessingImage(image, data);
-        createImageBlobURL(getCanvas(), postImage, data).then(image => {
+        createImageTypeResult(getCanvas(), postImage, data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
             postResponse(error);
