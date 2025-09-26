@@ -34,6 +34,9 @@
 * [get tile from image](https://maptalks.github.io/maptalks.tileclip/demo/imagetile.html)  
 * [get tile and clip from image](https://maptalks.github.io/maptalks.tileclip/demo/imagetile-clip.html)  
 
+* [tilerectify-gcj02-wgs84](https://maptalks.org/maptalks.tileclip/demo/tilerectify-gcj02-wgs84.html)  
+* [tilerectify-wgs84-gcj02](https://maptalks.org/maptalks.tileclip/demo/tilerectify-wgs84-gcj02.html)  
+
 * [big image slice](https://maptalks.github.io/maptalks.tileclip/demo/imageslicing.html)
 * [custom tile error](https://maptalks.github.io/maptalks.tileclip/demo/tile-custom-error.html)
 
@@ -137,7 +140,8 @@ const tileActor = getTileActor();
 | getTileWithMaxZoom(options)             | Cutting tiles, automatically cutting beyond the maximum level limit |
 | layoutTiles(options)                    | Tile layout arrangement |
 | transformTile(options)                  | Tile reprojection                                                   |
-| injectMask(maskId, Polygon/MultiPolygon) | Inject geojson data for tile clipping service                       |
+| rectifyTile(options)                    | Corrective tiles, only applicable to Chinese users                                                   |
+| injectMask(maskId, Polygon/MultiPolygon)| Inject geojson data for tile clipping service                       |
 | removeMask(maskId)                      | remove Inject geojson data                                          |
 | maskHasInjected(maskId)                 | Has the geojson data been injected                                  |
 | clipTile(options)                       | Crop tiles using injected geojson data                              |
@@ -344,7 +348,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                                                  `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                                                   `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -390,6 +394,56 @@ promise.then((imagebitmap) => {
     //do some things
     console.error(error);
 })
+```
+
+* `rectifyTile(options)` rectify tile [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap) by fetch in worker, return `Promise`. When the level exceeds the maximum level, tiles will be automatically cut
+  + `options.x`:tile col
+  + `options.y`:tile row
+  + `options.z`:tile zoom
+  + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
+  + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates 
+  + `options.projection`: 'EPSG:4326' | 'EPSG:3857'; 
+  + `options.tileBBOX`:tile BBOX `[minx,miny,maxx,maxy]`
+  + `options.transform`: 'WGS84-GCJ02' | 'GCJ02-WGS84', 
+  + `options.tileSize`: tile size 
+  + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
+  + `...fetchOptionsType` fetchOptionsType params
+  + `...postProcessingOptionsType` postProcessingOptionsType params
+  + `...returnResultType` returnResultType params 
+
+```js
+  baseLayer.on('renderercreate', function(e) {
+      //load tile image
+      //   img(Image): an Image object
+      //   url(String): the url of the tile
+      e.renderer.loadTileBitmap = function(url, tile, callback) {
+          // console.log(tile);
+          const {
+              x,
+              y,
+              z
+          } = tile;
+          const urlTemplate = baseLayer.options.urlTemplate;
+          const maxAvailableZoom = 18;
+          tileActor.rectifyTile({
+              x,
+              y,
+              z,
+              urlTemplate,
+              maxAvailableZoom,
+              tileBBOX: baseLayer._getTileBBox(tile),
+              projection: baseLayer.getProjection().code,
+              tileSize: baseLayer.getTileSize().width,
+              transform: 'GCJ02-WGS84',
+              mapZoom: map.getZoom()
+          }).then(imagebitmap => {
+              callback(imagebitmap);
+          }).catch(error => {
+              //do some things
+              console.error(error);
+          })
+      };
+  });
 ```
 
 * `injectMask(maskId,Polygon/MultiPolygon)` inject Mask(GeoJSON. Polygon) for clip tiles . return `Promise`
