@@ -20,7 +20,8 @@ import {
     resolveResultType,
     rejectResultType,
     sliceImageResultType,
-    getVTTileOptions
+    getVTTileOptions,
+    rectifyTileOptions
 } from './types.js';
 import { imageTile } from './imagetile.js';
 export { getBlankTile, get404Tile } from './canvas';
@@ -33,6 +34,8 @@ registerWorkerAdapter(WORKERNAME, WORKERCODE as unknown as string);
 const maskMap = {};
 const imageMap = {};
 const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
+
+const transformTypes = ['WGS84-GCJ02', 'GCJ02-WGS84'];
 const TerrainTypes = ['mapzen', 'tianditu', 'cesium', 'arcgis', 'qgis-gray'];
 
 function checkOptions(options, type: string) {
@@ -187,6 +190,56 @@ class TileActor extends worker.Actor {
             }
             if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
                 reject(createParamsValidateError('transformTile error:x/y/z is error'));
+                return;
+            }
+            this.send(options, [], (error, image) => {
+                if (isErrorOrCancel(error, promise)) {
+                    reject(error || FetchCancelError);
+                } else {
+                    resolve(image);
+                }
+            }, workerId);
+        });
+        wrapPromise(promise, options);
+        return promise;
+    }
+
+    rectifyTile(options: rectifyTileOptions) {
+        options = checkOptions(options, 'rectifyTile');
+        const { workerId } = getTaskId(options);
+        const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
+            const { urlTemplate, x, y, z, maxAvailableZoom, projection, tileBBOX, transform } = options;
+            const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
+            if (!projection) {
+                reject(createParamsValidateError('rectifyTile error:not find projection'));
+                return;
+            }
+            if (SUPPORTPROJECTION.indexOf(projection) === -1) {
+                reject(createParamsValidateError('rectifyTile error:not support projection:' + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
+                return;
+            }
+            if (!maxZoomEnable) {
+                reject(createParamsValidateError('rectifyTile error:maxAvailableZoom is error'));
+                return;
+            }
+            if (!urlTemplate) {
+                reject(createParamsValidateError('rectifyTile error:urlTemplate is error'));
+                return;
+            }
+            if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
+                reject(createParamsValidateError('rectifyTile error:x/y/z is error'));
+                return;
+            }
+            if (!tileBBOX) {
+                reject(createParamsValidateError('rectifyTile error:tileBBOX is null'));
+                return;
+            }
+            if (!transform) {
+                reject(createParamsValidateError('rectifyTile error:transform is null'));
+                return;
+            }
+            if (transformTypes.indexOf(transform) === -1) {
+                reject(createParamsValidateError('rectifyTile error:not support transformTo:' + transform + '.the support:' + transformTypes.join(',').toString()));
                 return;
             }
             this.send(options, [], (error, image) => {

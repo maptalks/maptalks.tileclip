@@ -16,6 +16,18 @@ export function bboxIntersect(bbox1: BBOXtype, bbox2: BBOXtype) {
     return true;
 }
 
+export function getBBOXCenter(bbox: BBOXtype): [number, number] {
+    const x = (bbox[0] + bbox[2]) / 2;
+    const y = (bbox[1] + bbox[3]) / 2;
+    return [x, y];
+}
+
+export function pointInBBOX(point: [number, number], bbox: BBOXtype) {
+    const [minx, miny, maxx, maxy] = bbox;
+    const [x, y] = point;
+    return x >= minx && x <= maxx && y >= miny && y <= maxy;
+}
+
 export function bboxInBBOX(bbox1: BBOXtype, bbox2: BBOXtype) {
     const [x1, y1, x2, y2] = bbox1;
     return x1 >= bbox2[0] && x2 <= bbox2[2] && y1 >= bbox2[1] && y2 <= bbox2[3];

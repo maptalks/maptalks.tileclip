@@ -3,7 +3,7 @@ import { getTileWithMaxZoom } from "./tileget";
 import { SphericalMercator } from '@mapbox/sphericalmercator';
 // import tileCover from '@mapbox/tile-cover';
 import { disposeImage, lnglat2Mercator } from "./util";
-import { createImageTypeResult, getBlankTile, getCanvas, getCanvasContext, layoutTiles, resizeCanvas } from "./canvas";
+import { createImageTypeResult, getBlankTile, getCanvas, getCanvasContext, layoutTiles, postProcessingImage, resizeCanvas } from "./canvas";
 import { bboxOfBBOXList, BBOXtype, pointsToBBOX, bboxToPoints } from "./bbox";
 import gcoord from 'gcoord';
 
@@ -487,13 +487,21 @@ export function tileTransform(options) {
                 if (result.loadCount >= tiles.length) {
                     const image = layoutTiles(tiles, debug);
                     let image1;
+                    const postProcessingImageHandler = (img: ImageBitmap) => {
+                        if (img) {
+                            return postProcessingImage(img, options);
+                        }
+                        return img;
+                    };
                     if (projection === 'EPSG:4326') {
                         const imageData = tilesImageData(image, result.tilesbbox, result.bbox, projection);
                         image1 = transformTiles(imageData, result.mbbox, debug);
+                        image1 = postProcessingImageHandler(image1);
                         returnImage(image1 || getBlankTile());
                     } else {
                         const imageData = tilesImageData(image, result.tilesbbox, result.mbbox, projection);
                         image1 = transformTiles(imageData, result.bbox, debug);
+                        image1 = postProcessingImageHandler(image1);
                         returnImage(image1 || getBlankTile());
                     }
                 } else {

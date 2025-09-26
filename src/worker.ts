@@ -3,6 +3,7 @@ import { imageSlicing, imageToBlobURL } from './imageslice';
 import { imagetTileFetch } from './imagetile';
 import { clip, injectMask, removeMask, tileBBOXIntersectMask } from './tileclip';
 import { cancelFetch, encodeTerrainTile, getTile, getTileWithMaxZoom, getVTTile, layout_Tiles } from './tileget';
+import { tileRectify } from './tilerectify';
 import { tileTransform } from './tiletransform';
 import { checkBuffers, createInnerError, isImageBitmap } from './util';
 
@@ -56,6 +57,14 @@ export const onmessage = function (message, postResponse) {
     }
     if (type === 'transformTile') {
         tileTransform(data).then(image => {
+            postResponse(null, image, checkBuffers(image));
+        }).catch(error => {
+            postResponse(error);
+        });
+        return;
+    }
+    if (type === 'rectifyTile') {
+        tileRectify(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
             postResponse(error);
