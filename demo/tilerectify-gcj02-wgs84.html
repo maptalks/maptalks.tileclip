@@ -13,57 +13,51 @@
 
     .container {
         width: 100%;
-        height: 100%;
-        display: flex;
-    }
-
-    .map {
-        width: 100%;
+        height: 100%
     }
 </style>
 <link rel='stylesheet' href='https://unpkg.com/maptalks/dist/maptalks.css' />
-<script type='text/javascript' src='https://unpkg.com/maptalks-gl/dist/maptalks-gl.js'></script>
+<script type='text/javascript' src='https://unpkg.com/maptalks/dist/maptalks.min.js'></script>
 <script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
 <script type='text/javascript' src='./util.js'></script>
 
-
 <body>
-    <div class="container">
-        <div id="map1" class="map"></div>
-        <!-- <div id="map2" class="map"></div> -->
-    </div>
+    <div id="map" class="container"></div>
     <script>
-
-
 
         const tileActor = maptalks.getTileActor();
         const maskId = '1';
         const baseLayer = new maptalks.TileLayer('base', {
-            // repeat: false,
             // debug: true,
             urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
+            // urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
             // urlTemplate: "https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
             subdomains: ["a", "b", "c", "d"],
             // bufferPixel: 1
         })
-
-        const urlTemplate = "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}";
 
         baseLayer.on('renderercreate', function (e) {
             //load tile image
             //   img(Image): an Image object
             //   url(String): the url of the tile
             e.renderer.loadTileBitmap = function (url, tile, callback) {
+                // console.log(tile);
                 const { x, y, z } = tile;
-                tileActor.transformTile({
+                const urlTemplate = baseLayer.options.urlTemplate;
+                const maxAvailableZoom = 18;
+                tileActor.rectifyTile({
                     x,
                     y,
                     z,
                     urlTemplate,
-                    projection: 'EPSG:3857',
-                    maxAvailableZoom: 18,
-                    isGCJ02: true
-                }).then(imagebitmap => {
+                    maxAvailableZoom,
+                    tileBBOX: baseLayer._getTileBBox(tile),
+                    projection: baseLayer.getProjection().code,
+                    tileSize: baseLayer.getTileSize().width,
+                    transform: 'GCJ02-WGS84',
+                    mapZoom: map.getZoom()
+                }
+                ).then(imagebitmap => {
                     callback(imagebitmap);
                 }).catch(error => {
                     //do some things
@@ -72,20 +66,22 @@
             };
         });
 
-        var map = new maptalks.Map('map1', {
+        var map = new maptalks.Map('map', {
             zoomControl: true,
-            "center": [120.39551233, 31.19774311], "zoom": 13.97297120395792, "pitch": 0, "bearing": 0,
-            spatialReference: {
-                projection: "EPSG:4326",
-            },
+            "center": [120.34842464, 31.18014762], "zoom": 13.00443245326703, "pitch": 0, "bearing": 0
         });
+
+        map.on('click', e => {
+            console.log(e.coordinate.toArray());
+        })
+
         baseLayer.addTo(map);
 
         const baseLayer1 = new maptalks.TileLayer('base1', {
             // debug: true,
             // urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
-            tileSystem: [1, -1, -180, 90],
-            urlTemplate: 'https://t0.tianditu.gov.cn/cia_c/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cia&STYLE=default&TILEMATRIXSET=c&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk='+tdtkey,
+            // tileSystem: [1, -1, -180, 90],
+            urlTemplate: 'https://t1.tianditu.gov.cn/DataServer?T=cva_w&X={x}&Y={y}&L={z}&tk=' + tdtkey,
             subdomains: ["a", "b", "c", "d"],
         }).addTo(map);
 

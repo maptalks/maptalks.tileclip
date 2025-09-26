@@ -17,21 +17,55 @@
     }
 </style>
 <link rel='stylesheet' href='https://unpkg.com/maptalks/dist/maptalks.css' />
-<script type='text/javascript' src='https://unpkg.com/maptalks-gl/dist/maptalks-gl.js'></script>
-<script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
+<script type='text/javascript' src='https://unpkg.com/maptalks/dist/maptalks.min.js'></script>
+<script type='text/javascript' src='../dist/maptalks.tileclip.js'></script>
 <script type='text/javascript' src='./util.js'></script>
 
 <body>
     <div id="map" class="container"></div>
     <script>
 
+        const TILESIZE = 256;
+        const ORIGIN = [-180, 90];
+        const FirstRes = 1.40625, mFirstRes = 156543.03392804097;
+
+        function get4326Res(zoom) {
+            return FirstRes / Math.pow(2, zoom);
+        }
+
+        function tile4326BBOX(x, y, z) {
+            const [orginX, orginY] = ORIGIN;
+            const res = get4326Res(z) * TILESIZE;
+
+            let mincol = x;
+            let maxcol = x;
+            let minrow = y;
+            let maxrow = y;
+            mincol = Math.floor(mincol);
+            maxcol = Math.floor(maxcol);
+            minrow = Math.floor(minrow);
+            maxrow = Math.floor(maxrow);
+
+            const xmin = orginX + (mincol) * res;
+            const xmax = orginX + (mincol + 1) * res;
+            const ymin = -orginY + (minrow) * res;
+            const ymax = -orginY + (minrow + 1) * res;
+            return [xmin, ymin, xmax, ymax];
+        }
+
+        // const bbox = tile4326BBOX(109, 21, 7);
+        // console.log(bbox);
+
+
+
         const tileActor = maptalks.getTileActor();
         const maskId = '1';
         const baseLayer = new maptalks.TileLayer('base', {
             // debug: true,
-            // urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
+            urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
             urlTemplate: "https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
             subdomains: ["a", "b", "c", "d"],
+            // bufferPixel: 1
         })
 
         const urlTemplate = 'https://t0.tianditu.gov.cn/vec_c/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=c&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tdtkey
@@ -49,6 +83,7 @@
                     urlTemplate,
                     projection: 'EPSG:4326',
                     maxAvailableZoom: 18,
+                    // debug: true
                 }).then(imagebitmap => {
                     callback(imagebitmap);
                 }).catch(error => {
@@ -60,19 +95,30 @@
 
         var map = new maptalks.Map('map', {
             zoomControl: true,
-            "center": [121.65586045, 31.12453538], "zoom": 7.064897200334302, "pitch": 0, "bearing": 0,
+            "center": [121.65586045, 31.12453538], "zoom": 3.064897200334302, "pitch": 0, "bearing": 0,
         });
         baseLayer.addTo(map);
 
         const layer = new maptalks.VectorLayer('layer').addTo(map);
 
-        const baseLayer1 = new maptalks.TileLayer('base1', {
-            // debug: true,
-            // urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
-            // tileSystem: [1, -1, -180, 90],
-            urlTemplate: 'https://t1.tianditu.gov.cn/DataServer?T=cva_w&X={x}&Y={y}&L={z}&tk=' + tdtkey,
-            subdomains: ["a", "b", "c", "d"],
-        }).addTo(map);
+
+        const symbol = {
+            polygonOpacity: 0,
+            lineColor: 'red'
+        }
+
+        // fetch('./上海市.json').then(res => res.json()).then(geojson => {
+        //     const polygons = maptalks.GeoJSON.toGeometry(geojson, (geo => {
+        //         geo.setSymbol(symbol);
+        //     }));
+        //     layer.addGeometry(polygons);
+        //     tileActor.injectMask(maskId, geojson.features[0]).then(data => {
+        //         baseLayer.addTo(map);
+        //         console.log(tileActor.maskHasInjected(maskId))
+        //     }).catch(error => {
+        //         console.error(error);
+        //     })
+        // })
 
 
     </script>

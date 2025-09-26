@@ -20,7 +20,7 @@
 <script type='text/javascript' src='http://localhost/d/maptalks.js/packages/maptalks/dist/maptalks.js'></script>
 <script type='text/javascript' src='http://localhost/d/maptalks.js/packages/gl/dist/maptalksgl.js'></script>
 <script type='text/javascript' src='../dist/maptalks.tileclip.js'></script>
-
+<script type='text/javascript' src='./util.js'></script>
 <body>
     <div id="map" class="container"></div>
     <script>
@@ -76,7 +76,7 @@
             // tileSize: 256,
             maxAvailableZoom: 14,
 
-            urlTemplate: 'https://t{s}.tianditu.gov.cn/mapservice/swdx?T=elv_c&tk=81f5d2faf4bd7ee6b55f7cd535e81518&x={x}&y={y}&l={z}',
+            urlTemplate: 'https://t{s}.tianditu.gov.cn/mapservice/swdx?T=elv_c&x={x}&y={y}&l={z}&tk=' + tdtkey,
             subdomains: ['1', '2', '3', '4', '5'],
             colors: colors4,
             exaggeration: 4,
@@ -84,7 +84,7 @@
         const group = new maptalks.GroupGLLayer('group', [], {
             terrain
         });
-  
+
         map.setView({
             "center": [118.25079334, 30.1210681, 430.3062438964844], "zoom": 8.892086520379873, "pitch": 66.64999999999992, "bearing": 112.90705084326646
         })

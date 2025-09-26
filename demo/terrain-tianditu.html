@@ -19,7 +19,7 @@
 <link rel='stylesheet' href='https://unpkg.com/maptalks/dist/maptalks.css' />
 <script type='text/javascript' src='https://unpkg.com/maptalks/dist/maptalks.min.js'></script>
 <script type='text/javascript' src='../dist/maptalks.tileclip.js'></script>
-
+<script type='text/javascript' src='./util.js'></script>
 <body>
     <div id="map" class="container"></div>
     <script>
@@ -28,7 +28,7 @@
         const maskId = '1';
         const baseLayer = new maptalks.TileLayer('base', {
             // debug: true,
-            urlTemplate: 'https://t{s}.tianditu.gov.cn/mapservice/swdx?T=elv_c&tk=81f5d2faf4bd7ee6b55f7cd535e81518&x={x}&y={y}&l={z}',
+            urlTemplate: 'https://t{s}.tianditu.gov.cn/mapservice/swdx?T=elv_c&x={x}&y={y}&l={z}&tk=' + tdtkey,
             subdomains: ['1', '2', '3', '4', '5'],
             tileSystem: [1, -1, -180, 90],
             zIndex: -1

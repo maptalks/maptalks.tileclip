@@ -21,6 +21,7 @@
 <script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
 <link href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script type='text/javascript' src='./util.js'></script>
 
 <body>
     <div id="map" class="container"></div>
@@ -36,7 +37,7 @@
         });
 
 
-      const urlTemplate = 'https://t0.tianditu.gov.cn/vec_c/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=c&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=6901643c38b65f1f9770196343cf72b2'
+        const urlTemplate = 'https://t0.tianditu.gov.cn/vec_c/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=c&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tdtkey
 
 
         // https://github.com/Leaflet/Leaflet/blob/142f94a9ba5757f7e7180ffa6cbed2b3a9bc73c9/src/layer/tile/TileLayer.js#L257
