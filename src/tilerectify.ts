@@ -2,7 +2,7 @@ import { getBBOXCenter, pointInBBOX } from "./bbox";
 import { createImageTypeResult, getBlankTile, getCanvas, getCanvasContext, layoutTiles, postProcessingImage, resizeCanvas } from "./canvas";
 import { rectifyTileOptions } from "./types";
 import gcoord from 'gcoord';
-import { isEPSG3857, lnglat2Mercator } from "./util";
+import { isEPSG3857, lnglat2Mercator, toTileItems } from "./util";
 import { getTileWithMaxZoom } from "./tileget";
 
 const debugCenter = [116.3388992615747, 39.897968400218986];
@@ -36,7 +36,7 @@ export function tileRectify(options: rectifyTileOptions) {
             return pointInBBOX(debugCenter as [number, number], tileBBOX) && z === Math.round(mapZoom);
         }
 
-        let offsetx, offsety;
+        let offsetx: number, offsety: number;
         const mx = tx >= 0 ? 1 : -1;
         const my = ty >= 0 ? -1 : 1;
         //同一个瓦片内
@@ -76,7 +76,7 @@ export function tileRectify(options: rectifyTileOptions) {
         const targetX = x + offsetx;
         const targetY = y + offsety;
 
-        let tiles = [
+        let tiles: Array<[number, number, number]> = [
             [targetX - 1, targetY - 1, z],
             [targetX, targetY - 1, z],
             [targetX + 1, targetY - 1, z],
@@ -124,8 +124,10 @@ export function tileRectify(options: rectifyTileOptions) {
             loadCount: 0
         }
 
+        const tileItemList = toTileItems(tiles);
+
         const end = () => {
-            const image = layoutTiles(tiles, debug);
+            const image = layoutTiles(tileItemList, debug);
             const canvas = getCanvas(tileSize);
             const ctx = getCanvasContext(canvas);
             ctx.drawImage(image, left, top, tileSize, tileSize, 0, 0, tileSize, tileSize);
@@ -139,12 +141,12 @@ export function tileRectify(options: rectifyTileOptions) {
         }
 
         const isEnd = () => {
-            return result.loadCount >= tiles.length;
+            return result.loadCount >= tileItemList.length;
         }
-        tiles.forEach(tile => {
-            const [x, y, z] = tile;
+        tileItemList.forEach(tile => {
+            const { x, y, z } = tile;
             getTileWithMaxZoom(Object.assign({}, options, { x, y, z, returnBlobURL: false })).then(image => {
-                (tile as any).tileImage = image;
+                tile.tileImage = image as ImageBitmap;
                 result.loadCount++;
                 if (isEnd()) {
                     end();
@@ -153,7 +155,7 @@ export function tileRectify(options: rectifyTileOptions) {
                 if (errorLog) {
                     console.error(error);
                 }
-                (tile as any).tileImage = getBlankTile();;
+                tile.tileImage = getBlankTile();;
                 result.loadCount++;
                 if (isEnd()) {
                     end();

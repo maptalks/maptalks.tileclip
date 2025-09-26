@@ -167,3 +167,11 @@ export type sliceImageResultType = {
 export type getVTTileOptions = {
     url: string | Array<string>
 } & fetchOptionsType;
+
+
+export type TileItem = {
+    x: number;
+    y: number;
+    z: number;
+    tileImage?: ImageBitmap;
+}

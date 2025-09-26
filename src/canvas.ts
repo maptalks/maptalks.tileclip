@@ -1,4 +1,4 @@
-import { clipBufferOptions, returnResultType } from "./types";
+import { clipBufferOptions, postProcessingOptionsType, returnResultType, TileItem } from "./types";
 import { createDataError, disposeImage, isImageBitmap, isNumber, needFormatImageType, rgb2Height } from "./util";
 import glur from 'glur';
 import { ColorIn } from 'colorin';
@@ -208,11 +208,11 @@ export function imageTileScale(image: ImageBitmap, dx: number, dy: number, w: nu
 }
 
 
-export function layoutTiles(tiles, debug: boolean) {
+export function layoutTiles(tiles: Array<TileItem>, debug: boolean) {
     let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
     let tileSize = 256;
     tiles.forEach(tile => {
-        const [x, y] = tile;
+        const { x, y } = tile;
         minx = Math.min(x, minx);
         miny = Math.min(y, miny);
         maxx = Math.max(x, maxx);
@@ -232,7 +232,7 @@ export function layoutTiles(tiles, debug: boolean) {
         ctx.strokeStyle = 'red'
     }
     tiles.forEach(tile => {
-        const [x, y, z] = tile;
+        const { x, y, z } = tile;
         const dx = (x - minx) * tileSize;
         const dy = (y - miny) * tileSize;
         let tileImage = tile.tileImage;
@@ -433,7 +433,7 @@ function imageInvertColor(image: ImageBitmap, invertColor: boolean) {
 
 
 
-export function postProcessingImage(image: ImageBitmap, options) {
+export function postProcessingImage(image: ImageBitmap, options: postProcessingOptionsType) {
     const filterImage = imageFilter(image, options.filter);
     const blurImage = imageGaussianBlur(filterImage, options.gaussianBlurRadius);
     const opImage = imageOpacity(blurImage, options.opacity);

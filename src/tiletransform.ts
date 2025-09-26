@@ -2,7 +2,7 @@ import { getTileWithMaxZoom } from "./tileget";
 //@ts-ignore
 import { SphericalMercator } from '@mapbox/sphericalmercator';
 // import tileCover from '@mapbox/tile-cover';
-import { disposeImage, lnglat2Mercator } from "./util";
+import { disposeImage, lnglat2Mercator, toTileItems } from "./util";
 import { createImageTypeResult, getBlankTile, getCanvas, getCanvasContext, layoutTiles, postProcessingImage, resizeCanvas } from "./canvas";
 import { bboxOfBBOXList, BBOXtype, pointsToBBOX, bboxToPoints } from "./bbox";
 import gcoord from 'gcoord';
@@ -482,10 +482,11 @@ export function tileTransform(options) {
                 returnImage(getBlankTile());
                 return;
             }
+            const tileItems = toTileItems(tiles);
             result.loadCount = 0;
             const loadTile = () => {
-                if (result.loadCount >= tiles.length) {
-                    const image = layoutTiles(tiles, debug);
+                if (result.loadCount >= tileItems.length) {
+                    const image = layoutTiles(tileItems, debug);
                     let image1;
                     const postProcessingImageHandler = (img: ImageBitmap) => {
                         if (img) {
@@ -505,10 +506,10 @@ export function tileTransform(options) {
                         returnImage(image1 || getBlankTile());
                     }
                 } else {
-                    const tile = tiles[result.loadCount];
-                    const [x, y, z] = tile;
+                    const tile = tileItems[result.loadCount];
+                    const { x, y, z } = tile;
                     getTileWithMaxZoom(Object.assign({}, options, { x, y, z, returnBlobURL: false })).then(image => {
-                        tile.tileImage = image;
+                        tile.tileImage = image as ImageBitmap;
                         result.loadCount++;
                         loadTile();
                     }).catch(error => {

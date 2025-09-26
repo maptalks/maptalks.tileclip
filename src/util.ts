@@ -1,4 +1,4 @@
-import { GeoJSONMultiPolygon, GeoJSONPolygon, postProcessingOptionsType, returnResultType } from './types';
+import { GeoJSONMultiPolygon, GeoJSONPolygon, postProcessingOptionsType, returnResultType, TileItem } from './types';
 
 class CustomError extends Error {
     public code: number;
@@ -134,6 +134,17 @@ export function checkBuffers(image: any) {
     return buffers;
 }
 
+export function toTileItems(tiles: Array<[number, number, number]>): Array<TileItem> {
+    return tiles.map(tile => {
+        const [x, y, z] = tile;
+        const item: TileItem = {
+            x,
+            y,
+            z,
+        };
+        return item;
+    })
+}
 
 
 function formatTileUrlBySubdomains(url: string, subdomains: string[]) {

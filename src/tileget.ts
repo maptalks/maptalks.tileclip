@@ -1,11 +1,12 @@
-import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions, getVTTileOptions, layoutTilesOptions } from './types';
+import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions, getVTTileOptions, layoutTilesOptions, resolveResultType } from './types';
 import { colorsTerrainTile, createImageTypeResult, getCanvas, getCanvasContext, imageTileScale, layoutTiles, mergeTiles, postProcessingImage, resizeCanvas } from './canvas';
 import LRUCache from './LRUCache';
 import {
     isNumber, checkTileUrl, FetchCancelError, FetchTimeoutError, createParamsValidateError, createInnerError, HEADERS, disposeImage,
     isImageBitmap, createDataError, validateSubdomains, getTileUrl,
     createNetWorkError,
-    copyArrayBuffer
+    copyArrayBuffer,
+    toTileItems
 } from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
@@ -235,7 +236,7 @@ export function getTile(url, options: getTileOptions) {
 
 export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
     const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, globalCompositeOperation } = options;
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve: resolveResultType, reject) => {
         const urlTemplates = checkTileUrl(urlTemplate);
         for (let i = 0, len = urlTemplates.length; i < len; i++) {
             const urlTemplate = urlTemplates[i];
@@ -327,10 +328,11 @@ export function layout_Tiles(options: layoutTilesOptions) {
             reject(createParamsValidateError('not find subdomains'));
             return;
         }
+        const tileItemList = toTileItems(tiles);
 
-        const urls = tiles.map(tile => {
-            const [tileX, tileY, tileZ] = tile;
-            return getTileUrl(urlTemplate, tileX, tileY, tileZ, subdomains);
+        const urls = tileItemList.map(tile => {
+            const { x, y, z } = tile;
+            return getTileUrl(urlTemplate, x, y, z, subdomains);
         });
         const headers = Object.assign({}, HEADERS, options.headers || {});
 
@@ -340,9 +342,9 @@ export function layout_Tiles(options: layoutTilesOptions) {
 
         Promise.all(fetchTiles).then(imagebits => {
             imagebits.forEach((image, index) => {
-                (tiles[index] as any).tileImage = image;
+                tileItemList[index].tileImage = image;
             });
-            const bigImage = layoutTiles(tiles, debug);
+            const bigImage = layoutTiles(tileItemList, debug);
             const postImage = postProcessingImage(bigImage, options);
             createImageTypeResult(getCanvas(), postImage, options).then(url => {
                 resolve(url);
