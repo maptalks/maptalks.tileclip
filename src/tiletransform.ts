@@ -508,7 +508,7 @@ export function tileTransform(options) {
                 } else {
                     const tile = tileItems[result.loadCount];
                     const { x, y, z } = tile;
-                    getTileWithMaxZoom(Object.assign({}, options, { x, y, z, returnBlobURL: false })).then(image => {
+                    getTileWithMaxZoom(Object.assign({}, options, { x, y, z, forceReturnImage: true })).then(image => {
                         tile.tileImage = image as ImageBitmap;
                         result.loadCount++;
                         loadTile();

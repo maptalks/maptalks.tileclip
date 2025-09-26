@@ -145,7 +145,7 @@ export function tileRectify(options: rectifyTileOptions) {
         }
         tileItemList.forEach(tile => {
             const { x, y, z } = tile;
-            getTileWithMaxZoom(Object.assign({}, options, { x, y, z, returnBlobURL: false })).then(image => {
+            getTileWithMaxZoom(Object.assign({}, options, { x, y, z, forceReturnImage: true })).then(image => {
                 tile.tileImage = image as ImageBitmap;
                 result.loadCount++;
                 if (isEnd()) {

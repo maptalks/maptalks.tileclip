@@ -21,6 +21,7 @@ export type returnResultType = {
     returnBlobURL?: boolean;
     returnUint32Buffer?: boolean;
     returnBase64?: boolean;
+    forceReturnImage?: boolean;
 }
 
 export type getTileOptions = {

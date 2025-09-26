@@ -186,7 +186,10 @@ export function copyArrayBuffer(buffer: ArrayBuffer) {
 }
 
 export function needFormatImageType(options: returnResultType) {
-    const { returnBase64, returnBlobURL, returnUint32Buffer } = options;
+    const { returnBase64, returnBlobURL, returnUint32Buffer, forceReturnImage } = options;
+    if (forceReturnImage) {
+        return false;
+    }
     return (returnBase64 || returnBlobURL || returnUint32Buffer);
 }
 
