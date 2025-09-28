@@ -115,8 +115,8 @@ export function imageClip(tileSize: number, polygons: number[][][][], image: Ima
     const ctx = getCanvasContext(canvas);
     const bufferPixels = [];
     const { width, height } = canvas;
-    const imageWidth = image.width;
-    const imageHeight = image.height;
+    // const imageWidth = image.width;
+    // const imageHeight = image.height;
     if (clipBufferOpts) {
         const { polygons, bufferSize } = clipBufferOpts;
         ctx.save();
@@ -171,16 +171,17 @@ export function imageClip(tileSize: number, polygons: number[][][][], image: Ima
     }
     let bitImage = canvas.transferToImageBitmap();
     ctx.restore();
-    disposeImage(image);
-    if (canvas.width === imageWidth && canvas.height === imageHeight) {
-        return bitImage;
-    }
+    return bitImage;
+    // disposeImage(image);
+    // if (canvas.width === imageWidth && canvas.height === imageHeight) {
+    //     return bitImage;
+    // }
 
-    resizeCanvas(canvas, imageWidth, imageHeight);
-    const ctx1 = getCanvasContext(canvas);
-    ctx1.drawImage(bitImage, 0, 0, imageWidth, imageHeight);
-    disposeImage(bitImage);
-    return canvas.transferToImageBitmap();
+    // resizeCanvas(canvas, imageWidth, imageHeight);
+    // const ctx1 = getCanvasContext(canvas);
+    // ctx1.drawImage(bitImage, 0, 0, imageWidth, imageHeight);
+    // disposeImage(bitImage);
+    // return canvas.transferToImageBitmap();
 }
 
 // function toBlobURL(image: ImageBitmap) {
