@@ -108,15 +108,42 @@ function drawPolygons(ctx: OffscreenCanvasRenderingContext2D, polygons: number[]
     });
 }
 
+function scalePolygons(polygons: number[][][][], scale: number) {
+    if (scale === 1) {
+        return;
+    }
+    const drawPolygon = (polygon: number[][][]) => {
+        for (let i = 0, len = polygon.length; i < len; i++) {
+            const ring = polygon[i];
+            for (let j = 0, len1 = ring.length; j < len1; j++) {
+                const [x, y] = ring[j];
+                ring[j][0] = x * scale;
+                ring[j][1] = y * scale;
+
+            }
+        }
+    };
+    polygons.forEach(polygon => {
+        drawPolygon(polygon);
+    });
+}
+
 
 
 export function imageClip(tileSize: number, polygons: number[][][][], image: ImageBitmap, reverse: boolean, clipBufferOpts?: clipBufferOptions) {
+    const imageWidth = image.width;
+    const imageHeight = image.height;
+    let scale = 1;
+    if (imageWidth !== tileSize) {
+        scale = imageWidth / tileSize;
+        scalePolygons(polygons, scale);
+
+    }
     const canvas = getCanvas(tileSize);
+    resizeCanvas(canvas, imageWidth, imageHeight);
     const ctx = getCanvasContext(canvas);
     const bufferPixels = [];
     const { width, height } = canvas;
-    // const imageWidth = image.width;
-    // const imageHeight = image.height;
     if (clipBufferOpts) {
         const { polygons, bufferSize } = clipBufferOpts;
         ctx.save();
@@ -124,6 +151,9 @@ export function imageClip(tileSize: number, polygons: number[][][][], image: Ima
         ctx.lineWidth = bufferSize * 2;
         ctx.lineJoin = "round";
         ctx.strokeStyle = 'black';
+        if (scale !== 1) {
+            scalePolygons(polygons, scale);
+        }
         //draw black border
 
         drawPolygons(ctx, polygons);

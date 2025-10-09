@@ -141,7 +141,7 @@ export function clip(options: clipTileOptions) {
 
         const judgeReverse = () => {
             if (!reverse) {
-                returnImage(getBlankTile(tileSize));
+                returnImage(getBlankTile(256));
             } else {
                 returnImage(tile);
             }
