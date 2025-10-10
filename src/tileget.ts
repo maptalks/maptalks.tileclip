@@ -396,6 +396,7 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
                 }
                 ctx.putImageData(imageData, 0, 0);
                 const terrainImage = canvas.transferToImageBitmap();
+                disposeImage(image);
                 returnImage(colorsTerrainTile(terrainColors, terrainImage));
             }).catch(error => {
                 reject(error);

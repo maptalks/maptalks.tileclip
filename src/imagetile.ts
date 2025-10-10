@@ -68,7 +68,8 @@ export function imagetTileFetch(options: injectImageOptions) {
 
         fetch(url, fetchOptions).then(res => {
             if (!res.ok) {
-                reject(createNetWorkError(url))
+                reject(createNetWorkError(url));
+                return;
             }
             return res.blob();
         }).then(blob => createImageBitmap(blob)).then(image => {

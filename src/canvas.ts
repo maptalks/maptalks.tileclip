@@ -201,6 +201,7 @@ export function imageClip(tileSize: number, polygons: number[][][][], image: Ima
     }
     let bitImage = canvas.transferToImageBitmap();
     ctx.restore();
+    disposeImage(image);
     return bitImage;
     // disposeImage(image);
     // if (canvas.width === imageWidth && canvas.height === imageHeight) {
