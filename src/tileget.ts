@@ -115,7 +115,8 @@ export function fetchTile(url: string, headers = {}, options) {
                 cacheFetch(taskId, control);
                 fetch(url, fetchOptions).then(res => {
                     if (!res.ok) {
-                        reject(createNetWorkError(url))
+                        reject(createNetWorkError(url));
+                        return;
                     }
                     return res.blob();
                 }).then(blob => createImageBitmap(blob)).then(image => {
@@ -170,7 +171,8 @@ export function fetchTileBuffer(url: string, headers = {}, options) {
                 cacheFetch(taskId, control);
                 fetch(url, fetchOptions).then(res => {
                     if (!res.ok) {
-                        reject(createNetWorkError(url))
+                        reject(createNetWorkError(url));
+                        return;
                     }
                     return res.arrayBuffer();
                 }).then(buffer => {
