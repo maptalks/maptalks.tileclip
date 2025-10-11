@@ -84,6 +84,7 @@
 * [leaflet gettile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-simple.html)
 * [leaflet transform tile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-transform.html)  
 * [leaflet-imagetile-clip demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-imagetile-clip.html)  
+* [maplibre transform EPSG4326 to EPSG3857 demo](https://maptalks.github.io/maptalks.tileclip/demo/maplibre.html)  
 
 ## Install
 

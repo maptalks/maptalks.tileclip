@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Interactions - Draw tool to draw geometries</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+</style>
+<link rel='stylesheet' href='https://unpkg.com/maplibre-gl@5.9.0/dist/maplibre-gl.css' />
+<script type='text/javascript' src='https://unpkg.com/maptalks/dist/maptalks.min.js'></script>
+<script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
+<script type='text/javascript' src='./maplibre-gl-dev.js'></script>
+<script type='text/javascript' src='./util.js'></script>
+
+<body>
+    <div id="map" class="container"></div>
+    <script>
+
+        // this is 4326
+        const urlTemplate = 'https://t0.tianditu.gov.cn/vec_c/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=c&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tdtkey
+
+        const tileActor = maptalks.getTileActor();
+        const maskId = '1';
+
+        const { ImageRequest, Texture } = maplibregl;
+
+        const ResourceType = {
+            Glyphs: 'Glyphs',
+            Image: 'Image',
+            Source: 'Source',
+            SpriteImage: 'SpriteImage',
+            SpriteJSON: 'SpriteJSON',
+            Style: 'Style',
+            Tile: 'Tile',
+            Unknown: 'Unknown',
+        };
+
+        //custom tile fetch
+        maplibregl.RasterTileSource.prototype.loadTile = async function (tile) {
+            const url = tile.tileID.canonical.url(this.tiles, this.map.getPixelRatio(), this.scheme);
+            tile.abortController = new AbortController();
+            try {
+
+                let response;
+                // this is need to transform
+                if (url.includes('SERVICE=WMTS')) {
+                    // console.log(url, tile);
+                    const { x, y, z } = tile.tileID.canonical;
+                    const image = await tileActor.transformTile({
+                        x,
+                        y,
+                        z,
+                        urlTemplate,
+                        projection: 'EPSG:4326',
+                        maxAvailableZoom: 18,
+                    });
+                    console.log(image);
+                    response = {
+                        data: image
+                    }
+                } else {
+                    response = await ImageRequest.getImage(this.map._requestManager.transformRequest(url, ResourceType.Tile), tile.abortController, this.map._refreshExpiredTiles);
+                }
+                // const response = await ImageRequest.getImage(this.map._requestManager.transformRequest(url, ResourceType.Tile), tile.abortController, this.map._refreshExpiredTiles);
+                delete tile.abortController;
+                if (tile.aborted) {
+                    tile.state = 'unloaded';
+                    return;
+                }
+                if (response && response.data) {
+                    if (this.map._refreshExpiredTiles && (response.cacheControl || response.expires)) {
+                        tile.setExpiryData({ cacheControl: response.cacheControl, expires: response.expires });
+                    }
+                    const context = this.map.painter.context;
+                    const gl = context.gl;
+                    const img = response.data;
+                    tile.texture = this.map.painter.getTileTexture(img.width);
+                    if (tile.texture) {
+                        tile.texture.update(img, { useMipmap: true });
+                    } else {
+                        tile.texture = new Texture(context, img, gl.RGBA, { useMipmap: true });
+                        tile.texture.bind(gl.LINEAR, gl.CLAMP_TO_EDGE, gl.LINEAR_MIPMAP_NEAREST);
+                    }
+                    tile.state = 'loaded';
+                }
+            } catch (err) {
+                delete tile.abortController;
+                if (tile.aborted) {
+                    tile.state = 'unloaded';
+                } else if (err) {
+                    tile.state = 'errored';
+                    throw err;
+                }
+            }
+        }
+
+        const map = new maplibregl.Map({
+            container: 'map', // container id
+            style: {
+                'version': 8,
+                'sources': {
+                    'raster-label': {
+                        'type': 'raster',
+                        //this is 3857
+                        'tiles': ['https://t1.tianditu.gov.cn/DataServer?T=cva_w&X={x}&Y={y}&L={z}&tk=' + tdtkey],
+                        'tileSize': 256,
+                        'minzoom': 0,
+                        'maxzoom': 18
+                    },
+                    'raster-tiles': {
+                        'type': 'raster',
+                        'tiles': [urlTemplate],
+                        'tileSize': 256,
+                        'minzoom': 0,
+                        'maxzoom': 18
+                    }
+                },
+                'layers': [
+
+                    {
+                        'id': 'simple-tiles1',
+                        'type': 'raster',
+                        'source': 'raster-tiles',
+                        'attribution': "© OpenStreetMap contributors",
+                    },
+                    {
+                        'id': 'simple-tiles',
+                        'type': 'raster',
+                        'source': 'raster-label',
+                        'attribution': "© OpenStreetMap contributors",
+                    },
+                ],
+                'id': 'blank'
+            },
+            "center": [121.65586045, 31.12453538], "zoom": 7.064897200334302, "pitch": 0, "bearing": 0,
+        });
+
+
+
+
+
+
+
+    </script>
+</body>
+
+</html>
