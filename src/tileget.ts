@@ -23,8 +23,49 @@ const tileImageCache = new LRUCache<ImageBitmap>(LRUCount, (image) => {
 });
 const tileBufferCache = new LRUCache<ArrayBuffer>(LRUCount, (buffer) => {
     buffer = null;
-    // disposeImage(image);
 });
+
+type FetchQueueItem = {
+    control: AbortController;
+    fetchRun: Function
+}
+const FetchRuningQueue: number[] = [];
+const FetchWaitQueue: Array<FetchQueueItem> = [];
+
+function addFetchQueue(control: AbortController, fetchRun: Function) {
+    if (FetchRuningQueue.length < 4) {
+        FetchRuningQueue.push(1)
+        fetchRun();
+    } else {
+        FetchWaitQueue.push({
+            control,
+            fetchRun
+        });
+    }
+}
+
+function finishFetchQueue(control: AbortController) {
+    if (FetchRuningQueue.length) {
+        FetchRuningQueue.shift();
+    }
+
+    if (FetchWaitQueue.length) {
+        let item = FetchWaitQueue.filter(item => {
+            return item.control === control;
+        })[0];
+        if (item) {
+            const index = FetchWaitQueue.indexOf(item);
+            if (index > -1) {
+                FetchWaitQueue.splice(index, 1);
+            }
+        }
+    }
+    if (FetchWaitQueue.length) {
+        const item = FetchWaitQueue.shift();
+        addFetchQueue(item.control, item.fetchRun);
+    }
+
+}
 
 
 const CONTROLCACHE: Record<string, Array<AbortController>> = {};
@@ -39,12 +80,14 @@ export function cancelFetch(taskId: string) {
     if (controlList.length) {
         controlList.forEach(control => {
             control.abort(FetchCancelError);
+            finishFetchQueue(control);
         });
     }
     delete CONTROLCACHE[taskId];
 }
 
 function finishFetch(control: AbortController) {
+    finishFetchQueue(control);
     const deletekeys = [];
     for (let key in CONTROLCACHE) {
         const controlList = CONTROLCACHE[key] || [];
@@ -86,7 +129,6 @@ function generateFetchOptions(headers, options) {
 }
 
 export function fetchTile(url: string, headers = {}, options) {
-    // console.log(abortControlCache);
     return new Promise((resolve: (image: ImageBitmap) => void, reject) => {
         const copyImageBitMap = (image: ImageBitmap) => {
             createImageBitmap(image).then(imagebit => {
@@ -99,50 +141,51 @@ export function fetchTile(url: string, headers = {}, options) {
             copyImageBitMap(url as unknown as ImageBitmap);
             return;
         }
-        const { indexedDBCache } = options;
 
+        const image = tileImageCache.get(url);
+        if (image) {
+            copyImageBitMap(image);
+            return;
+        }
+        const { indexedDBCache } = options;
+        const { fetchOptions, control } = generateFetchOptions(headers, options);
         const fetchTileData = () => {
             const taskId = options.__taskId;
             if (!taskId) {
                 reject(createInnerError('taskId is null'));
                 return;
             }
-            const image = tileImageCache.get(url);
-            if (image) {
+            cacheFetch(taskId, control);
+            fetch(url, fetchOptions).then(res => {
+                if (!res.ok) {
+                    finishFetch(control);
+                    reject(createNetWorkError(url));
+                    return;
+                }
+                return res.blob();
+            }).then(blob => createImageBitmap(blob)).then(image => {
+                if (options.disableCache !== true) {
+                    tileImageCache.add(url, image);
+                }
+                if (indexedDBCache) {
+                    storeTile(url, image);
+                }
+                finishFetch(control);
                 copyImageBitMap(image);
-            } else {
-                const { fetchOptions, control } = generateFetchOptions(headers, options);
-                cacheFetch(taskId, control);
-                fetch(url, fetchOptions).then(res => {
-                    if (!res.ok) {
-                        reject(createNetWorkError(url));
-                        return;
-                    }
-                    return res.blob();
-                }).then(blob => createImageBitmap(blob)).then(image => {
-                    if (options.disableCache !== true) {
-                        tileImageCache.add(url, image);
-                    }
-                    if (indexedDBCache) {
-                        storeTile(url, image);
-                    }
-                    finishFetch(control);
-                    copyImageBitMap(image);
-                }).catch(error => {
-                    finishFetch(control);
-                    reject(error);
-                });
-            }
+            }).catch(error => {
+                finishFetch(control);
+                reject(error);
+            });
         }
         if (!indexedDBCache) {
-            fetchTileData();
+            addFetchQueue(control, fetchTileData);
             return;
         }
         getStoreTile(url).then(image => {
             if (image && indexedDBCache) {
                 copyImageBitMap(image as ImageBitmap);
             } else {
-                fetchTileData();
+                addFetchQueue(control, fetchTileData);
             }
         }).catch(() => {
 
@@ -164,46 +207,47 @@ export function fetchTileBuffer(url: string, headers = {}, options) {
         const buffer = tileBufferCache.get(url);
         if (buffer) {
             copyBuffer(buffer);
-        } else {
-            const { indexedDBCache } = options;
-            const fetchTileData = () => {
-                const { fetchOptions, control } = generateFetchOptions(headers, options);
-                cacheFetch(taskId, control);
-                fetch(url, fetchOptions).then(res => {
-                    if (!res.ok) {
-                        reject(createNetWorkError(url));
-                        return;
-                    }
-                    return res.arrayBuffer();
-                }).then(buffer => {
-                    if (options.disableCache !== true) {
-                        tileBufferCache.add(url, buffer);
-                    }
+            return;
+        }
+        const { indexedDBCache } = options;
+        const { fetchOptions, control } = generateFetchOptions(headers, options);
+        const fetchTileData = () => {
+            cacheFetch(taskId, control);
+            fetch(url, fetchOptions).then(res => {
+                if (!res.ok) {
                     finishFetch(control);
-                    if (indexedDBCache) {
-                        storeTile(url, buffer);
-                    }
-                    copyBuffer(buffer);
-                }).catch(error => {
-                    finishFetch(control);
-                    reject(error);
-                });
-            }
-            if (!indexedDBCache) {
-                fetchTileData();
-                return;
-            }
-
-            getStoreTile(url).then(buffer => {
-                if (buffer && indexedDBCache) {
-                    copyBuffer(buffer as ArrayBuffer);
-                } else {
-                    fetchTileData();
+                    reject(createNetWorkError(url));
+                    return;
                 }
-            }).catch(() => {
-
+                return res.arrayBuffer();
+            }).then(buffer => {
+                if (options.disableCache !== true) {
+                    tileBufferCache.add(url, buffer);
+                }
+                finishFetch(control);
+                if (indexedDBCache) {
+                    storeTile(url, buffer);
+                }
+                copyBuffer(buffer);
+            }).catch(error => {
+                finishFetch(control);
+                reject(error);
             });
         }
+        if (!indexedDBCache) {
+            addFetchQueue(control, fetchTileData);
+            return;
+        }
+
+        getStoreTile(url).then(buffer => {
+            if (buffer && indexedDBCache) {
+                copyBuffer(buffer as ArrayBuffer);
+            } else {
+                addFetchQueue(control, fetchTileData);
+            }
+        }).catch(() => {
+
+        });
     });
 
 }
