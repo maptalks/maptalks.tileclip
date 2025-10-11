@@ -468,63 +468,65 @@ export function tileTransform(options) {
             })
         }
 
-        const loadTiles = () => {
-            let result;
-            if (projection === 'EPSG:4326') {
-                result = cal4326Tiles(x, y, z, zoomOffset || 0, isGCJ02);
+        let result;
+        if (projection === 'EPSG:4326') {
+            result = cal4326Tiles(x, y, z, zoomOffset || 0, isGCJ02);
 
-            } else if (projection === 'EPSG:3857') {
-                result = cal3857Tiles(x, y, z, zoomOffset || 0, isGCJ02);
-            }
-            // console.log(result);
-            const { tiles } = result || {};
-            if (!tiles || tiles.length === 0) {
-                returnImage(getBlankTile());
-                return;
-            }
-            const tileItems = toTileItems(tiles);
-            result.loadCount = 0;
-            const loadTile = () => {
-                if (result.loadCount >= tileItems.length) {
-                    const image = layoutTiles(tileItems, debug);
-                    let image1;
-                    const postProcessingImageHandler = (img: ImageBitmap) => {
-                        if (img) {
-                            return postProcessingImage(img, options);
-                        }
-                        return img;
-                    };
-                    if (projection === 'EPSG:4326') {
-                        const imageData = tilesImageData(image, result.tilesbbox, result.bbox, projection);
-                        image1 = transformTiles(imageData, result.mbbox, debug);
-                        image1 = postProcessingImageHandler(image1);
-                        returnImage(image1 || getBlankTile());
-                    } else {
-                        const imageData = tilesImageData(image, result.tilesbbox, result.mbbox, projection);
-                        image1 = transformTiles(imageData, result.bbox, debug);
-                        image1 = postProcessingImageHandler(image1);
-                        returnImage(image1 || getBlankTile());
-                    }
-                } else {
-                    const tile = tileItems[result.loadCount];
-                    const { x, y, z } = tile;
-                    getTileWithMaxZoom(Object.assign({}, options, { x, y, z, forceReturnImage: true })).then(image => {
-                        tile.tileImage = image as ImageBitmap;
-                        result.loadCount++;
-                        loadTile();
-                    }).catch(error => {
-                        if (errorLog) {
-                            console.error(error);
-                        }
-                        tile.tileImage = getBlankTile();;
-                        result.loadCount++;
-                        loadTile();
-                    });
-                }
-            }
-            loadTile();
+        } else if (projection === 'EPSG:3857') {
+            result = cal3857Tiles(x, y, z, zoomOffset || 0, isGCJ02);
         }
-        loadTiles();
+        const { tiles } = result || {};
+        if (!tiles || tiles.length === 0) {
+            returnImage(getBlankTile());
+            return;
+        }
+        const tileItems = toTileItems(tiles);
+        result.loadCount = 0;
+        const isEnd = () => {
+            return result.loadCount >= tileItems.length;
+        }
+        const transform = () => {
+            const image = layoutTiles(tileItems, debug);
+            let image1;
+            const postProcessingImageHandler = (img: ImageBitmap) => {
+                if (img) {
+                    return postProcessingImage(img, options);
+                }
+                return img;
+            };
+            if (projection === 'EPSG:4326') {
+                const imageData = tilesImageData(image, result.tilesbbox, result.bbox, projection);
+                image1 = transformTiles(imageData, result.mbbox, debug);
+                image1 = postProcessingImageHandler(image1);
+                returnImage(image1 || getBlankTile());
+            } else {
+                const imageData = tilesImageData(image, result.tilesbbox, result.mbbox, projection);
+                image1 = transformTiles(imageData, result.bbox, debug);
+                image1 = postProcessingImageHandler(image1);
+                returnImage(image1 || getBlankTile());
+            }
+        }
+
+        tileItems.forEach(tile => {
+            const { x, y, z } = tile;
+            getTileWithMaxZoom(Object.assign({}, options, { x, y, z, forceReturnImage: true })).then(image => {
+                tile.tileImage = image as ImageBitmap;
+                result.loadCount++;
+                if (isEnd()) {
+                    transform();
+                }
+            }).catch(error => {
+                if (errorLog) {
+                    console.error(error);
+                }
+                tile.tileImage = getBlankTile();;
+                result.loadCount++;
+                if (isEnd()) {
+                    transform();
+                }
+            });
+        });
+
 
     })
 }
