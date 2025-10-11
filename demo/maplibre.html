@@ -45,6 +45,19 @@
             Unknown: 'Unknown',
         };
 
+
+        maplibregl.RasterTileSource.prototype.abortTile = async function (tile) {
+            if (tile.promise && tile.promise.cancel) {
+                tile.promise.cancel();
+                tile.aborted = true;
+            }
+            if (tile.abortController) {
+                tile.abortController.abort();
+                delete tile.abortController;
+            }
+        }
+
+
         //custom tile fetch
         maplibregl.RasterTileSource.prototype.loadTile = async function (tile) {
             const url = tile.tileID.canonical.url(this.tiles, this.map.getPixelRatio(), this.scheme);
@@ -54,9 +67,8 @@
                 let response;
                 // this is need to transform
                 if (url.includes('SERVICE=WMTS')) {
-                    // console.log(url, tile);
                     const { x, y, z } = tile.tileID.canonical;
-                    const image = await tileActor.transformTile({
+                    const promise = tileActor.transformTile({
                         x,
                         y,
                         z,
@@ -64,14 +76,15 @@
                         projection: 'EPSG:4326',
                         maxAvailableZoom: 18,
                     });
-                    console.log(image);
+                    tile.promise = promise;
+                    const image = await promise;
                     response = {
-                        data: image
+                        data: image,
+                        cacheControl: "max-age=432000"
                     }
                 } else {
                     response = await ImageRequest.getImage(this.map._requestManager.transformRequest(url, ResourceType.Tile), tile.abortController, this.map._refreshExpiredTiles);
                 }
-                // const response = await ImageRequest.getImage(this.map._requestManager.transformRequest(url, ResourceType.Tile), tile.abortController, this.map._refreshExpiredTiles);
                 delete tile.abortController;
                 if (tile.aborted) {
                     tile.state = 'unloaded';
@@ -79,6 +92,7 @@
                 }
                 if (response && response.data) {
                     if (this.map._refreshExpiredTiles && (response.cacheControl || response.expires)) {
+                        // console.log(response)
                         tile.setExpiryData({ cacheControl: response.cacheControl, expires: response.expires });
                     }
                     const context = this.map.painter.context;
@@ -119,6 +133,14 @@
                     },
                     'raster-tiles': {
                         'type': 'raster',
+                        //this is 3857
+                        'tiles': ['https://t1.tianditu.gov.cn/DataServer?T=vec_w&X={x}&Y={y}&L={z}&tk=' + tdtkey],
+                        'tileSize': 256,
+                        'minzoom': 0,
+                        'maxzoom': 18
+                    },
+                    'raster-tiles1': {
+                        'type': 'raster',
                         'tiles': [urlTemplate],
                         'tileSize': 256,
                         'minzoom': 0,
@@ -130,7 +152,7 @@
                     {
                         'id': 'simple-tiles1',
                         'type': 'raster',
-                        'source': 'raster-tiles',
+                        'source': 'raster-tiles1',
                         'attribution': "© OpenStreetMap contributors",
                     },
                     {
