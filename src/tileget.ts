@@ -16,7 +16,7 @@ import { VectorTile } from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 import vtpbf from 'vt-pbf';
 
-const LRUCount = 200;
+const LRUCount = 500;
 
 const tileImageCache = new LRUCache<ImageBitmap>(LRUCount, (image) => {
     disposeImage(image as ImageBitmap);

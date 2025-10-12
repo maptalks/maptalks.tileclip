@@ -7,6 +7,20 @@ import { createImageTypeResult, getBlankTile, getCanvas, getCanvasContext, layou
 import { bboxOfBBOXList, BBOXtype, pointsToBBOX, bboxToPoints } from "./bbox";
 import gcoord from 'gcoord';
 
+type tileCalResult = {
+    //所有的tiles
+    tiles: Array<[number, number, number]>;
+    //所有tiles的包围盒,经纬度
+    tilesbbox: BBOXtype,
+    //当前瓦片的包围盒,经纬度
+    bbox: BBOXtype,
+    //当前瓦片的包围盒,墨卡托
+    mbbox: BBOXtype;
+    x: number;
+    y: number;
+    z: number;
+}
+
 const FirstRes = 1.40625, mFirstRes = 156543.03392804097;
 const TILESIZE = 256;
 const ORIGIN = [-180, 90];
@@ -48,7 +62,7 @@ function tile4326BBOX(x: number, y: number, z: number): BBOXtype {
 }
 
 
-function offsetTileBBOX(bbox: BBOXtype, projection: string, isGCJ02) {
+function offsetTileBBOX(bbox: BBOXtype, projection: string, isGCJ02: boolean) {
     if (!isGCJ02) {
         return;
     }
@@ -104,7 +118,7 @@ function offsetTileBBOX(bbox: BBOXtype, projection: string, isGCJ02) {
  * @param zoomOffset 
  * @returns 
  */
-function cal4326Tiles(x: number, y: number, z: number, zoomOffset = 0, isGCJ02) {
+function cal4326Tiles(x: number, y: number, z: number, zoomOffset = 0, isGCJ02: boolean): tileCalResult {
     zoomOffset = zoomOffset || 0;
     const [orginX, orginY] = ORIGIN;
     const res = get4326Res(z) * TILESIZE;
@@ -150,7 +164,7 @@ function cal4326Tiles(x: number, y: number, z: number, zoomOffset = 0, isGCJ02) 
     };
 }
 
-function cal3857Tiles(x: number, y: number, z: number, zoomOffset = 0, isGCJ02) {
+function cal3857Tiles(x: number, y: number, z: number, zoomOffset = 0, isGCJ02: boolean): tileCalResult {
     zoomOffset = zoomOffset || 0;
     const [orginX, orginY] = MORIGIN;
     const res = get3857Res(z) * TILESIZE;
@@ -194,7 +208,7 @@ function cal3857Tiles(x: number, y: number, z: number, zoomOffset = 0, isGCJ02) 
 }
 
 
-function tilesImageData(image, tilesbbox, tilebbox, projection) {
+function tilesImageData(image: ImageBitmap, tilesbbox: BBOXtype, tilebbox: BBOXtype, projection: string) {
     const { width, height } = image;
     const [minx, miny, maxx, maxy] = tilesbbox;
     const ax = (maxx - minx) / width, ay = (maxy - miny) / height;
@@ -229,23 +243,39 @@ function tilesImageData(image, tilesbbox, tilebbox, projection) {
     let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
     let index = -1;
     const method = projection === 'EPSG:4326' ? merc.forward : merc.inverse;
+    const tempRow = [];
+    const TEMPPOINT = [];
     for (let row = 1; row <= h; row++) {
         const y = tmaxy - (row - 1) * ay;
         const y1 = y - ay;
+        const nextRow = row > 1;
         for (let col = 1; col <= w; col++) {
             const idx = (row - 1) * w * 4 + (col - 1) * 4;
             const r = imageData[idx], g = imageData[idx + 1], b = imageData[idx + 2], a = imageData[idx + 3];
             const x = tminx + (col - 1) * ax;
-            const coordinates = [x, y];
-            const point = method(coordinates as any);
+            let point;
+            if (nextRow) {
+                point = tempRow[col];
+            } else {
+                TEMPPOINT[0] = x;
+                TEMPPOINT[1] = y;
+                point = method(TEMPPOINT as any);
+            }
+
             xmin = Math.min(xmin, point[0]);
             xmax = Math.max(xmax, point[0]);
             ymin = Math.min(ymin, point[1]);
             ymax = Math.max(ymax, point[1]);
-            const coordinates1 = [x, y1];
+
+            TEMPPOINT[0] = x;
+            TEMPPOINT[1] = y1;
+            let point1 = method(TEMPPOINT as any);
+            tempRow[col] = point1;
+
+
             pixels[++index] = {
                 point,
-                point1: method(coordinates1 as any),
+                point1,
                 r,
                 g,
                 b,
@@ -253,12 +283,13 @@ function tilesImageData(image, tilesbbox, tilebbox, projection) {
             };
         }
     }
+
     return {
         pixels,
         bbox: [xmin, ymin, xmax, ymax],
         width: w,
         height: h,
-        image: tileCanvas.transferToImageBitmap()
+        // image: tileCanvas.transferToImageBitmap()
         // canvas: tileCanvas
     };
 }
@@ -293,9 +324,14 @@ function transformTiles(pixelsresult, mbbox, debug) {
         const { point, point1, r, g, b, a } = pixels[i];
         const [x1, y1] = point;
         const [x2, y2] = point1;
-        const [col1, row1] = transformPixel(x1, y1);
-        // eslint-disable-next-line no-unused-vars
+        let col1, row1;
+        if (point1.colrow) {
+            [col1, row1] = point1.colrow;
+        } else {
+            [col1, row1] = transformPixel(x1, y1);
+        }
         const [col2, row2] = transformPixel(x2, y2);
+        point1.colrow = [col2, row2];
         for (let j = row1; j <= row2; j++) {
             const idx = (j - 1) * width * 4 + (col1 - 1) * 4;
             data[idx] = r;
@@ -319,6 +355,7 @@ function transformTiles(pixelsresult, mbbox, debug) {
         ctx1.rect(0, 0, TILESIZE, TILESIZE);
         ctx1.stroke();
     }
+    disposeImage(image);
     return canvas1.transferToImageBitmap();
 }
 
@@ -495,8 +532,14 @@ export function tileTransform(options) {
                 return img;
             };
             if (projection === 'EPSG:4326') {
+                // const time = 'tilesImageData';
+                // console.time(time);
                 const imageData = tilesImageData(image, result.tilesbbox, result.bbox, projection);
+                // console.timeEnd(time);
+                // const time1 = 'transformTiles';
+                // console.time(time1);
                 image1 = transformTiles(imageData, result.mbbox, debug);
+                // console.timeEnd(time1);
                 image1 = postProcessingImageHandler(image1);
                 returnImage(image1 || getBlankTile());
             } else {
