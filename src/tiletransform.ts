@@ -239,48 +239,71 @@ function tilesImageData(image: ImageBitmap, tilesbbox: BBOXtype, tilebbox: BBOXt
     disposeImage(image);
 
     const imageData = ctx.getImageData(0, 0, w, h).data;
+    let isPureColorTile = true, r, g, b, a;
+    for (let i = 0, len = imageData.length; i < len - 4; i += 4) {
+        const R = imageData[i];
+        const G = imageData[i + 1];
+        const B = imageData[i + 2];
+        const A = imageData[i + 3];
+        if (i === 0) {
+            r = R;
+            g = G;
+            b = B;
+            a = A;
+        } else {
+            if (R === 0 && G === 0 && B === 0 && A === 0) {
+                continue;
+            }
+            if (R !== r || G !== g || B !== b || A !== a) {
+                isPureColorTile = false;
+                break;
+            }
+        }
+    }
     const pixels = [];
     let xmin = Infinity, ymin = Infinity, xmax = -Infinity, ymax = -Infinity;
     let index = -1;
     const method = projection === 'EPSG:4326' ? merc.forward : merc.inverse;
     const tempRow = [];
     const TEMPPOINT = [];
-    for (let row = 1; row <= h; row++) {
-        const y = tmaxy - (row - 1) * ay;
-        const y1 = y - ay;
-        const nextRow = row > 1;
-        for (let col = 1; col <= w; col++) {
-            const idx = (row - 1) * w * 4 + (col - 1) * 4;
-            const r = imageData[idx], g = imageData[idx + 1], b = imageData[idx + 2], a = imageData[idx + 3];
-            const x = tminx + (col - 1) * ax;
-            let point;
-            if (nextRow) {
-                point = tempRow[col];
-            } else {
+    if (!isPureColorTile) {
+        for (let row = 1; row <= h; row++) {
+            const y = tmaxy - (row - 1) * ay;
+            const y1 = y - ay;
+            const nextRow = row > 1;
+            for (let col = 1; col <= w; col++) {
+                const idx = (row - 1) * w * 4 + (col - 1) * 4;
+                const r = imageData[idx], g = imageData[idx + 1], b = imageData[idx + 2], a = imageData[idx + 3];
+                const x = tminx + (col - 1) * ax;
+                let point;
+                if (nextRow) {
+                    point = tempRow[col];
+                } else {
+                    TEMPPOINT[0] = x;
+                    TEMPPOINT[1] = y;
+                    point = method(TEMPPOINT as any);
+                }
+
+                xmin = Math.min(xmin, point[0]);
+                xmax = Math.max(xmax, point[0]);
+                ymin = Math.min(ymin, point[1]);
+                ymax = Math.max(ymax, point[1]);
+
                 TEMPPOINT[0] = x;
-                TEMPPOINT[1] = y;
-                point = method(TEMPPOINT as any);
+                TEMPPOINT[1] = y1;
+                let point1 = method(TEMPPOINT as any);
+                tempRow[col] = point1;
+
+
+                pixels[++index] = {
+                    point,
+                    point1,
+                    r,
+                    g,
+                    b,
+                    a
+                };
             }
-
-            xmin = Math.min(xmin, point[0]);
-            xmax = Math.max(xmax, point[0]);
-            ymin = Math.min(ymin, point[1]);
-            ymax = Math.max(ymax, point[1]);
-
-            TEMPPOINT[0] = x;
-            TEMPPOINT[1] = y1;
-            let point1 = method(TEMPPOINT as any);
-            tempRow[col] = point1;
-
-
-            pixels[++index] = {
-                point,
-                point1,
-                r,
-                g,
-                b,
-                a
-            };
         }
     }
 
@@ -289,12 +312,28 @@ function tilesImageData(image: ImageBitmap, tilesbbox: BBOXtype, tilebbox: BBOXt
         bbox: [xmin, ymin, xmax, ymax],
         width: w,
         height: h,
+        pureColor: isPureColorTile ? [r, g, b, a] : null
         // image: tileCanvas.transferToImageBitmap()
         // canvas: tileCanvas
     };
 }
 
-function transformTiles(pixelsresult, mbbox, debug) {
+function transformTiles(pixelsresult, mbbox, pureColor, debug) {
+    const canvas = getCanvas();
+    if (pureColor) {
+        resizeCanvas(canvas, TILESIZE, TILESIZE);
+        const ctx1 = getCanvasContext(canvas);
+        const imageData = ctx1.createImageData(TILESIZE, TILESIZE);
+        const [r, g, b, a] = pureColor;
+        for (let i = 0, len = imageData.data.length; i < len; i += 4) {
+            imageData.data[i] = r;
+            imageData.data[i + 1] = g;
+            imageData.data[i + 2] = b;
+            imageData.data[i + 3] = a;
+        }
+        ctx1.putImageData(imageData, 0, 0);
+        return canvas.transferToImageBitmap();
+    }
     const [xmin, ymin, xmax, ymax] = mbbox;
     const ax = (xmax - xmin) / TILESIZE, ay = (ymax - ymin) / TILESIZE;
     const { pixels, bbox } = pixelsresult;
@@ -306,10 +345,8 @@ function transformTiles(pixelsresult, mbbox, debug) {
         // console.log(width, height, result);
         return;
     }
-    const canvas = getCanvas();
     resizeCanvas(canvas, width, height);
     const ctx = getCanvasContext(canvas);
-
     function transformPixel(x, y) {
         let col = Math.round((x - minx) / ax + 1);
         col = Math.min(col, width);
@@ -341,12 +378,14 @@ function transformTiles(pixelsresult, mbbox, debug) {
         }
     }
     ctx.putImageData(imageData, 0, 0);
+
+
     const image = canvas.transferToImageBitmap();
     const px = Math.round((xmin - minx) / ax);
     const py = Math.round((maxy - ymax) / ay);
     const canvas1 = getCanvas();
     resizeCanvas(canvas1, TILESIZE, TILESIZE);
-    const ctx1 = getCanvasContext(canvas);
+    const ctx1 = getCanvasContext(canvas1);
     ctx1.drawImage(image, px - 1, py, TILESIZE, TILESIZE, 0, 0, TILESIZE, TILESIZE);
     checkBoundaryBlank(ctx1);
     if (debug) {
@@ -538,13 +577,13 @@ export function tileTransform(options) {
                 // console.timeEnd(time);
                 // const time1 = 'transformTiles';
                 // console.time(time1);
-                image1 = transformTiles(imageData, result.mbbox, debug);
+                image1 = transformTiles(imageData, result.mbbox, imageData.pureColor, debug);
                 // console.timeEnd(time1);
                 image1 = postProcessingImageHandler(image1);
                 returnImage(image1 || getBlankTile());
             } else {
                 const imageData = tilesImageData(image, result.tilesbbox, result.mbbox, projection);
-                image1 = transformTiles(imageData, result.bbox, debug);
+                image1 = transformTiles(imageData, result.bbox, imageData.pureColor, debug);
                 image1 = postProcessingImageHandler(image1);
                 returnImage(image1 || getBlankTile());
             }

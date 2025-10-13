@@ -33,7 +33,7 @@ const FetchRuningQueue: number[] = [];
 const FetchWaitQueue: Array<FetchQueueItem> = [];
 
 function addFetchQueue(control: AbortController, fetchRun: Function) {
-    if (FetchRuningQueue.length < 4) {
+    if (FetchRuningQueue.length < 6) {
         FetchRuningQueue.push(1)
         fetchRun();
     } else {
