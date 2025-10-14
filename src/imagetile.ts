@@ -29,7 +29,7 @@ export function imageTile(imageInfo, options: getImageTileOptions) {
         });
     }
     if (!bboxIntersect(imageBBOX, [minx, miny, maxx, maxy])) {
-        return getBlankTile();
+        return getBlankTile(tileSize);
     }
 
     let left = (minx - x1) * ax;
@@ -42,7 +42,7 @@ export function imageTile(imageInfo, options: getImageTileOptions) {
     top = Math.floor(top);
     right = Math.floor(right);
     if (right < 0 || left > width || top > height || bottom < 0) {
-        return getBlankTile();
+        return getBlankTile(tileSize);
     }
     if (left === right) {
         right++;

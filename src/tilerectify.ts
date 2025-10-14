@@ -155,7 +155,7 @@ export function tileRectify(options: rectifyTileOptions) {
                 if (errorLog) {
                     console.error(error);
                 }
-                tile.tileImage = getBlankTile();;
+                tile.tileImage = getBlankTile(tileSize);;
                 result.loadCount++;
                 if (isEnd()) {
                     end();
