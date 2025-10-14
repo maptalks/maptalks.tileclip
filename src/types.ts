@@ -1,5 +1,12 @@
 import { BBOXtype } from "./bbox";
 
+declare global {
+    interface AbortController {
+        runing?: boolean;
+        reject?: Function;
+    }
+}
+
 export type postProcessingOptionsType = {
     filter?: string;
     opacity?: number;

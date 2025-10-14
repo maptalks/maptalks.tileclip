@@ -2,7 +2,7 @@ import { getBBOXCenter, pointInBBOX } from "./bbox";
 import { createImageTypeResult, getBlankTile, getCanvas, getCanvasContext, layoutTiles, postProcessingImage, resizeCanvas } from "./canvas";
 import { rectifyTileOptions } from "./types";
 import gcoord from 'gcoord';
-import { isEPSG3857, lnglat2Mercator, toTileItems } from "./util";
+import { CancelTaskLRUCache, FetchCancelError, isEPSG3857, lnglat2Mercator, toTileItems } from "./util";
 import { getTileWithMaxZoom } from "./tileget";
 
 const debugCenter = [116.3388992615747, 39.897968400218986];
@@ -127,6 +127,11 @@ export function tileRectify(options: rectifyTileOptions) {
         const tileItemList = toTileItems(tiles);
 
         const end = () => {
+            const taskId = (options as any).__taskId;
+            if (CancelTaskLRUCache.has(taskId)) {
+                reject(FetchCancelError);
+                return;
+            }
             const image = layoutTiles(tileItemList, debug);
             const canvas = getCanvas(tileSize);
             const ctx = getCanvasContext(canvas);
@@ -154,6 +159,10 @@ export function tileRectify(options: rectifyTileOptions) {
             }).catch(error => {
                 if (errorLog) {
                     console.error(error);
+                }
+                if (error === FetchCancelError) {
+                    reject(FetchCancelError);
+                    return;
                 }
                 tile.tileImage = getBlankTile(tileSize);;
                 result.loadCount++;

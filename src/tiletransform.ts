@@ -2,7 +2,7 @@ import { getTileWithMaxZoom } from "./tileget";
 //@ts-ignore
 import { SphericalMercator } from '@mapbox/sphericalmercator';
 // import tileCover from '@mapbox/tile-cover';
-import { disposeImage, lnglat2Mercator, toTileItems } from "./util";
+import { disposeImage, FetchCancelError, lnglat2Mercator, toTileItems, CancelTaskLRUCache } from "./util";
 import { createImageTypeResult, getBlankTile, getCanvas, getCanvasContext, layoutTiles, postProcessingImage, resizeCanvas } from "./canvas";
 import { bboxOfBBOXList, BBOXtype, pointsToBBOX, bboxToPoints } from "./bbox";
 import gcoord from 'gcoord';
@@ -562,31 +562,39 @@ export function tileTransform(options) {
             return result.loadCount >= tileItems.length;
         }
         const transform = () => {
-            const image = layoutTiles(tileItems, debug);
-            let image1;
-            const postProcessingImageHandler = (img: ImageBitmap) => {
-                if (img) {
-                    return postProcessingImage(img, options);
+            setTimeout(() => {
+                const taskId = options.__taskId;
+                if (CancelTaskLRUCache.has(taskId)) {
+                    reject(FetchCancelError);
+                    return;
                 }
-                return img;
-            };
-            if (projection === 'EPSG:4326') {
-                // const time = 'tilesImageData';
-                // console.time(time);
-                const imageData = tilesImageData(image, result.tilesbbox, result.bbox, projection);
-                // console.timeEnd(time);
-                // const time1 = 'transformTiles';
-                // console.time(time1);
-                image1 = transformTiles(imageData, result.mbbox, imageData.pureColor, debug);
-                // console.timeEnd(time1);
-                image1 = postProcessingImageHandler(image1);
-                returnImage(image1 || getBlankTile());
-            } else {
-                const imageData = tilesImageData(image, result.tilesbbox, result.mbbox, projection);
-                image1 = transformTiles(imageData, result.bbox, imageData.pureColor, debug);
-                image1 = postProcessingImageHandler(image1);
-                returnImage(image1 || getBlankTile());
-            }
+                const image = layoutTiles(tileItems, debug);
+                let image1;
+                const postProcessingImageHandler = (img: ImageBitmap) => {
+                    if (img) {
+                        return postProcessingImage(img, options);
+                    }
+                    return img;
+                };
+                if (projection === 'EPSG:4326') {
+                    // const time = 'tilesImageData';
+                    // console.time(time);
+                    const imageData = tilesImageData(image, result.tilesbbox, result.bbox, projection);
+                    // console.timeEnd(time);
+                    // const time1 = 'transformTiles';
+                    // console.time(time1);
+                    image1 = transformTiles(imageData, result.mbbox, imageData.pureColor, debug);
+                    // console.timeEnd(time1);
+                    image1 = postProcessingImageHandler(image1);
+                    returnImage(image1 || getBlankTile());
+                } else {
+                    const imageData = tilesImageData(image, result.tilesbbox, result.mbbox, projection);
+                    image1 = transformTiles(imageData, result.bbox, imageData.pureColor, debug);
+                    image1 = postProcessingImageHandler(image1);
+                    returnImage(image1 || getBlankTile());
+                }
+            }, 20);
+
         }
 
         tileItems.forEach(tile => {
@@ -600,6 +608,10 @@ export function tileTransform(options) {
             }).catch(error => {
                 if (errorLog) {
                     console.error(error);
+                }
+                if (error === FetchCancelError) {
+                    reject(error);
+                    return;
                 }
                 tile.tileImage = getBlankTile();;
                 result.loadCount++;

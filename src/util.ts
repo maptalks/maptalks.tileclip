@@ -1,3 +1,4 @@
+import LRUCache from './LRUCache';
 import { GeoJSONMultiPolygon, GeoJSONPolygon, postProcessingOptionsType, returnResultType, TileItem } from './types';
 
 class CustomError extends Error {
@@ -8,6 +9,10 @@ class CustomError extends Error {
         this.code = code;
     }
 }
+
+export const CancelTaskLRUCache = new LRUCache<number>(1000, () => {
+
+})
 
 export const HEADERS = {
     'accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',

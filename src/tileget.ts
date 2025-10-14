@@ -33,8 +33,9 @@ const FetchRuningQueue: number[] = [];
 const FetchWaitQueue: Array<FetchQueueItem> = [];
 
 function addFetchQueue(control: AbortController, fetchRun: Function) {
-    if (FetchRuningQueue.length < 6) {
-        FetchRuningQueue.push(1)
+    if (FetchRuningQueue.length < 3) {
+        FetchRuningQueue.push(1);
+        control.runing = true;
         fetchRun();
     } else {
         FetchWaitQueue.push({
@@ -44,22 +45,31 @@ function addFetchQueue(control: AbortController, fetchRun: Function) {
     }
 }
 
-function finishFetchQueue(control: AbortController) {
-    if (FetchRuningQueue.length) {
-        FetchRuningQueue.shift();
+function removeFetchQueue(controls: Array<AbortController>) {
+    if (!Array.isArray(controls)) {
+        controls = [controls];
     }
+    if (!controls.length) {
+        return;
+    }
+    controls.forEach(control => {
+        if (FetchRuningQueue.length) {
+            FetchRuningQueue.shift();
+        }
 
-    if (FetchWaitQueue.length) {
-        let item = FetchWaitQueue.filter(item => {
-            return item.control === control;
-        })[0];
-        if (item) {
-            const index = FetchWaitQueue.indexOf(item);
-            if (index > -1) {
-                FetchWaitQueue.splice(index, 1);
+        if (FetchWaitQueue.length) {
+            let item = FetchWaitQueue.filter(item => {
+                return item.control === control;
+            })[0];
+            if (item) {
+                const index = FetchWaitQueue.indexOf(item);
+                if (index > -1) {
+                    FetchWaitQueue.splice(index, 1);
+                }
             }
         }
-    }
+    });
+
     if (FetchWaitQueue.length) {
         const item = FetchWaitQueue.shift();
         addFetchQueue(item.control, item.fetchRun);
@@ -79,15 +89,19 @@ export function cancelFetch(taskId: string) {
     const controlList = CONTROLCACHE[taskId] || [];
     if (controlList.length) {
         controlList.forEach(control => {
-            control.abort(FetchCancelError);
-            finishFetchQueue(control);
+            if (control.runing) {
+                control.abort(FetchCancelError);
+            } else if (control.reject) {
+                control.reject(FetchCancelError);
+            }
         });
     }
+    removeFetchQueue(controlList);
     delete CONTROLCACHE[taskId];
 }
 
 function finishFetch(control: AbortController) {
-    finishFetchQueue(control);
+    removeFetchQueue([control]);
     const deletekeys = [];
     for (let key in CONTROLCACHE) {
         const controlList = CONTROLCACHE[key] || [];
@@ -149,13 +163,15 @@ export function fetchTile(url: string, headers = {}, options) {
         }
         const { indexedDBCache } = options;
         const { fetchOptions, control } = generateFetchOptions(headers, options);
+        control.reject = reject;
+        const taskId = options.__taskId;
+        if (!taskId) {
+            reject(createInnerError('taskId is null'));
+            return;
+        }
+        cacheFetch(taskId, control);
         const fetchTileData = () => {
-            const taskId = options.__taskId;
-            if (!taskId) {
-                reject(createInnerError('taskId is null'));
-                return;
-            }
-            cacheFetch(taskId, control);
+
             fetch(url, fetchOptions).then(res => {
                 if (!res.ok) {
                     finishFetch(control);
@@ -211,8 +227,9 @@ export function fetchTileBuffer(url: string, headers = {}, options) {
         }
         const { indexedDBCache } = options;
         const { fetchOptions, control } = generateFetchOptions(headers, options);
+        control.reject = reject;
+        cacheFetch(taskId, control);
         const fetchTileData = () => {
-            cacheFetch(taskId, control);
             fetch(url, fetchOptions).then(res => {
                 if (!res.ok) {
                     finishFetch(control);
