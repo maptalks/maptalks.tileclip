@@ -466,6 +466,9 @@ function imageInvertColor(image: ImageBitmap, invertColor: boolean) {
 
 
 export function postProcessingImage(image: ImageBitmap, options: postProcessingOptionsType) {
+    if (options.ignorePostProcessing) {
+        return image;
+    }
     const filterImage = imageFilter(image, options.filter);
     const blurImage = imageGaussianBlur(filterImage, options.gaussianBlurRadius);
     const opImage = imageOpacity(blurImage, options.opacity);

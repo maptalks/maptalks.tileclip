@@ -14,6 +14,7 @@ export type postProcessingOptionsType = {
     mosaicSize?: number;
     oldPhoto?: boolean;
     invertColor?: boolean;
+    ignorePostProcessing?: boolean;
 }
 
 export type fetchOptionsType = {
