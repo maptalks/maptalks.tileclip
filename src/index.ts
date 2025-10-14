@@ -6,7 +6,8 @@ import {
     CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon,
     checkBuffers, TaskCancelError, disposeImage,
     needFormatImageType,
-    needPostProcessingImage
+    needPostProcessingImage,
+    removeTimeOut
 } from './util';
 import { getCanvas, getCanvasContext, resizeCanvas } from './canvas';
 import {
@@ -65,10 +66,6 @@ function isErrorOrCancel(error: Error, promise): boolean {
     return (error || (promise && promise.canceled));
 }
 
-function removeTimeOut(id: number) {
-    clearTimeout(id);
-}
-
 
 class TileActor extends worker.Actor {
 
@@ -100,6 +97,7 @@ class TileActor extends worker.Actor {
             const buffers = checkBuffers(url);
             this.send(options, buffers, (error, image) => {
                 if (isErrorOrCancel(error, promise)) {
+                    disposeImage(image);
                     reject(error || FetchCancelError);
                 } else {
                     resolve(image);
@@ -126,6 +124,7 @@ class TileActor extends worker.Actor {
             const buffers = [];
             this.send(options, buffers, (error, image) => {
                 if (isErrorOrCancel(error, promise)) {
+                    disposeImage(image);
                     reject(error || FetchCancelError);
                 } else {
                     resolve(image);
@@ -156,6 +155,7 @@ class TileActor extends worker.Actor {
             }
             this.send(options, [], (error, image) => {
                 if (isErrorOrCancel(error, promise)) {
+                    disposeImage(image);
                     reject(error || FetchCancelError);
                 } else {
                     resolve(image);
@@ -194,6 +194,7 @@ class TileActor extends worker.Actor {
             }
             this.send(options, [], (error, image) => {
                 if (isErrorOrCancel(error, promise)) {
+                    disposeImage(image);
                     reject(error || FetchCancelError);
                 } else {
                     resolve(image);
@@ -244,6 +245,7 @@ class TileActor extends worker.Actor {
             }
             this.send(options, [], (error, image) => {
                 if (isErrorOrCancel(error, promise)) {
+                    disposeImage(image);
                     reject(error || FetchCancelError);
                 } else {
                     resolve(image);
@@ -290,6 +292,7 @@ class TileActor extends worker.Actor {
             }
             this.send(options, buffers, (error, image) => {
                 if (isErrorOrCancel(error, promise)) {
+                    disposeImage(image);
                     reject(error || TaskCancelError);
                 } else {
                     resolve(image);
@@ -499,6 +502,7 @@ class TileActor extends worker.Actor {
             }
             this.send(Object.assign({ terrainWidth: 65, tileSize: 256 }, options), [], (error, image) => {
                 if (isErrorOrCancel(error, promise)) {
+                    disposeImage(image);
                     reject(error || FetchCancelError);
                 } else {
                     resolve(image);
@@ -577,6 +581,7 @@ class TileActor extends worker.Actor {
             } else {
                 const tid = setTimeout(() => {
                     if (isErrorOrCancel(null, promise)) {
+                        disposeImage(image);
                         reject(TaskCancelError);
                         return;
                     }
@@ -605,6 +610,7 @@ class TileActor extends worker.Actor {
             const buffers = checkBuffers(tile);
             this.send(Object.assign({}, options), buffers, (error, image) => {
                 if (isErrorOrCancel(error, promise)) {
+                    disposeImage(image);
                     reject(error || TaskCancelError);
                 } else {
                     resolve(image);
@@ -722,6 +728,7 @@ class TileActor extends worker.Actor {
             } else {
                 const tid = setTimeout(() => {
                     if (isErrorOrCancel(null, promise)) {
+                        disposeImage(image);
                         reject(TaskCancelError);
                         return;
                     }

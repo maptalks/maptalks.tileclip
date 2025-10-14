@@ -6,7 +6,8 @@ import {
     isImageBitmap, createDataError, validateSubdomains, getTileUrl,
     createNetWorkError,
     copyArrayBuffer,
-    toTileItems
+    toTileItems,
+    removeTimeOut
 } from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
@@ -19,7 +20,7 @@ import vtpbf from 'vt-pbf';
 const LRUCount = 500;
 
 const tileImageCache = new LRUCache<ImageBitmap>(LRUCount, (image) => {
-    disposeImage(image as ImageBitmap);
+    disposeImage(image);
 });
 const tileBufferCache = new LRUCache<ArrayBuffer>(LRUCount, (buffer) => {
     buffer = null;
@@ -130,8 +131,9 @@ function generateFetchOptions(headers, options) {
     const control = new AbortController();
     const signal = control.signal;
     if (timeout && isNumber(timeout) && timeout > 0) {
-        setTimeout(() => {
+        const tid = setTimeout(() => {
             control.abort(FetchTimeoutError);
+            removeTimeOut(tid);
         }, timeout);
     }
     fetchOptions.signal = signal;
@@ -146,7 +148,10 @@ export function fetchTile(url: string, headers = {}, options) {
     return new Promise((resolve: (image: ImageBitmap) => void, reject) => {
         const copyImageBitMap = (image: ImageBitmap) => {
             createImageBitmap(image).then(imagebit => {
-                resolve(imagebit);
+                const tid = setTimeout(() => {
+                    removeTimeOut(tid);
+                    resolve(imagebit);
+                }, 50);
             }).catch(error => {
                 reject(error);
             });
