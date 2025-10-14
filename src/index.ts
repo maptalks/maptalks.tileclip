@@ -11,8 +11,10 @@ import {
 } from './util';
 import { getCanvas, getCanvasContext, resizeCanvas } from './canvas';
 import {
-    privateOptions, getTileOptions, layoutTilesOptions, getTileWithMaxZoomOptions,
-    transformTileOptions, clipTileOptions, GeoJSONPolygon, GeoJSONMultiPolygon,
+    privateOptions, getTileOptions, layoutTilesOptions,
+    getTileWithMaxZoomOptions,
+    transformTileOptions, clipTileOptions, GeoJSONPolygon,
+    GeoJSONMultiPolygon,
     encodeTerrainTileOptions, colorTerrainTileOptions,
     tileIntersectMaskOptions,
     injectImageOptions,
@@ -793,8 +795,8 @@ function getWorkerId() {
 }
 
 function wrapPromise(promise: Promise<any>, options) {
-    (promise as any).cancel = () => {
+    promise.cancel = () => {
         getTileActor()._cancelTask(options);
-        (promise as any).canceled = true;
+        promise.canceled = true;
     }
 }

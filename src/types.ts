@@ -5,6 +5,11 @@ declare global {
         runing?: boolean;
         reject?: Function;
     }
+
+    interface Promise<T> {
+        cancel?: () => void;
+        canceled?: boolean;
+    }
 }
 
 export type postProcessingOptionsType = {
