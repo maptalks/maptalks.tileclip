@@ -2,7 +2,8 @@ import { createImageTypeResult, postProcessingImage, colorsTerrainTile, getCanva
 import { imageSlicing, imageToBlobURL } from './imageslice';
 import { imagetTileFetch } from './imagetile';
 import { clip, injectMask, removeMask, tileBBOXIntersectMask } from './tileclip';
-import { cancelFetch, encodeTerrainTile, getTile, getTileWithMaxZoom, getVTTile, layout_Tiles } from './tileget';
+import { cancelFetch } from './tilefetch';
+import { encodeTerrainTile, getTile, getTileWithMaxZoom, getVTTile, layout_Tiles } from './tileget';
 import { tileRectify } from './tilerectify';
 import { tileTransform } from './tiletransform';
 import { checkBuffers, createInnerError, isImageBitmap, CancelTaskLRUCache } from './util';
