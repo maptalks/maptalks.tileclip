@@ -37,6 +37,10 @@ export const FetchCancelError = createError('fetch tile data cancel', 499);
 export const FetchTimeoutError = createError('fetch tile data timeout', 408);
 export const TaskCancelError = createError('the task is cancel', -6);
 
+export function isFetchDefaultError(error: Error) {
+    return error === FetchCancelError || error === FetchTimeoutError;
+}
+
 export function createNetWorkError(url: string) {
     return createError(`fetch NetWork error, the url is ${url}`, -5);
 }

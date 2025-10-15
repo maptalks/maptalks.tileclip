@@ -2,7 +2,7 @@ import { getTileWithMaxZoom } from "./tileget";
 //@ts-ignore
 import { SphericalMercator } from '@mapbox/sphericalmercator';
 // import tileCover from '@mapbox/tile-cover';
-import { disposeImage, FetchCancelError, lnglat2Mercator, toTileItems, CancelTaskLRUCache, removeTimeOut } from "./util";
+import { disposeImage, FetchCancelError, lnglat2Mercator, toTileItems, CancelTaskLRUCache, removeTimeOut, isFetchDefaultError } from "./util";
 import { createImageTypeResult, getBlankTile, getCanvas, getCanvasContext, layoutTiles, postProcessingImage, resizeCanvas } from "./canvas";
 import { bboxOfBBOXList, BBOXtype, pointsToBBOX, bboxToPoints } from "./bbox";
 import gcoord from 'gcoord';
@@ -610,7 +610,7 @@ export function tileTransform(options) {
                 if (errorLog) {
                     console.error(error);
                 }
-                if (error === FetchCancelError) {
+                if (isFetchDefaultError(error)) {
                     reject(error);
                     return;
                 }
