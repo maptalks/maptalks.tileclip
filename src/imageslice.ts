@@ -1,7 +1,7 @@
 import { createImageTypeResult, getCanvas, getCanvasContext, mergeTiles, postProcessingImage, resizeCanvas } from "./canvas";
 import { fetchTile } from "./tilefetch";
 import { getTileOptions, sliceImageItemType, sliceImageResultType } from "./types";
-import { checkTileUrl, HEADERS, uuid, disposeImage } from "./util";
+import { checkArray, HEADERS, uuid, disposeImage } from "./util";
 
 const SIZE = 512;
 
@@ -9,7 +9,7 @@ export function imageSlicing(options: getTileOptions) {
     (options as any).disableCache = true;
     return new Promise((resolve, reject) => {
         const url = options.url;
-        const urls = checkTileUrl(url as string);
+        const urls = checkArray(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
         const fetchTiles = urls.map(tileUrl => {
             return fetchTile(tileUrl, headers, options)

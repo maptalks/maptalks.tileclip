@@ -4,7 +4,7 @@ import {
     layoutTiles, mergeTiles, postProcessingImage, resizeCanvas
 } from './canvas';
 import {
-    checkTileUrl, createParamsValidateError, createInnerError, HEADERS, disposeImage,
+    checkArray, createParamsValidateError, createInnerError, HEADERS, disposeImage,
     createDataError, validateSubdomains, getTileUrl,
     copyArrayBuffer,
     toTileItems
@@ -18,7 +18,7 @@ import { fetchTile, fetchTileBuffer } from './tilefetch';
 
 export function getTile(url, options: getTileOptions) {
     return new Promise((resolve, reject) => {
-        const urls = checkTileUrl(url);
+        const urls = checkArray(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
         const fetchTiles = urls.map(tileUrl => {
             return fetchTile(tileUrl, headers, options)
@@ -47,7 +47,7 @@ export function getTile(url, options: getTileOptions) {
 export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
     const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, globalCompositeOperation } = options;
     return new Promise((resolve: resolveResultType, reject) => {
-        const urlTemplates = checkTileUrl(urlTemplate);
+        const urlTemplates = checkArray(urlTemplate);
         for (let i = 0, len = urlTemplates.length; i < len; i++) {
             const urlTemplate = urlTemplates[i];
             if (!validateSubdomains(urlTemplate, subdomains)) {
@@ -171,7 +171,7 @@ export function layout_Tiles(options: layoutTilesOptions) {
 export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
     return new Promise((resolve, reject) => {
 
-        const urls = checkTileUrl(url);
+        const urls = checkArray(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
         const { terrainWidth, tileSize, terrainType, minHeight, maxHeight, terrainColors } = options;
         const returnImage = (terrainImage: ImageBitmap) => {
@@ -252,7 +252,7 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
 
 export function getVTTile(url, options: getVTTileOptions) {
     return new Promise((resolve, reject) => {
-        const urls = checkTileUrl(url);
+        const urls = checkArray(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
         const fetchTiles = urls.map(tileUrl => {
             return fetchTileBuffer(tileUrl, headers, options)

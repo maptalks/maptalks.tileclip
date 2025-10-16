@@ -4,7 +4,8 @@ import {
     isNumber, FetchCancelError, FetchTimeoutError, createInnerError, disposeImage,
     isImageBitmap,
     createNetWorkError,
-    removeTimeOut
+    removeTimeOut,
+    checkArray
 } from './util';
 import { getStoreTile, saveStoreTile } from './store';
 
@@ -23,9 +24,10 @@ type FetchQueueItem = {
 }
 const FetchRuningQueue: number[] = [];
 const FetchWaitQueue: Array<FetchQueueItem> = [];
+const FETCHMAXCOUNT = 3;
 
 function addFetchQueue(control: AbortController, fetchRun: Function) {
-    if (FetchRuningQueue.length < 3) {
+    if (FetchRuningQueue.length < FETCHMAXCOUNT) {
         FetchRuningQueue.push(1);
         control.runing = true;
         fetchRun();
@@ -38,9 +40,7 @@ function addFetchQueue(control: AbortController, fetchRun: Function) {
 }
 
 function removeFetchQueue(controls: Array<AbortController>) {
-    if (!Array.isArray(controls)) {
-        controls = [controls];
-    }
+    controls = checkArray(controls);
     if (!controls.length) {
         return;
     }
@@ -48,7 +48,6 @@ function removeFetchQueue(controls: Array<AbortController>) {
         if (FetchRuningQueue.length) {
             FetchRuningQueue.shift();
         }
-
         if (FetchWaitQueue.length) {
             let item = FetchWaitQueue.filter(item => {
                 return item.control === control;
@@ -60,12 +59,12 @@ function removeFetchQueue(controls: Array<AbortController>) {
                 }
             }
         }
+        if (FetchWaitQueue.length && FetchRuningQueue.length < FETCHMAXCOUNT) {
+            const item = FetchWaitQueue.shift();
+            addFetchQueue(item.control, item.fetchRun);
+        }
     });
 
-    if (FetchWaitQueue.length) {
-        const item = FetchWaitQueue.shift();
-        addFetchQueue(item.control, item.fetchRun);
-    }
 
 }
 

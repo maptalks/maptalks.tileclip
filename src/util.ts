@@ -57,7 +57,7 @@ export function createInnerError(message) {
     return createError(message, -3);
 }
 
-export function checkTileUrl(url: string | Array<string>): Array<string> {
+export function checkArray(url: any | Array<any>): Array<any> {
     if (Array.isArray(url)) {
         return url;
     }
@@ -70,7 +70,8 @@ export function lnglat2Mercator(coordinates: Array<number>) {
     const earthRad = 6378137.0;
     const x = lng * Math.PI / 180 * earthRad;
     const a = lat * Math.PI / 180;
-    const y = earthRad / 2 * Math.log((1.0 + Math.sin(a)) / (1.0 - Math.sin(a)));
+    const b = Math.sin(a);
+    const y = earthRad / 2 * Math.log((1.0 + b) / (1.0 - b));
     return [x, y];
 }
 
@@ -138,7 +139,7 @@ export function replaceAll(template: string, key: string, value: string) {
 
 
 export function checkBuffers(image: any) {
-    const images = checkTileUrl(image);
+    const images = checkArray(image);
     const buffers = [];
     images.forEach(item => {
         if (isImageBitmap(item) || (item && (item as unknown as ArrayBuffer instanceof ArrayBuffer))) {
