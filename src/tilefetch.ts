@@ -24,7 +24,7 @@ type FetchQueueItem = {
 }
 const FetchRuningQueue: number[] = [];
 const FetchWaitQueue: Array<FetchQueueItem> = [];
-const FETCHMAXCOUNT = 3;
+const FETCHMAXCOUNT = 4;
 
 function addFetchQueue(control: AbortController, fetchRun: Function) {
     if (FetchRuningQueue.length < FETCHMAXCOUNT) {
@@ -175,7 +175,9 @@ export function fetchTile(url: string, headers = {}, options) {
                     reject(createNetWorkError(url));
                     return;
                 }
-                return res.blob();
+                return res.arrayBuffer();
+            }).then(buffer => {
+                return new Blob([buffer]);
             }).then(blob => createImageBitmap(blob)).then(image => {
                 if (options.disableCache !== true) {
                     tileImageCache.add(url, image);
