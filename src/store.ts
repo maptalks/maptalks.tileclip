@@ -14,7 +14,7 @@ function getStore() {
     return tempStore;
 }
 
-export function storeTile(url: string, data: ImageBitmap | ArrayBuffer) {
+export function saveStoreTile(url: string, data: ImageBitmap | ArrayBuffer) {
     getStore().setItem(url, data)
         .then(() => {
             // console.log(`Tile saved: ${url}`);

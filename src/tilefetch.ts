@@ -6,7 +6,7 @@ import {
     createNetWorkError,
     removeTimeOut
 } from './util';
-import { getStoreTile, storeTile } from './store';
+import { getStoreTile, saveStoreTile } from './store';
 
 const LRUCount = 500;
 
@@ -182,7 +182,7 @@ export function fetchTile(url: string, headers = {}, options) {
                     tileImageCache.add(url, image);
                 }
                 if (indexedDBCache) {
-                    storeTile(url, image);
+                    saveStoreTile(url, image);
                 }
                 finishFetch(control);
                 copyImageBitMap(image);
@@ -240,7 +240,7 @@ export function fetchTileBuffer(url: string, headers = {}, options) {
                 }
                 finishFetch(control);
                 if (indexedDBCache) {
-                    storeTile(url, buffer);
+                    saveStoreTile(url, buffer);
                 }
                 copyBuffer(buffer);
             }).catch(error => {
