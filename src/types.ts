@@ -35,6 +35,7 @@ export type returnResultType = {
     returnUint32Buffer?: boolean;
     returnBase64?: boolean;
     forceReturnImage?: boolean;
+    quality?: number;
 }
 
 export type getTileOptions = {

@@ -478,41 +478,74 @@ export function postProcessingImage(image: ImageBitmap, options: postProcessingO
     return mosaicImage;
 }
 
-
-export function createImageTypeResult(canvas: OffscreenCanvas, image: ImageBitmap, options: returnResultType) {
-    return new Promise((resolve: (image: ImageBitmap | string | ArrayBuffer) => void, reject) => {
-        const { returnBlobURL, returnUint32Buffer } = options || {};
-        if (!needFormatImageType(options)) {
-            resolve(image);
-            return;
-        }
-        const { width, height } = image;
-        resizeCanvas(canvas, width, height);
-        const ctx = getCanvasContext(canvas);
-        ctx.drawImage(image, 0, 0);
-        disposeImage(image);
-        if (returnUint32Buffer) {
-            const imageData = ctx.getImageData(0, 0, width, height);
-            const array = new Uint32Array(imageData.data);
-            resolve(array.buffer);
-        } else if (returnBlobURL) {
-            canvas.convertToBlob().then(blob => {
-                const url = URL.createObjectURL(blob);
-                resolve(url);
+export function imageQuality(image: ImageBitmap, options: returnResultType) {
+    return new Promise((resolve: (image: ImageBitmap) => void, reject) => {
+        const { quality } = options;
+        if (isNumber(quality) && quality >= 0 && quality < 1) {
+            if (quality === 0) {
+                resolve(getBlankTile());
+                return;
+            }
+            const canvas = getCanvas();
+            resizeCanvas(canvas, image.width, image.height);
+            const ctx = getCanvasContext(canvas);
+            ctx.drawImage(image, 0, 0);
+            canvas.convertToBlob({
+                quality,
+                type: 'image/webp'
+            }).then(blob => {
+                createImageBitmap(blob).then(imagebit => {
+                    disposeImage(image);
+                    resolve(imagebit);
+                }).catch(error => {
+                    reject(error);
+                })
             }).catch(error => {
                 reject(error);
-            });
+            })
         } else {
-            canvas.convertToBlob().then(blob => {
-                const fileReader = new FileReader();
-                fileReader.onload = () => {
-                    resolve(fileReader.result);
-                };
-                fileReader.readAsDataURL(blob);
-            }).catch(error => {
-                reject(error);
-            });
+            resolve(image);
         }
+    })
+}
+
+
+export function createImageTypeResult(canvas: OffscreenCanvas, image1: ImageBitmap, options: returnResultType) {
+    return new Promise((resolve: (image: ImageBitmap | string | ArrayBuffer) => void, reject) => {
+        imageQuality(image1, options).then(image => {
+            const { returnBlobURL, returnUint32Buffer } = options || {};
+            if (!needFormatImageType(options)) {
+                resolve(image);
+                return;
+            }
+            const { width, height } = image;
+            resizeCanvas(canvas, width, height);
+            const ctx = getCanvasContext(canvas);
+            ctx.drawImage(image, 0, 0);
+            disposeImage(image);
+            if (returnUint32Buffer) {
+                const imageData = ctx.getImageData(0, 0, width, height);
+                const array = new Uint32Array(imageData.data);
+                resolve(array.buffer);
+            } else if (returnBlobURL) {
+                canvas.convertToBlob().then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    resolve(url);
+                }).catch(error => {
+                    reject(error);
+                });
+            } else {
+                canvas.convertToBlob().then(blob => {
+                    const fileReader = new FileReader();
+                    fileReader.onload = () => {
+                        resolve(fileReader.result);
+                    };
+                    fileReader.readAsDataURL(blob);
+                }).catch(error => {
+                    reject(error);
+                });
+            }
+        })
     })
 }
 
