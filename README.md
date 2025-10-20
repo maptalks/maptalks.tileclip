@@ -176,7 +176,6 @@ export type fetchOptionsType = {
     fetchOptions?: Record<string, any>;//fetch options. if need, If it exists, headers will be ignored
     timeout?: number;//fetch timeout if need
     indexedDBCache?: boolean;//cache tile data by IndexedDB 
-    quality?:number;//image quality 0-1
 }
 
 //tile default return ImageBitMap
@@ -184,6 +183,7 @@ export type returnResultType = {
     returnUint32Buffer?:boolean;//return to Unit32 ArrayBuffer 
     returnBlobURL?: boolean;// to return Blob URL by createObjectURL() When the blob URL is no longer in use, be sure to destroy its value revokeObjectURL() 
     returnBase64?: boolean;// return base64 
+    quality?:number;//image quality 0-1,MIME types is image/webp https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Guides/MIME_types/Common_types
 }
 
 ```
@@ -350,7 +350,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                                                    `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                                                     `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
