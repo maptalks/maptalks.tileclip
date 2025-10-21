@@ -16,8 +16,9 @@ import Protobuf from 'pbf';
 import vtpbf from 'vt-pbf';
 import { fetchTile, fetchTileBuffer } from './tilefetch';
 
-export function getTile(url, options: getTileOptions) {
+export function getTile(options: getTileOptions) {
     return new Promise((resolve, reject) => {
+        const { url } = options;
         const urls = checkArray(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
         const fetchTiles = urls.map(tileUrl => {
@@ -168,8 +169,9 @@ export function layout_Tiles(options: layoutTilesOptions) {
 
 }
 
-export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
+export function encodeTerrainTile(options: encodeTerrainTileOptions) {
     return new Promise((resolve, reject) => {
+        const { url } = options;
 
         const urls = checkArray(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
@@ -250,8 +252,9 @@ export function encodeTerrainTile(url, options: encodeTerrainTileOptions) {
 }
 
 
-export function getVTTile(url, options: getVTTileOptions) {
+export function getVTTile(options: getVTTileOptions) {
     return new Promise((resolve, reject) => {
+        const { url } = options;
         const urls = checkArray(url);
         const headers = Object.assign({}, HEADERS, options.headers || {});
         const fetchTiles = urls.map(tileUrl => {

@@ -15,8 +15,7 @@ export const onmessage = function (message, postResponse) {
     const data = message.data || {};
     const type = data.__type;
     if (type === 'getTile') {
-        const { url } = data;
-        getTile(url, data).then(image => {
+        getTile(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
             postResponse(error);
@@ -121,8 +120,8 @@ export const onmessage = function (message, postResponse) {
         return;
     }
     if (type === 'encodeTerrainTile') {
-        const { url } = data;
-        encodeTerrainTile(url, data).then(image => {
+
+        encodeTerrainTile(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
             postResponse(error);
@@ -159,8 +158,7 @@ export const onmessage = function (message, postResponse) {
         return;
     }
     if (type === 'getVTTile') {
-        const { url } = data;
-        getVTTile(url, data).then(buffer => {
+        getVTTile(data).then(buffer => {
             postResponse(null, buffer, checkBuffers(buffer));
         }).catch(error => {
             postResponse(error);
