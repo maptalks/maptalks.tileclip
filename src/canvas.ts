@@ -283,6 +283,22 @@ export function layoutTiles(tiles: Array<TileItem>, debug: boolean) {
 }
 
 
+function imageFlipY(image: ImageBitmap, flipY: boolean) {
+    if (!flipY) {
+        return image;
+    }
+    const canvas = getCanvas(image.width);
+    resizeCanvas(canvas, image.width, image.height);
+    const ctx = getCanvasContext(canvas);
+    ctx.save();
+    ctx.scale(1, -1);
+    ctx.drawImage(image, 0, -image.height, image.width, image.height);
+    ctx.restore();
+    const bitImage = canvas.transferToImageBitmap();
+    disposeImage(image);
+    return bitImage;
+}
+
 function imageFilter(image: ImageBitmap, filter: string) {
     if (!filter) {
         return image;
@@ -469,7 +485,8 @@ export function postProcessingImage(image: ImageBitmap, options: postProcessingO
     if (options.ignorePostProcessing) {
         return image;
     }
-    const filterImage = imageFilter(image, options.filter);
+    const flipYImage = imageFlipY(image, options.flipY);
+    const filterImage = imageFilter(flipYImage, options.filter);
     const blurImage = imageGaussianBlur(filterImage, options.gaussianBlurRadius);
     const opImage = imageOpacity(blurImage, options.opacity);
     const oldImage = imageOldPhoto(opImage, options.oldPhoto);

@@ -13,6 +13,7 @@ declare global {
 }
 
 export type postProcessingOptionsType = {
+    flipY?: boolean;
     filter?: string;
     opacity?: number;
     gaussianBlurRadius?: number;

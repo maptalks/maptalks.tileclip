@@ -24,7 +24,7 @@ type FetchQueueItem = {
 }
 const FetchRuningQueue: number[] = [];
 const FetchWaitQueue: Array<FetchQueueItem> = [];
-const FETCHMAXCOUNT = 4;
+const FETCHMAXCOUNT = 6;
 
 function addFetchQueue(control: AbortController, fetchRun: Function) {
     if (FetchRuningQueue.length < FETCHMAXCOUNT) {
