@@ -168,6 +168,10 @@ class TileActor extends worker.Actor {
         return promise;
     }
 
+    reProjectTile(options: transformTileOptions) {
+        return this.transformTile(options);
+    }
+
     transformTile(options: transformTileOptions) {
         options = checkOptions(options, 'transformTile');
         const { workerId } = getTaskId(options);
