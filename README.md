@@ -13,7 +13,7 @@
 ### Common
 
 * [fetch tile](https://maptalks.github.io/maptalks.tileclip/demo/tile.html)
-* [merge tiles](https://maptalks.github.io/maptalks.tileclip/demo/tile-array.html)
+* [fetch and merge tiles](https://maptalks.github.io/maptalks.tileclip/demo/tile-array.html)
 * [tiles filter by  mask(only load tiles in mask)](https://maptalks.github.io/maptalks.tileclip/demo/tile-mask-filter.html) 
 * [clip by polygon](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip.html)
 * [clip by polygon with holes](https://maptalks.github.io/maptalks.tileclip/demo/polygon-hole-clip.html)
@@ -29,17 +29,17 @@
 * [maxAvailableZoom terrain](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-terrain.html)  
 
 * [update mask](https://maptalks.github.io/maptalks.tileclip/demo/update-mask.html)
-* [mask remove or add](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-remve.html) 
+* [mask remove/add](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-remve.html) 
 * [layout tiles](https://maptalks.github.io/maptalks.tileclip/demo/layouttiles.html)  
 
-* [get tile from image](https://maptalks.github.io/maptalks.tileclip/demo/imagetile.html)  
-* [get tile and clip from image](https://maptalks.github.io/maptalks.tileclip/demo/imagetile-clip.html)  
+* [get tile from single image](https://maptalks.github.io/maptalks.tileclip/demo/imagetile.html)  
+* [get tile and clip from single image](https://maptalks.github.io/maptalks.tileclip/demo/imagetile-clip.html)  
 
 * [tilerectify-gcj02-wgs84](https://maptalks.org/maptalks.tileclip/demo/tilerectify-gcj02-wgs84.html)  
 * [tilerectify-wgs84-gcj02](https://maptalks.org/maptalks.tileclip/demo/tilerectify-wgs84-gcj02.html)  
 
 * [big image slice](https://maptalks.github.io/maptalks.tileclip/demo/imageslicing.html)
-* [custom tile error](https://maptalks.github.io/maptalks.tileclip/demo/tile-custom-error.html)
+* [custom tile fetch error](https://maptalks.github.io/maptalks.tileclip/demo/tile-custom-error.html)
 
 * [vt tile](https://maptalks.github.io/maptalks.tileclip/demo/tile-vt.html)  
 * [vt tiles will merge mvt data](https://maptalks.github.io/maptalks.tileclip/demo/tile-vts.html) 
@@ -142,7 +142,7 @@ const tileActor = getTileActor();
 | getTile(options)                        | Request tile support for batch and some processing                  |
 | getTileWithMaxZoom(options)             | Cutting tiles, automatically cutting beyond the maximum level limit |
 | layoutTiles(options)                    | Tile layout arrangement |
-| transformTile(options)                  | Tile reprojection                                                   |
+| reProjectTile(options)                  | Tile reprojection                                                   |
 | rectifyTile(options)                    | Corrective tiles, only applicable to Chinese users                                                   |
 | injectMask(maskId, Polygon/MultiPolygon)| Inject geojson data for tile clipping service                       |
 | removeMask(maskId)                      | remove Inject geojson data                                          |
@@ -349,7 +349,7 @@ promise.then((imagebitmap) => {
 })
 ```
 
-* `transformTile(options)` Reprojection tile in worker, return `Promise`
+* `reProjectTile(options)` Reprojection tile in worker, return `Promise`
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
@@ -370,7 +370,7 @@ const {
     z
 } = tile;
 const maxAvailableZoom = 18;
-tileActor.transformTile({
+tileActor.reProjectTile({
     x,
     y,
     z,
@@ -385,7 +385,7 @@ tileActor.transformTile({
 })
 
 //or if you want to cancel task
-const promise = tileActor.transformTile({
+const promise = tileActor.reProjectTile({
     ...
 });
 //mock cancel fetch task

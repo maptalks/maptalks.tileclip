@@ -25,7 +25,7 @@
 <body>
     <div id="map" class="container"></div>
     <script>
-        maptalks.GlobalConfig.workerCount = 2;
+        maptalks.GlobalConfig.workerCount = 1;
         // this is 4326
         // const urlTemplate = 'https://t{s}.tianditu.gov.cn/cva_c/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=cva&STYLE=default&TILEMATRIXSET=c&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tdtkey
         const urlTemplate = 'https://t{s}.tianditu.gov.cn/vec_c/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=vec&STYLE=default&TILEMATRIXSET=c&FORMAT=tiles&TILEMATRIX={z}&TILEROW={y}&TILECOL={x}&tk=' + tdtkey
@@ -58,8 +58,17 @@
             }
         }
 
+        let cacheImage;
+        function fetchTestImage() {
+            if (cacheImage) {
+                return createImageBitmap(cacheImage);
+            }
+            return fetch('./404.png').then(res => res.arrayBuffer()).then(buffer=>new Blob([buffer])).then(blob => { return createImageBitmap(blob) })
+        }
+
 
         //custom tile fetch
+        let fetchCount = 0;
         maplibregl.RasterTileSource.prototype.loadTile = async function (tile) {
             const url = tile.tileID.canonical.url(this.tiles, this.map.getPixelRatio(), this.scheme);
             tile.abortController = new AbortController();
@@ -69,15 +78,19 @@
                 // this is need to transform
                 if (url.includes('SERVICE=WMTS')) {
                     const { x, y, z } = tile.tileID.canonical;
-                    const promise = tileActor.transformTile({
+
+
+                    const promise = tileActor.reProjectTile({
                         x,
                         y,
                         z,
                         urlTemplate,
                         projection: 'EPSG:4326',
                         maxAvailableZoom: 18,
-                        subdomains: ['1', '2', '3', '4', '5']
+                        subdomains: ['1', '2', '3', '4', '5'],
+                        // quality:0.6
                     });
+                    // const promise = fetchTestImage();
                     tile.promise = promise;
                     const image = await promise;
                     response = {
