@@ -1,10 +1,10 @@
 # maptalks.tileclip
 
-[maptalks](https://github.com/maptalks/maptalks.js) TileLayer tiles merge/clip/transform  tool
+[maptalks](https://github.com/maptalks/maptalks.js) TileLayer tiles merge/clip/transform etc tool
 
-* This plugin requires the runtime environment to support [OffscreenCanvas](https://developer.mozilla.org/zh-CN/docs/Web/API/OffscreenCanvas). Pay attention to relevant compatibility
+* This plugin requires the runtime environment to support [OffscreenCanvas](https://developer.mozilla.org/zh-CN/docs/Web/API/OffscreenCanvas). Pay attention to relevant compatibility. Especially the Safari browser
 
-* Considering performance, all operations are completed within the [web worker](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Workers_API/Using_web_workers)
+* Considering performance, all operations are completed within the [Web Worker](https://developer.mozilla.org/zh-CN/docs/Web/API/Web_Workers_API/Using_web_workers)
 
 * If you are familiar with other map engines, you can also apply them to other map engines  [leaflet demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet.html)
 
