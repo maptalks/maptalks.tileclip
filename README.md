@@ -51,10 +51,10 @@
 * [identify projection](https://maptalks.github.io/maptalks.tileclip/demo/identify.html)
 * [EPSG:9807](https://maptalks.github.io/maptalks.tileclip/demo/epsg9807.html)
 
-### Transform Tile
+### Reproject Tile
 
-* [transform EPSG4326 to EPSG3857](https://maptalks.github.io/maptalks.tileclip/demo/4326-transform-3857.html)
-* [transform EPSG3857 to EPSG4326](https://maptalks.github.io/maptalks.tileclip/demo/3857-transform-4326.html)
+* [Reproject EPSG4326 to EPSG3857](https://maptalks.github.io/maptalks.tileclip/demo/4326-transform-3857.html)
+* [Reproject EPSG3857 to EPSG4326](https://maptalks.github.io/maptalks.tileclip/demo/3857-transform-4326.html)
 
 ### Terrain Encode
 
@@ -84,9 +84,9 @@
 * [terrain-tiles-blendmode shadow](https://maptalks.github.io/maptalks.tileclip/demo/terrain-tiles-blendmode-shadow.html)
 * [leaflet clip demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet.html)
 * [leaflet gettile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-simple.html)
-* [leaflet transform tile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-transform.html)  
+* [leaflet reproject tile demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-transform.html)  
 * [leaflet-imagetile-clip demo](https://maptalks.github.io/maptalks.tileclip/demo/leaflet-imagetile-clip.html)  
-* [maplibre transform EPSG4326 to EPSG3857 demo](https://maptalks.github.io/maptalks.tileclip/demo/maplibre.html)  
+* [maplibre reproject EPSG4326 to EPSG3857 demo](https://maptalks.github.io/maptalks.tileclip/demo/maplibre.html)  
 
 ## Install
 
