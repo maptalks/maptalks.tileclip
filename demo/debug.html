@@ -46,7 +46,6 @@
                         projection: baseLayer.getProjection().code,
                         tileSize: baseLayer.getTileSize().width,
                         maskId,
-                        xyz: [tile.x, tile.y, tile.z]
                     }).then(image => {
 
                         callback(image);
