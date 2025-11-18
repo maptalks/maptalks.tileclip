@@ -156,7 +156,8 @@ export type clipBufferOptions = {
     polygons: number[][][][]
 }
 
-export type resolveResultType = (image: ImageBitmap | string | ArrayBuffer) => void;
+export type imageResultType = ImageBitmap | string | ArrayBuffer;
+export type resolveResultType = (image: imageResultType) => void;
 export type rejectResultType = (error: Error) => void;
 export type sliceImageItemType = {
     x: number;
@@ -166,7 +167,7 @@ export type sliceImageItemType = {
     height: number;
     row: number;
     col: number;
-    image: ImageBitmap | string | ArrayBuffer;
+    image: imageResultType;
 }
 
 export type sliceImageResultType = {

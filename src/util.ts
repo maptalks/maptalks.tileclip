@@ -1,5 +1,37 @@
 import LRUCache from './LRUCache';
-import { GeoJSONMultiPolygon, GeoJSONPolygon, postProcessingOptionsType, returnResultType, TileItem } from './types';
+import { GeoJSONMultiPolygon, GeoJSONPolygon, imageResultType, postProcessingOptionsType, returnResultType, rejectResultType, TileItem } from './types';
+
+export function allSettled(promiseList: Array<Promise<imageResultType>>, urls: string[]) {
+    return new Promise((resolve: (images: Array<any>) => void, reject: rejectResultType) => {
+        const results = [];
+        const isEnd = () => {
+            if (results.length === promiseList.length) {
+                let filterResults = results.filter(image => {
+                    return !!image;
+                });
+                if (filterResults.length === 0) {
+                    reject(createNetWorkError(urls));
+                    return;
+                }
+                filterResults = filterResults.sort((a, b) => {
+                    return a.index - b.index;
+                })
+                resolve(filterResults.map(item => {
+                    return item.data;
+                }));
+            }
+        }
+        promiseList.forEach((promise, index) => {
+            promise.then(image => {
+                results.push({ index, data: image });
+                isEnd();
+            }).catch(error => {
+                results.push(null);
+                isEnd();
+            })
+        });
+    });
+}
 
 class CustomError extends Error {
     public code: number;
@@ -41,7 +73,11 @@ export function isFetchDefaultError(error: Error) {
     return error === FetchCancelError || error === FetchTimeoutError;
 }
 
-export function createNetWorkError(url: string) {
+export function createNetWorkError(url: string | string[]) {
+    if (!Array.isArray(url)) {
+        url = [url];
+    }
+    url = url.join(',').toString();
     return createError(`fetch NetWork error, the url is ${url}`, -5);
 }
 

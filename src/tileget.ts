@@ -7,7 +7,8 @@ import {
     checkArray, createParamsValidateError, createInnerError, HEADERS, disposeImage,
     createDataError, validateSubdomains, getTileUrl,
     copyArrayBuffer,
-    toTileItems
+    toTileItems,
+    allSettled
 } from './util';
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
@@ -25,7 +26,7 @@ export function getTile(options: getTileOptions) {
             return fetchTile(tileUrl, headers, options)
         });
         const { globalCompositeOperation } = options;
-        Promise.all(fetchTiles).then(imagebits => {
+        allSettled(fetchTiles, urls).then(imagebits => {
             const canvas = getCanvas();
             const image = mergeTiles(imagebits, globalCompositeOperation);
             if (image instanceof Error) {
@@ -101,7 +102,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
             return fetchTile(url, headers, options);
         })
 
-        Promise.all(fetchTiles).then(imagebits => {
+        allSettled(fetchTiles, urls).then(imagebits => {
             // const canvas = getCanvas();
             const image = mergeTiles(imagebits, globalCompositeOperation);
             if (image instanceof Error) {
@@ -190,7 +191,7 @@ export function encodeTerrainTile(options: encodeTerrainTileOptions) {
             const fetchTiles = urls.map(tileUrl => {
                 return fetchTile(tileUrl, headers, options)
             });
-            Promise.all(fetchTiles).then(imagebits => {
+            allSettled(fetchTiles, urls).then(imagebits => {
                 const canvas = getCanvas();
                 const image = mergeTiles(imagebits);
                 if (image instanceof Error) {
@@ -217,7 +218,7 @@ export function encodeTerrainTile(options: encodeTerrainTileOptions) {
             const fetchTiles = urls.map(tileUrl => {
                 return fetchTileBuffer(tileUrl, headers, options)
             });
-            Promise.all(fetchTiles).then(buffers => {
+            allSettled(fetchTiles, urls).then(buffers => {
                 if (!buffers || buffers.length === 0) {
                     reject(createDataError('buffers is null'));
                     return;
@@ -260,7 +261,7 @@ export function getVTTile(options: getVTTileOptions) {
         const fetchTiles = urls.map(tileUrl => {
             return fetchTileBuffer(tileUrl, headers, options)
         });
-        Promise.all(fetchTiles).then(buffers => {
+        allSettled(fetchTiles, urls).then(buffers => {
             buffers = buffers.filter(buffer => {
                 return !!buffer;
             });
