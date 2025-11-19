@@ -1,14 +1,18 @@
 import LRUCache from './LRUCache';
-import { GeoJSONMultiPolygon, GeoJSONPolygon, imageResultType, postProcessingOptionsType, returnResultType, rejectResultType, TileItem } from './types';
+import { GeoJSONMultiPolygon, GeoJSONPolygon, postProcessingOptionsType, returnResultType, rejectResultType, TileItem } from './types';
 
-export function allSettled(promiseList: Array<Promise<imageResultType>>, urls: string[]) {
-    return new Promise((resolve: (images: Array<any>) => void, reject: rejectResultType) => {
+export function allSettled<T>(promiseList: Promise<T>[], urls: string[], isAll?: boolean) {
+    return new Promise((resolve: (images: Array<T>) => void, reject: rejectResultType) => {
         const results = [];
         const isEnd = () => {
             if (results.length === promiseList.length) {
                 let filterResults = results.filter(image => {
                     return !!image;
                 });
+                if (isAll && filterResults.length < promiseList.length) {
+                    reject(createNetWorkError(urls));
+                    return;
+                }
                 if (filterResults.length === 0) {
                     reject(createNetWorkError(urls));
                     return;

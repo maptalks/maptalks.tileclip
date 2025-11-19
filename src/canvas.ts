@@ -54,11 +54,14 @@ export function get404Tile(tileSize?: number) {
 }
 
 export function mergeTiles(images: Array<ImageBitmap>, globalCompositeOperation?: GlobalCompositeOperation) {
-    if (images.length === 1) {
-        return images[0];
-    }
+    images = images.filter(image => {
+        return isImageBitmap(image);
+    })
     if (images.length === 0) {
         return createDataError('merge tiles error,not find imagebitmaps');
+    }
+    if (images.length === 1) {
+        return images[0];
     }
     for (let i = 0, len = images.length; i < len; i++) {
         const image = images[i];

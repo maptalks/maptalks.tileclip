@@ -152,7 +152,7 @@ export function layout_Tiles(options: layoutTilesOptions) {
             return fetchTile(url, headers, options);
         })
 
-        Promise.all(fetchTiles).then(imagebits => {
+        allSettled(fetchTiles, urls, true).then(imagebits => {
             imagebits.forEach((image, index) => {
                 tileItemList[index].tileImage = image;
             });
