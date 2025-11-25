@@ -156,7 +156,7 @@ export function layout_Tiles(options: layoutTilesOptions) {
             imagebits.forEach((image, index) => {
                 tileItemList[index].tileImage = image;
             });
-            const bigImage = layoutTiles(tileItemList, debug);
+            const bigImage = layoutTiles(tileItemList, debug, false);
             const postImage = postProcessingImage(bigImage, options);
             createImageTypeResult(getCanvas(), postImage, options).then(url => {
                 resolve(url);

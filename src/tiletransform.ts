@@ -569,7 +569,7 @@ export function tileTransform(options) {
                     reject(FetchCancelError);
                     return;
                 }
-                const image = layoutTiles(tileItems, debug);
+                const image = layoutTiles(tileItems, debug, false);
                 let image1;
                 const postProcessingImageHandler = (img: ImageBitmap) => {
                     if (img) {

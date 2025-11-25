@@ -1,6 +1,7 @@
 import { createImageTypeResult, postProcessingImage, colorsTerrainTile, getCanvas } from './canvas';
 import { imageSlicing, imageToBlobURL } from './imageslice';
 import { imagetTileFetch } from './imagetile';
+import { tileBaduRectify } from './tilebaidurectify';
 import { clip, injectMask, removeMask, tileBBOXIntersectMask } from './tileclip';
 import { cancelFetch } from './tilefetch';
 import { encodeTerrainTile, getTile, getTileWithMaxZoom, getVTTile, layout_Tiles } from './tileget';
@@ -65,6 +66,14 @@ export const onmessage = function (message, postResponse) {
     }
     if (type === 'rectifyTile') {
         tileRectify(data).then(image => {
+            postResponse(null, image, checkBuffers(image));
+        }).catch(error => {
+            postResponse(error);
+        });
+        return;
+    }
+    if (type === 'rectifyBaiduTile') {
+        tileBaduRectify(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
             postResponse(error);

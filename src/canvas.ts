@@ -243,7 +243,7 @@ export function imageTileScale(image: ImageBitmap, dx: number, dy: number, w: nu
 }
 
 
-export function layoutTiles(tiles: Array<TileItem>, debug: boolean) {
+export function layoutTiles(tiles: Array<TileItem>, debug: boolean, reverseY: boolean) {
     let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
     let tileSize = 256;
     tiles.forEach(tile => {
@@ -254,6 +254,7 @@ export function layoutTiles(tiles: Array<TileItem>, debug: boolean) {
         maxy = Math.max(y, maxy);
         tileSize = tile.tileImage.width;
     });
+    const multiRow = miny !== maxy;
     const width = (maxx - minx + 1) * tileSize;
     const height = (maxy - miny + 1) * tileSize;
     const canvas = getCanvas();
@@ -269,7 +270,13 @@ export function layoutTiles(tiles: Array<TileItem>, debug: boolean) {
     tiles.forEach(tile => {
         const { x, y, z } = tile;
         const dx = (x - minx) * tileSize;
-        const dy = (y - miny) * tileSize;
+        let dy = (y - miny) * tileSize;
+        if (reverseY && multiRow) {
+            dy = height - dy;
+            if (multiRow) {
+                dy -= tileSize;
+            }
+        }
         let tileImage = tile.tileImage;
         ctx.drawImage(tileImage, dx, dy, tileSize, tileSize);
         if (debug) {

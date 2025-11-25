@@ -24,7 +24,8 @@ import {
     rejectResultType,
     sliceImageResultType,
     getVTTileOptions,
-    rectifyTileOptions
+    rectifyTileOptions,
+    rectifyBaiduTileOptions
 } from './types.js';
 import { imageTile } from './imagetile.js';
 export { getBlankTile, get404Tile } from './canvas';
@@ -39,6 +40,7 @@ const imageMap = {};
 const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
 
 const transformTypes = ['WGS84-GCJ02', 'GCJ02-WGS84'];
+const transformBaiduTypes = ['BAIDU-WGS84', 'BAIDU-GCJ02'];
 const TerrainTypes = ['mapzen', 'tianditu', 'cesium', 'arcgis', 'qgis-gray'];
 
 function checkOptions(options, type: string) {
@@ -247,6 +249,49 @@ class TileActor extends worker.Actor {
             }
             if (transformTypes.indexOf(transform) === -1) {
                 reject(createParamsValidateError('rectifyTile error:not support transformTo:' + transform + '.the support:' + transformTypes.join(',').toString()));
+                return;
+            }
+            this.send(options, [], (error, image) => {
+                if (isErrorOrCancel(error, promise)) {
+                    disposeImage(image);
+                    reject(error || FetchCancelError);
+                } else {
+                    resolve(image);
+                }
+            }, workerId);
+        });
+        wrapPromise(promise, options);
+        return promise;
+    }
+
+    rectifyBaiduTile(options: rectifyBaiduTileOptions) {
+        options = checkOptions(options, 'rectifyBaiduTile');
+        const { workerId } = getTaskId(options);
+        const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
+            const { urlTemplate, x, y, z, maxAvailableZoom, tileBBOX, transform } = options;
+            const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
+            if (!maxZoomEnable) {
+                reject(createParamsValidateError('rectifyBaiduTile error:maxAvailableZoom is error'));
+                return;
+            }
+            if (!urlTemplate) {
+                reject(createParamsValidateError('rectifyBaiduTile error:urlTemplate is error'));
+                return;
+            }
+            if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
+                reject(createParamsValidateError('rectifyBaiduTile error:x/y/z is error'));
+                return;
+            }
+            if (!tileBBOX) {
+                reject(createParamsValidateError('rectifyBaiduTile error:tileBBOX is null'));
+                return;
+            }
+            if (!transform) {
+                reject(createParamsValidateError('rectifyBaiduTile error:transform is null'));
+                return;
+            }
+            if (transformBaiduTypes.indexOf(transform) === -1) {
+                reject(createParamsValidateError('rectifyBaiduTile error:not support transformTo:' + transform + '.the support:' + transformBaiduTypes.join(',').toString()));
                 return;
             }
             this.send(options, [], (error, image) => {

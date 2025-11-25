@@ -103,6 +103,15 @@ export type rectifyTileOptions = getTileWithMaxZoomOptions & {
     mapZoom?: number;
 }
 
+export type rectifyBaiduTileOptions = getTileWithMaxZoomOptions & {
+    tileBBOX: BBOXtype;
+    transform: 'BAIDU-WGS84' | 'BAIDU-GCJ02',
+    tileSize: number;
+    errorLog?: boolean;
+    debug?: boolean;
+    mapZoom?: number;
+}
+
 export type colorTerrainTileOptions = {
     tile: ImageBitmap;
     colors: Array<[number, string]>;
