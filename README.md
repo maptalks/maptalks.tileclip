@@ -143,7 +143,8 @@ const tileActor = getTileActor();
 | getTileWithMaxZoom(options)             | Cutting tiles, automatically cutting beyond the maximum level limit |
 | layoutTiles(options)                    | Tile layout arrangement |
 | reProjectTile(options)                  | Tile reprojection                                                   |
-| rectifyTile(options)                    | Corrective tiles, only applicable to Chinese users                                                   |
+| rectifyTile(options)                    | Corrective tiles, only applicable to Chinese users                  |
+| rectifyBaiduTile(options)               | Corrective baidu tiles, only applicable to Chinese users                  |
 | injectMask(maskId, Polygon/MultiPolygon)| Inject geojson data for tile clipping service                       |
 | removeMask(maskId)                      | remove Inject geojson data                                          |
 | maskHasInjected(maskId)                 | Has the geojson data been injected                                  |
@@ -353,7 +354,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                                                      `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                                                        `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -440,6 +441,54 @@ promise.then((imagebitmap) => {
               projection: baseLayer.getProjection().code,
               tileSize: baseLayer.getTileSize().width,
               transform: 'GCJ02-WGS84',
+              mapZoom: map.getZoom()
+          }).then(imagebitmap => {
+              callback(imagebitmap);
+          }).catch(error => {
+              //do some things
+              console.error(error);
+          })
+      };
+  });
+```
+
+* `rectifyBaiduTile(options)` rectify baidu tile [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap) by fetch in worker, return `Promise`. When the level exceeds the maximum level, tiles will be automatically cut
+  + `options.x`:tile col
+  + `options.y`:tile row
+  + `options.z`:tile zoom
+  + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
+  + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates 
+  + `options.tileBBOX`:tile BBOX `[minx,miny,maxx,maxy]`
+  + `options.transform`:  'BAIDU-WGS84' | 'BAIDU-GCJ02', 
+  + `options.tileSize`: tile size 
+  + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
+  + `...fetchOptionsType` fetchOptionsType params
+  + `...postProcessingOptionsType` postProcessingOptionsType params
+  + `...returnResultType` returnResultType params 
+
+```js
+  baseLayer.on('renderercreate', function(e) {
+      //load tile image
+      //   img(Image): an Image object
+      //   url(String): the url of the tile
+      e.renderer.loadTileBitmap = function(url, tile, callback) {
+          // console.log(tile);
+          const {
+              x,
+              y,
+              z
+          } = tile;
+          const urlTemplate = baseLayer.options.urlTemplate;
+          const maxAvailableZoom = 18;
+          tileActor.rectifyBaiduTile({
+              x,
+              y,
+              z,
+              urlTemplate,
+              maxAvailableZoom,
+              tileBBOX: baseLayer._getTileBBox(tile),
+              tileSize: baseLayer.getTileSize().width,
+              transform: 'BAIDU-WGS84',
               mapZoom: map.getZoom()
           }).then(imagebitmap => {
               callback(imagebitmap);
