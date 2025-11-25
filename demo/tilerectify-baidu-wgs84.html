@@ -207,7 +207,7 @@
             once: true,
             mode: 'LineString',
             // 'symbol': drawSymbol,
-        }).addTo(map1);
+        }).addTo(map1).disable();
 
         drawTool.on('drawend', function (e) {
             layer1.addGeometry(e.geometry);

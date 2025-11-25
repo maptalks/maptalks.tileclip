@@ -10,11 +10,29 @@
 
 ## Examples
 
-### Common
+### Fetch Tile
 
 * [fetch tile](https://maptalks.github.io/maptalks.tileclip/demo/tile.html)
 * [fetch and merge tiles](https://maptalks.github.io/maptalks.tileclip/demo/tile-array.html)
 * [tiles filter by  mask(only load tiles in mask)](https://maptalks.github.io/maptalks.tileclip/demo/tile-mask-filter.html) 
+
+* [maxAvailableZoom](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom.html)
+* [maxAvailableZoom tiles](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-array.html)
+* [maxAvailableZoom terrain](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-terrain.html)  
+
+* [layout tiles](https://maptalks.github.io/maptalks.tileclip/demo/layouttiles.html)  
+
+* [get tile from single image](https://maptalks.github.io/maptalks.tileclip/demo/imagetile.html)  
+
+* [big image slice](https://maptalks.github.io/maptalks.tileclip/demo/imageslicing.html)
+
+* [custom tile fetch error](https://maptalks.github.io/maptalks.tileclip/demo/tile-custom-error.html)
+
+* [vt tile](https://maptalks.github.io/maptalks.tileclip/demo/tile-vt.html)  
+* [vt tiles will merge mvt data](https://maptalks.github.io/maptalks.tileclip/demo/tile-vts.html) 
+
+### Clip Tile
+
 * [clip by polygon](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip.html)
 * [clip by polygon with holes](https://maptalks.github.io/maptalks.tileclip/demo/polygon-hole-clip.html)
 * [clip by multipolygon](https://maptalks.github.io/maptalks.tileclip/demo/multipolygon-clip.html)
@@ -22,28 +40,14 @@
 * [clip reverse](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-reverse.html) 
 * [clip buffer](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-buffer.html) 
 
-* [maxAvailableZoom](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom.html)
-* [maxAvailableZoom tiles](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-array.html)
 * [maxAvailableZoom polygon clip](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-polygon-clip.html)
 * [maxAvailableZoom tiles polygon clip](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-polygon-clip-array.html)  
-* [maxAvailableZoom terrain](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-terrain.html)  
 
 * [update mask](https://maptalks.github.io/maptalks.tileclip/demo/update-mask.html)
 * [mask remove/add](https://maptalks.github.io/maptalks.tileclip/demo/polygon-clip-remve.html) 
-* [layout tiles](https://maptalks.github.io/maptalks.tileclip/demo/layouttiles.html)  
 
-* [get tile from single image](https://maptalks.github.io/maptalks.tileclip/demo/imagetile.html)  
 * [get tile and clip from single image](https://maptalks.github.io/maptalks.tileclip/demo/imagetile-clip.html)  
 
-* [tilerectify-gcj02-wgs84](https://maptalks.org/maptalks.tileclip/demo/tilerectify-gcj02-wgs84.html)  
-* [tilerectify-wgs84-gcj02](https://maptalks.org/maptalks.tileclip/demo/tilerectify-wgs84-gcj02.html)  
-* [tilerectify-baidu-wgs](https://maptalks.org/maptalks.tileclip/demo/tilerectify-baidu-wgs84.html)  
-
-* [big image slice](https://maptalks.github.io/maptalks.tileclip/demo/imageslicing.html)
-* [custom tile fetch error](https://maptalks.github.io/maptalks.tileclip/demo/tile-custom-error.html)
-
-* [vt tile](https://maptalks.github.io/maptalks.tileclip/demo/tile-vt.html)  
-* [vt tiles will merge mvt data](https://maptalks.github.io/maptalks.tileclip/demo/tile-vts.html) 
 
 ### Clip By Custom Prj
 
@@ -52,10 +56,20 @@
 * [identify projection](https://maptalks.github.io/maptalks.tileclip/demo/identify.html)
 * [EPSG:9807](https://maptalks.github.io/maptalks.tileclip/demo/epsg9807.html)
 
+
+
+### Rectify Tile  
+
+* [tilerectify-gcj02-wgs84](https://maptalks.org/maptalks.tileclip/demo/tilerectify-gcj02-wgs84.html)  
+* [tilerectify-wgs84-gcj02](https://maptalks.org/maptalks.tileclip/demo/tilerectify-wgs84-gcj02.html)  
+* [tilerectify-baidu-wgs84](https://maptalks.org/maptalks.tileclip/demo/tilerectify-baidu-wgs84.html)  
+
+
 ### Reproject Tile
 
 * [Reproject EPSG4326 to EPSG3857](https://maptalks.github.io/maptalks.tileclip/demo/4326-transform-3857.html)
 * [Reproject EPSG3857 to EPSG4326](https://maptalks.github.io/maptalks.tileclip/demo/3857-transform-4326.html)
+
 
 ### Terrain Encode
 
