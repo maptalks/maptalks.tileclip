@@ -69,6 +69,7 @@ export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {
     y: number;
     z: number;
     subdomains?: Array<string>;
+    tms?: boolean;
 }
 
 export type clipTileOptions = {

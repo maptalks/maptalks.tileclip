@@ -115,16 +115,17 @@ function transformPixel(image: ImageBitmap, allTilesBBOX: BBOXtype, needTransfor
     const canvas = getCanvas();
     resizeCanvas(canvas, width, height);
     let ctx = getCanvasContext(canvas);
+    ctx.drawImage(image, 0, 0);
     const offsetY = minY < 0 ? Math.abs(minY) : 0;
     for (let i = 0, len = cells.length; i < len; i++) {
         const { x1, y1, x2, y2, px1, py1, px2, py2 } = cells[i];
-        ctx.drawImage(image, x1, y1, x2 - x1, y2 - y1, px1, py1, px2 - px1, py2 - py1);
+        ctx.drawImage(image, x1, y1, x2 - x1, y2 - y1, px1, py1 + offsetY, px2 - px1, py2 - py1);
     }
     disposeImage(image);
     const tempImage = canvas.transferToImageBitmap();
     resizeCanvas(canvas, tileSize, tileSize);
     ctx == getCanvasContext(canvas);
-    ctx.drawImage(tempImage, left, top + minY, tileSize, tileSize, 0, 0, tileSize, tileSize);
+    ctx.drawImage(tempImage, left, top, tileSize, tileSize, 0, 0, tileSize, tileSize);
     disposeImage(tempImage);
     return canvas.transferToImageBitmap();
 
@@ -289,7 +290,7 @@ export function tileBaduRectify(options: rectifyBaiduTileOptions) {
         }
         tileItemList.forEach(tile => {
             const { x, y, z } = tile;
-            getTileWithMaxZoom(Object.assign({}, options, { x, y, z, forceReturnImage: true, ignorePostProcessing: true })).then(image => {
+            getTileWithMaxZoom(Object.assign({}, options, { x, y, z, forceReturnImage: true, ignorePostProcessing: true, tms: true })).then(image => {
                 tile.tileImage = image as ImageBitmap;
                 result.loadCount++;
                 if (isEnd()) {

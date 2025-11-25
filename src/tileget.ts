@@ -47,7 +47,7 @@ export function getTile(options: getTileOptions) {
 }
 
 export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
-    const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, globalCompositeOperation } = options;
+    const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, globalCompositeOperation, tms } = options;
     return new Promise((resolve: resolveResultType, reject) => {
         const urlTemplates = checkArray(urlTemplate);
         for (let i = 0, len = urlTemplates.length; i < len; i++) {
@@ -57,6 +57,8 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
                 return;
             }
         }
+        // const isDebug = x === 398789 && y === 143180;
+        const isDebug = false;
         let dxScale, dyScale, wScale, hScale;
         let tileX = x, tileY = y, tileZ = z;
         const zoomOffset = z - maxAvailableZoom;
@@ -66,8 +68,11 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
             // parent tile
             while (zoom > maxAvailableZoom) {
                 px = Math.floor(px / 2);
-                py = Math.floor(py / 2);
+                py = Math.floor(py / 2)
                 zoom--;
+            }
+            if (isDebug) {
+                console.log(px, py);
             }
             const scale = Math.pow(2, zoomOffset);
             // child tiles
@@ -86,12 +91,27 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
             // console.log(startCol, endCol, startRow, endRow);
             dxScale = (x - startX) / (endX - startX);
             dyScale = (y - startY) / (endY - startY);
+            if (tms) {
+                const ady = 1 / (endY - startY);
+                const offsety = endY - y - 1;
+                dyScale = offsety * ady;
+                if (isDebug) {
+                    console.log(offsety);
+                }
+            }
+
+            if (isDebug) {
+                console.log(startY, endY);
+                // console.log(startX, endX);
+                console.log(dxScale, dyScale);
+            }
             wScale = 1 / (endX - startX);
             hScale = 1 / (endY - startY);
             // console.log(dxScale, dyScale, wScale, hScale);
             tileX = px;
             tileY = py;
             tileZ = maxAvailableZoom;
+            // console.log(dxScale, dyScale);
         }
         const urls = urlTemplates.map(urlTemplate => {
             return getTileUrl(urlTemplate, tileX, tileY, tileZ, subdomains);
