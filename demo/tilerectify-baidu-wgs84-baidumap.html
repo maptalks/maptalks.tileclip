@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Interactions - Draw tool to draw geometries</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .main {
+        width: 100%;
+        height: 100%;
+        display: flex;
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+
+    .tools {
+        position: absolute;
+        z-index: 1;
+    }
+</style>
+<link rel='stylesheet' href='https://unpkg.com/maptalks/dist/maptalks.css' />
+<script type='text/javascript' src='https://unpkg.com/maptalks/dist/maptalks.min.js'></script>
+<script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
+<script src="https://unpkg.com/maptalks.mapsync/dist/maptalks.mapsync.js"></script>
+<script type='text/javascript' src='./util.js'></script>
+<script type='text/javascript' src='./gcoord.js'></script>
+<script src="https://api.map.baidu.com/api?v=3.0&ak=bweewZpbMmnREqMMoT03iA8ayYP0zfVx"></script>
+
+<body>
+    <div class="tools">
+        <button onclick="drawLine()">绘制线</button>
+    </div>
+    <div class="main">
+        <div id="map1" class="container"></div>
+        <div id="map2" class="container"></div>
+    </div>
+
+    <script>
+
+        const tileActor = maptalks.getTileActor();
+
+        const maxAvailableZoom = 18;
+        const baseLayer = new maptalks.TileLayer('base', {
+            debug: true,
+            urlTemplate: "https://maponline{s}.bdimg.com/tile/?qt=vtile&x={x}&y={y}&z={z}&styles=pl&udt=20251120&scaler=1&showtext=1",
+            subdomains: ['0', "1", "2", "3"],
+            spatialReference: {
+                projection: 'baidu', // 投影类型
+            },
+            // maxAvailableZoom
+        })
+
+        baseLayer.on('renderercreate', function (e) {
+            //load tile image
+            //   img(Image): an Image object
+            //   url(String): the url of the tile
+            e.renderer.loadTileBitmap = function (url, tile, callback) {
+                // console.log(tile);
+                const { x, y, z } = tile;
+                const urlTemplate = baseLayer.options.urlTemplate;
+                // console.log( baseLayer._getTileBBox(tile))
+                tileActor.rectifyBaiduTile({
+                    x,
+                    y,
+                    z,
+                    urlTemplate,
+                    subdomains: baseLayer.options.subdomains,
+                    maxAvailableZoom,
+                    tileBBOX: baseLayer._getTileBBox(tile),
+                    tileSize: baseLayer.getTileSize().width,
+                    transform: 'BAIDU-WGS84',
+                    errorLog: true,
+                    // indexedDBCache: true,
+                }
+                ).then(imagebitmap => {
+                    callback(imagebitmap);
+                }).catch(error => {
+                    //do some things
+                    console.error(error);
+                })
+            };
+        });
+
+        var map1 = new maptalks.Map('map1', {
+            zoomControl: true,
+            "center": [114.60255955, 37.87049573], "zoom": 15.012137981732052, "pitch": 0, "bearing": 0,
+            spatialReference: {
+                projection: 'baidu', // 投影类型
+            },
+        });
+
+        map1.on('click', e => {
+            // console.log(e.coordinate.toArray());
+        })
+
+        baseLayer.addTo(map1);
+
+
+
+
+        const layer1 = new maptalks.VectorLayer('vector').addTo(map1);
+
+
+        const coordinates = [
+            [
+                114.62990465099243,
+                38.20924574969397
+            ],
+            [
+                114.63028057794423,
+                38.20913497938413
+            ],
+            [
+                114.63078181387998,
+                38.20897497752786
+            ],
+            [
+                114.63108725452832,
+                38.20880574441254
+            ],
+            [
+                114.63132612477895,
+                38.20862727997375
+            ],
+            [
+                114.63156107912383,
+                38.2084088142892
+            ],
+            [
+                114.63175687441122,
+                38.20812265402033
+            ],
+            [
+                114.63187826748941,
+                38.20778726044524
+            ],
+            [
+                114.63190567882964,
+                38.20757186926102
+            ],
+            [
+                114.63189001520665,
+                38.20733801525363
+            ],
+            [
+                114.63186260386642,
+                38.20711031457717
+            ],
+            [
+                114.63168247220202,
+                38.20670414403448
+            ],
+            [
+                114.63155324731234,
+                38.20651336617914
+            ]
+        ];
+
+        const line = new maptalks.LineString(coordinates).addTo(layer1);
+
+
+        // const c = [
+        //     114.6426559419478,
+        //     38.21552784082945
+        // ];
+        // const point = new maptalks.Marker(c, {
+        //     symbol: {
+        //         markerType: 'ellipse',
+        //         markerFill: 'blue'
+        //     }
+        // }).addTo(layer1);
+
+        // const c2 = gcoord.transform(c, gcoord.Baidu, gcoord.WGS84);
+        // const point1 = new maptalks.Marker(c2, {
+        //     symbol: {
+        //         markerType: 'ellipse',
+        //         markerFill: 'red'
+        //     }
+        // }).addTo(layer1);
+
+        map1.setView({
+            "center": [114.63158249, 38.20834212], "zoom": 16.884644909014614, "pitch": 0, "bearing": 0
+        })
+
+        const drawTool = new maptalks.DrawTool({
+            once: true,
+            mode: 'LineString',
+            // 'symbol': drawSymbol,
+        }).addTo(map1);
+
+        drawTool.on('drawend', function (e) {
+            layer1.addGeometry(e.geometry);
+            addLineToBaiduMap(e.geometry.getCoordinates())
+            // layer2.addGeometry(e.geometry.copy());
+        });
+        drawTool.on('drawstart', function (param) {
+            //设置绘制图形时，图形的样式
+            updateGeometrySymbol(param.tempGeometry);
+        });
+        function updateGeometrySymbol(geometry) {
+            const mode = drawTool.getMode();
+            if (mode === 'linestring') {
+                // if (geometry.getCoordinates().length > 1) {
+                geometry.setSymbol({
+                    lineColor: 'red',
+                    markerType: 'ellipse',
+                    markerWidth: 10,
+                    markerHeight: 10,
+                    'markerPlacement': 'vertex',
+                })
+                // }
+
+            }
+            if (mode === 'polygon') {
+                // if (geometry.getCoordinates().length > 1) {
+                geometry.setSymbol({
+                    polygonFill: "white",
+                    polygonOpacity: 0.7,
+                    lineColor: 'blue',
+                    lineWidth: 2,
+                    markerType: 'ellipse',
+                    markerWidth: 10,
+                    markerHeight: 10,
+                    markerFill: "red",
+                    'markerPlacement': 'vertex',
+                })
+                // }
+            }
+            if (mode === 'point') {
+                geometry.setSymbol({
+                    markerType: 'ellipse',
+                    markerWidth: 10,
+                    markerHeight: 10,
+                    markerFill: "red",
+                })
+            }
+        }
+        function drawLine() {
+            drawTool.enable();
+
+        }
+
+        const map2 = new BMap.Map('map2');
+        map2.enableScrollWheelZoom();
+        // var map = new BMap.Map("container");          // 创建地图实例 
+        var point = new BMap.Point(...map1.getCenter().toArray());  // 创建点坐标 
+        map2.centerAndZoom(point, map1.getZoom());
+
+        function addLineToBaiduMap(coordinates) {
+            const points = coordinates.map(c => {
+                const { x, y } = c;
+                const c2 = gcoord.transform([x, y], gcoord.WGS84, gcoord.Baidu);
+                return new BMap.Point(c2[0], c2[1]);
+            })
+            let polyline = new BMap.Polyline(points, {
+                strokeColor: 'blue',
+            });
+            map2.addOverlay(polyline);
+        }
+
+        addLineToBaiduMap(line.getCoordinates());
+    </script>
+</body>
+
+</html>
