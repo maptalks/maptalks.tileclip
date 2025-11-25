@@ -7,7 +7,8 @@ import {
     checkBuffers, TaskCancelError, disposeImage,
     needFormatImageType,
     needPostProcessingImage,
-    removeTimeOut
+    removeTimeOut,
+    validateSubdomains
 } from './util';
 import { getCanvas, getCanvasContext, resizeCanvas } from './canvas';
 import {
@@ -116,13 +117,17 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'layoutTiles');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { urlTemplate, tiles } = options;
+            const { urlTemplate, tiles, subdomains } = options;
             if (!urlTemplate) {
                 reject(createParamsValidateError('layoutTiles error:urlTemplate is null'));
                 return;
             }
             if (!tiles || tiles.length === 0) {
                 reject(createParamsValidateError('layoutTiles error:tiles is null'));
+                return;
+            }
+            if (!validateSubdomains(urlTemplate, subdomains)) {
+                reject(createParamsValidateError('layoutTiles error:subdomains is null'));
                 return;
             }
             const buffers = [];
@@ -143,7 +148,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'getTileWithMaxZoom');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { urlTemplate, maxAvailableZoom, x, y, z } = options;
+            const { urlTemplate, maxAvailableZoom, x, y, z, subdomains } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!maxZoomEnable) {
                 reject(createParamsValidateError('getTileWithMaxZoom error:maxAvailableZoom is error'));
@@ -155,6 +160,10 @@ class TileActor extends worker.Actor {
             }
             if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
                 reject(createParamsValidateError('getTileWithMaxZoom error:x/y/z is error'));
+                return;
+            }
+            if (!validateSubdomains(urlTemplate, subdomains)) {
+                reject(createParamsValidateError('getTileWithMaxZoom error:subdomains is null'));
                 return;
             }
             this.send(options, [], (error, image) => {
@@ -178,7 +187,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'transformTile');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { urlTemplate, x, y, z, maxAvailableZoom, projection } = options;
+            const { urlTemplate, x, y, z, maxAvailableZoom, projection, subdomains } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!projection) {
                 reject(createParamsValidateError('transformTile error:not find projection'));
@@ -200,6 +209,11 @@ class TileActor extends worker.Actor {
                 reject(createParamsValidateError('transformTile error:x/y/z is error'));
                 return;
             }
+
+            if (!validateSubdomains(urlTemplate, subdomains)) {
+                reject(createParamsValidateError('transformTile error:subdomains is null'));
+                return;
+            }
             this.send(options, [], (error, image) => {
                 if (isErrorOrCancel(error, promise)) {
                     disposeImage(image);
@@ -217,7 +231,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'rectifyTile');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { urlTemplate, x, y, z, maxAvailableZoom, projection, tileBBOX, transform } = options;
+            const { urlTemplate, x, y, z, maxAvailableZoom, projection, tileBBOX, transform, subdomains } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!projection) {
                 reject(createParamsValidateError('rectifyTile error:not find projection'));
@@ -251,6 +265,11 @@ class TileActor extends worker.Actor {
                 reject(createParamsValidateError('rectifyTile error:not support transformTo:' + transform + '.the support:' + transformTypes.join(',').toString()));
                 return;
             }
+
+            if (!validateSubdomains(urlTemplate, subdomains)) {
+                reject(createParamsValidateError('rectifyTile error:subdomains is null'));
+                return;
+            }
             this.send(options, [], (error, image) => {
                 if (isErrorOrCancel(error, promise)) {
                     disposeImage(image);
@@ -268,7 +287,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'rectifyBaiduTile');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { urlTemplate, x, y, z, maxAvailableZoom, tileBBOX, transform } = options;
+            const { urlTemplate, x, y, z, maxAvailableZoom, tileBBOX, transform, subdomains } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!maxZoomEnable) {
                 reject(createParamsValidateError('rectifyBaiduTile error:maxAvailableZoom is error'));
@@ -292,6 +311,10 @@ class TileActor extends worker.Actor {
             }
             if (transformBaiduTypes.indexOf(transform) === -1) {
                 reject(createParamsValidateError('rectifyBaiduTile error:not support transformTo:' + transform + '.the support:' + transformBaiduTypes.join(',').toString()));
+                return;
+            }
+            if (!validateSubdomains(urlTemplate, subdomains)) {
+                reject(createParamsValidateError('rectifyBaiduTile error:subdomains is null'));
                 return;
             }
             this.send(options, [], (error, image) => {

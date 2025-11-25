@@ -222,10 +222,16 @@ export function getTileUrl(urlTemplate: string, x: number, y: number, z: number,
     return formatTileUrlBySubdomains(url, subdomains);
 }
 
-export function validateSubdomains(urlTemplate: string, subdomains: string[]) {
-    if (urlTemplate && urlTemplate.indexOf('{s}') > -1) {
-        if (!subdomains || subdomains.length === 0) {
-            return false;
+export function validateSubdomains(urlTemplates: string | string[], subdomains: string[]) {
+    if (!Array.isArray(urlTemplates)) {
+        urlTemplates = [urlTemplates];
+    }
+    for (let i = 0, len = urlTemplates.length; i < len; i++) {
+        const urlTemplate = urlTemplates[i];
+        if (urlTemplate && urlTemplate.indexOf('{s}') > -1) {
+            if (!subdomains || subdomains.length === 0) {
+                return false;
+            }
         }
     }
     return true;
