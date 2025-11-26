@@ -47,8 +47,12 @@ const TerrainTypes = ['mapzen', 'tianditu', 'cesium', 'arcgis', 'qgis-gray'];
 function checkOptions(options, type: string) {
     return Object.assign(
         {
+            //default params
             referrer: document.location.href,
-            tileSize: 256
+            tileSize: 256,
+            maxAvailableZoom: 18,
+            opacity: 1,
+            quality: 1
         },
         options,
         {
@@ -69,6 +73,17 @@ function getTaskId(options: Record<string, any>) {
 
 function isErrorOrCancel(error: Error, promise): boolean {
     return (error || (promise && promise.canceled));
+}
+
+function validateUrlTemplate(type: string, options: any) {
+    const { urlTemplate, subdomains } = options;
+    if (!urlTemplate) {
+        return createParamsValidateError(`${type} error:urlTemplate is null`)
+    }
+    if (!validateSubdomains(urlTemplate, subdomains)) {
+        return createParamsValidateError(`${type} error: urlTemplate has {s} but subdomains is null`);
+    }
+    return null;
 }
 
 
@@ -117,17 +132,14 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'layoutTiles');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { urlTemplate, tiles, subdomains } = options;
-            if (!urlTemplate) {
-                reject(createParamsValidateError('layoutTiles error:urlTemplate is null'));
+            const { tiles } = options;
+            const error = validateUrlTemplate('layoutTiles', options);
+            if (error) {
+                reject(error);
                 return;
             }
             if (!tiles || tiles.length === 0) {
                 reject(createParamsValidateError('layoutTiles error:tiles is null'));
-                return;
-            }
-            if (!validateSubdomains(urlTemplate, subdomains)) {
-                reject(createParamsValidateError('layoutTiles error:subdomains is null'));
                 return;
             }
             const buffers = [];
@@ -148,22 +160,19 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'getTileWithMaxZoom');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { urlTemplate, maxAvailableZoom, x, y, z, subdomains } = options;
+            const { maxAvailableZoom, x, y, z } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!maxZoomEnable) {
                 reject(createParamsValidateError('getTileWithMaxZoom error:maxAvailableZoom is error'));
                 return;
             }
-            if (!urlTemplate) {
-                reject(createParamsValidateError('getTileWithMaxZoom error:urlTemplate is error'));
+            const error = validateUrlTemplate('getTileWithMaxZoom', options);
+            if (error) {
+                reject(error);
                 return;
             }
             if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
                 reject(createParamsValidateError('getTileWithMaxZoom error:x/y/z is error'));
-                return;
-            }
-            if (!validateSubdomains(urlTemplate, subdomains)) {
-                reject(createParamsValidateError('getTileWithMaxZoom error:subdomains is null'));
                 return;
             }
             this.send(options, [], (error, image) => {
@@ -187,7 +196,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'transformTile');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { urlTemplate, x, y, z, maxAvailableZoom, projection, subdomains } = options;
+            const { x, y, z, maxAvailableZoom, projection } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!projection) {
                 reject(createParamsValidateError('transformTile error:not find projection'));
@@ -201,8 +210,9 @@ class TileActor extends worker.Actor {
                 reject(createParamsValidateError('transformTile error:maxAvailableZoom is error'));
                 return;
             }
-            if (!urlTemplate) {
-                reject(createParamsValidateError('transformTile error:urlTemplate is error'));
+            const error = validateUrlTemplate('transformTile', options);
+            if (error) {
+                reject(error);
                 return;
             }
             if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
@@ -210,10 +220,6 @@ class TileActor extends worker.Actor {
                 return;
             }
 
-            if (!validateSubdomains(urlTemplate, subdomains)) {
-                reject(createParamsValidateError('transformTile error:subdomains is null'));
-                return;
-            }
             this.send(options, [], (error, image) => {
                 if (isErrorOrCancel(error, promise)) {
                     disposeImage(image);
@@ -231,7 +237,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'rectifyTile');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { urlTemplate, x, y, z, maxAvailableZoom, projection, tileBBOX, transform, subdomains } = options;
+            const { x, y, z, maxAvailableZoom, projection, tileBBOX, transform } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!projection) {
                 reject(createParamsValidateError('rectifyTile error:not find projection'));
@@ -245,8 +251,9 @@ class TileActor extends worker.Actor {
                 reject(createParamsValidateError('rectifyTile error:maxAvailableZoom is error'));
                 return;
             }
-            if (!urlTemplate) {
-                reject(createParamsValidateError('rectifyTile error:urlTemplate is error'));
+            const error = validateUrlTemplate('rectifyTile', options);
+            if (error) {
+                reject(error);
                 return;
             }
             if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
@@ -263,11 +270,6 @@ class TileActor extends worker.Actor {
             }
             if (transformTypes.indexOf(transform) === -1) {
                 reject(createParamsValidateError('rectifyTile error:not support transformTo:' + transform + '.the support:' + transformTypes.join(',').toString()));
-                return;
-            }
-
-            if (!validateSubdomains(urlTemplate, subdomains)) {
-                reject(createParamsValidateError('rectifyTile error:subdomains is null'));
                 return;
             }
             this.send(options, [], (error, image) => {
@@ -287,14 +289,15 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'rectifyBaiduTile');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { urlTemplate, x, y, z, maxAvailableZoom, tileBBOX, transform, subdomains } = options;
+            const { x, y, z, maxAvailableZoom, tileBBOX, transform } = options;
             const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!maxZoomEnable) {
                 reject(createParamsValidateError('rectifyBaiduTile error:maxAvailableZoom is error'));
                 return;
             }
-            if (!urlTemplate) {
-                reject(createParamsValidateError('rectifyBaiduTile error:urlTemplate is error'));
+            const error = validateUrlTemplate('rectifyBaiduTile', options);
+            if (error) {
+                reject(error);
                 return;
             }
             if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
@@ -311,10 +314,6 @@ class TileActor extends worker.Actor {
             }
             if (transformBaiduTypes.indexOf(transform) === -1) {
                 reject(createParamsValidateError('rectifyBaiduTile error:not support transformTo:' + transform + '.the support:' + transformBaiduTypes.join(',').toString()));
-                return;
-            }
-            if (!validateSubdomains(urlTemplate, subdomains)) {
-                reject(createParamsValidateError('rectifyBaiduTile error:subdomains is null'));
                 return;
             }
             this.send(options, [], (error, image) => {
