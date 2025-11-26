@@ -175,10 +175,10 @@ const tileActor = getTileActor();
 | getImageTile(options)                   | get tile data from    injectImage                |
 | getVTTile(options)                      | get VT tile, support merge vt data            |
 
-#### Types
+#### Common Types
 
 ```ts
-
+// postProcessing params
 export type postProcessingOptionsType = {
     flipY?:boolean;
     filter?: string; //[CanvasRenderingContext2D.filter](https://mdn.org.cn/en-US/docs/Web/API/CanvasRenderingContext2D/filter)
@@ -188,7 +188,7 @@ export type postProcessingOptionsType = {
     oldPhoto?: boolean;//Old photo effect
     invertColor?:boolean;// invert Color
 }
-
+//fetch params 
 export type fetchOptionsType = {
     referrer?: string;//fetch referrer
     headers?: Record<string, string>;// fetch headers params. if need
@@ -197,6 +197,7 @@ export type fetchOptionsType = {
     indexedDBCache?: boolean;//cache tile data by IndexedDB 
 }
 
+// image reutrn result params
 //tile default return ImageBitMap
 export type returnResultType = {
     returnUint32Buffer?:boolean;//return to Unit32 ArrayBuffer 
