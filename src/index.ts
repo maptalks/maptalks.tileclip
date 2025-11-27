@@ -76,7 +76,11 @@ function isErrorOrCancel(error: Error, promise): boolean {
 }
 
 function validateUrlTemplate(type: string, options: any) {
-    const { urlTemplate, subdomains } = options;
+    const { urlTemplate, subdomains, maxAvailableZoom } = options;
+    const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
+    if (!maxZoomEnable) {
+        return createParamsValidateError(`${type} error:maxAvailableZoom is error`)
+    }
     if (!urlTemplate) {
         return createParamsValidateError(`${type} error:urlTemplate is null`)
     }
@@ -160,12 +164,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'getTileWithMaxZoom');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { maxAvailableZoom, x, y, z } = options;
-            const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
-            if (!maxZoomEnable) {
-                reject(createParamsValidateError('getTileWithMaxZoom error:maxAvailableZoom is error'));
-                return;
-            }
+            const { x, y, z } = options;
             const error = validateUrlTemplate('getTileWithMaxZoom', options);
             if (error) {
                 reject(error);
@@ -196,18 +195,13 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'transformTile');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { x, y, z, maxAvailableZoom, projection } = options;
-            const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
+            const { x, y, z, projection } = options;
             if (!projection) {
                 reject(createParamsValidateError('transformTile error:not find projection'));
                 return;
             }
             if (SUPPORTPROJECTION.indexOf(projection) === -1) {
                 reject(createParamsValidateError('transformTile error:not support projection:' + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
-                return;
-            }
-            if (!maxZoomEnable) {
-                reject(createParamsValidateError('transformTile error:maxAvailableZoom is error'));
                 return;
             }
             const error = validateUrlTemplate('transformTile', options);
@@ -238,17 +232,12 @@ class TileActor extends worker.Actor {
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { x, y, z, maxAvailableZoom, projection, tileBBOX, transform } = options;
-            const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
             if (!projection) {
                 reject(createParamsValidateError('rectifyTile error:not find projection'));
                 return;
             }
             if (SUPPORTPROJECTION.indexOf(projection) === -1) {
                 reject(createParamsValidateError('rectifyTile error:not support projection:' + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
-                return;
-            }
-            if (!maxZoomEnable) {
-                reject(createParamsValidateError('rectifyTile error:maxAvailableZoom is error'));
                 return;
             }
             const error = validateUrlTemplate('rectifyTile', options);
@@ -289,12 +278,7 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'rectifyBaiduTile');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
-            const { x, y, z, maxAvailableZoom, tileBBOX, transform } = options;
-            const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
-            if (!maxZoomEnable) {
-                reject(createParamsValidateError('rectifyBaiduTile error:maxAvailableZoom is error'));
-                return;
-            }
+            const { x, y, z, tileBBOX, transform } = options;
             const error = validateUrlTemplate('rectifyBaiduTile', options);
             if (error) {
                 reject(error);
