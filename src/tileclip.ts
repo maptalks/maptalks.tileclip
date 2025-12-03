@@ -158,7 +158,7 @@ export function clip(options: clipTileOptions) {
         let prjCoordinates, clipBufferOpts: clipBufferOptions;
 
         const transform = () => {
-            if (isNumber(bufferSize) && bufferSize > 0) {
+            if (isNumber(bufferSize) && bufferSize !== 0) {
                 const prjCoordinates = transformCoordinates(projection, polygons);
                 const bufferPixels = transformPixels(projection, tileBBOX, tileSize, prjCoordinates);
                 clipBufferOpts = {

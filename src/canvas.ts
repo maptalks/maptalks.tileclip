@@ -147,20 +147,31 @@ export function imageClip(tileSize: number, polygons: number[][][][], image: Ima
     const ctx = getCanvasContext(canvas);
     const bufferPixels = [];
     const { width, height } = canvas;
+    let isInner = false;
     if (clipBufferOpts) {
         const { polygons, bufferSize } = clipBufferOpts;
         ctx.save();
         ctx.beginPath();
-        ctx.lineWidth = bufferSize * 2;
+        const lineWidth = Math.abs(bufferSize) * 2;
+        ctx.lineWidth = lineWidth;
         ctx.lineJoin = "round";
         ctx.strokeStyle = 'black';
         if (scale !== 1) {
             scalePolygons(polygons, scale);
         }
+        isInner = bufferSize < 0;
         //draw black border
 
         drawPolygons(ctx, polygons);
+        if (isInner) {
+            ctx.save();
+            ctx.clip('evenodd');
+        }
         ctx.stroke();
+
+        if (isInner) {
+            ctx.restore();
+        }
         ctx.restore();
 
         const imageData = ctx.getImageData(0, 0, width, height);
@@ -198,7 +209,7 @@ export function imageClip(tileSize: number, polygons: number[][][][], image: Ima
             data[idx] = R;
             data[idx + 1] = G;
             data[idx + 2] = B;
-            data[idx + 3] = A;
+            data[idx + 3] = isInner ? 0 : A;
         }
         ctx.putImageData(imageData, 0, 0);
     }
