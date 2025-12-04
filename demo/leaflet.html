@@ -79,28 +79,25 @@
             // tile.src = this.getTileUrl(coords);
             const url = this.getTileUrl(coords);
 
-            tileActor.getTile({ url: maptalks.Util.getAbsoluteURL(url) }).then(imagebitmap => {
-                const bounds = this._tileCoordsToBounds(coords);
-                const tileBBOX = bounds.toBBoxString().split(',').map(v => {
-                    return parseFloat(v);
-                })
-                tileActor.clipTile({
-                    tile: imagebitmap,
-                    tileBBOX,
-                    projection: map.options.crs.code,
-                    tileSize: baseLayer.getTileSize().x,
-                    maskId,
-                    returnBlobURL: true,
-                }).then(image => {
-                    tile.src = image;
 
-                }).catch(error => {
-                    console.error(error);
-                })
+            const bounds = this._tileCoordsToBounds(coords);
+            const tileBBOX = bounds.toBBoxString().split(',').map(v => {
+                return parseFloat(v);
+            })
+            tileActor.clipTile({
+                tile: maptalks.Util.getAbsoluteURL(url),
+                tileBBOX,
+                projection: map.options.crs.code,
+                tileSize: baseLayer.getTileSize().x,
+                maskId,
+                returnBlobURL: true,
+            }).then(image => {
+                tile.src = image;
+
             }).catch(error => {
-                //do some things
                 console.error(error);
             })
+
 
             return tile;
         }

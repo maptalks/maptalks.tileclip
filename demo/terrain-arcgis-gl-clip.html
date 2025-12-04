@@ -59,30 +59,19 @@
 
         baseLayer.on('renderercreate', function (e) {
             e.renderer.loadTileBitmap = function (url, tile, callback) {
-                const promise = tileActor.getTile({
-                    url: maptalks.Util.getAbsoluteURL(url),
-                    // mosaicSize: tile.z > 10 ? 2 : 0
-                    // gaussianBlurRadius: 4,
-                    // filter:'blur(4px)'
-                    // url: 'https://khms3.google.com/kh/v=995?x=52&y=27&z=6',
-                    // timeout: 2000
-                });
-                promise.then(imagebitmap => {
-                    tileActor.clipTile({
-                        tile: imagebitmap,
-                        tileBBOX: baseLayer._getTileBBox(tile),
-                        projection: baseLayer.getProjection().code,
-                        maskId,
-                        bufferSize: tile.z - 2
-                    }).then(image => {
-                        callback(image);
-                    }).catch(error => {
-                        console.error(error);
-                    })
+
+                tileActor.clipTile({
+                    tile: maptalks.Util.getAbsoluteURL(url),
+                    tileBBOX: baseLayer._getTileBBox(tile),
+                    projection: baseLayer.getProjection().code,
+                    maskId,
+                    bufferSize: tile.z - 2
+                }).then(image => {
+                    callback(image);
                 }).catch(error => {
-                    //do some things
                     console.error(error);
                 })
+
             };
         });
 

@@ -38,23 +38,20 @@
             //   img(Image): an Image object
             //   url(String): the url of the tile
             e.renderer.loadTileBitmap = function (url, tile, callback) {
-                tileActor.getTile({ url: maptalks.Util.getAbsoluteURL(url) }).then(imagebitmap => {
-                    tileActor.clipTile({
-                        tile: imagebitmap,
-                        tileBBOX: baseLayer._getTileBBox(tile),
-                        projection: baseLayer.getProjection().code,
-                        tileSize: baseLayer.getTileSize().width,
-                        maskId,
-                    }).then(image => {
-                        callback(image);
-                    }).catch(error => {
-                        //do some things
-                        console.error(error);
-                    })
+
+                tileActor.clipTile({
+                    tile: maptalks.Util.getAbsoluteURL(url),
+                    tileBBOX: baseLayer._getTileBBox(tile),
+                    projection: baseLayer.getProjection().code,
+                    tileSize: baseLayer.getTileSize().width,
+                    maskId,
+                }).then(image => {
+                    callback(image);
                 }).catch(error => {
                     //do some things
                     console.error(error);
                 })
+
             };
         });
 
@@ -84,7 +81,7 @@
             }));
             layer.addGeometry(polygons);
             map.setView({
-               "center":[121.57557917,31.55200041],"zoom":10.76644300415406,"pitch":0,"bearing":0
+                "center": [121.57557917, 31.55200041], "zoom": 10.76644300415406, "pitch": 0, "bearing": 0
             })
             tileActor.injectMask(maskId, geojson.features[0]).then(data => {
                 baseLayer.addTo(groupLayer);

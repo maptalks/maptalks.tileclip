@@ -38,24 +38,21 @@
             //   img(Image): an Image object
             //   url(String): the url of the tile
             e.renderer.loadTileBitmap = function (url, tile, callback) {
-                tileActor.getTile({ url: maptalks.Util.getAbsoluteURL(url) }).then(imagebitmap => {
-                    tileActor.clipTile({
-                        tile: imagebitmap,
-                        tileBBOX: baseLayer._getTileBBox(tile),
-                        projection: baseLayer.getProjection().code,
-                        tileSize: baseLayer.getTileSize().width,
-                        maskId,
-                        bufferSize: tile.z
-                    }).then(image => {
-                        callback(image);
-                    }).catch(error => {
-                        //do some things
-                        console.error(error);
-                    })
+
+                tileActor.clipTile({
+                    tile: maptalks.Util.getAbsoluteURL(url),
+                    tileBBOX: baseLayer._getTileBBox(tile),
+                    projection: baseLayer.getProjection().code,
+                    tileSize: baseLayer.getTileSize().width,
+                    maskId,
+                    bufferSize: tile.z
+                }).then(image => {
+                    callback(image);
                 }).catch(error => {
                     //do some things
                     console.error(error);
                 })
+
             };
         });
 
@@ -79,7 +76,7 @@
             lineColor: 'red'
         }
 
-         fetch('./青浦区-holes.geojson').then(res => res.json()).then(geojson => {
+        fetch('./青浦区-holes.geojson').then(res => res.json()).then(geojson => {
             const polygons = maptalks.GeoJSON.toGeometry(geojson, (geo => {
                 geo.setSymbol(symbol);
             }));
