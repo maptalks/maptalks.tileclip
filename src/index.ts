@@ -315,6 +315,7 @@ class TileActor extends worker.Actor {
 
     clipTile(options: clipTileOptions) {
         options = checkOptions(options, 'clipTile');
+        const { workerId } = getTaskId(options);
         // delete (options as unknown as privateOptions).__taskId;
         // delete (options as unknown as privateOptions).__workerId;
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
@@ -354,7 +355,7 @@ class TileActor extends worker.Actor {
                 } else {
                     resolve(image);
                 }
-            });
+            }, workerId);
         });
         wrapPromise(promise, options);
         return promise;
