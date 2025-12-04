@@ -73,7 +73,7 @@ export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {
 }
 
 export type clipTileOptions = {
-    tile: ImageBitmap;
+    tile: ImageBitmap | string;
     tileBBOX: BBOXtype;
     projection: string;
     maskId: string;

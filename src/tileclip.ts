@@ -2,8 +2,9 @@ import geojsonbbox from '@maptalks/geojson-bbox';
 import lineclip from 'lineclip';
 import { createImageTypeResult, getBlankTile, getCanvas, imageClip } from './canvas';
 import { bboxInBBOX, bboxIntersect, BBOXtype } from './bbox';
-import { clipBufferOptions, clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon } from './types';
+import { clipBufferOptions, clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon, getTileOptions } from './types';
 import { lnglat2Mercator, isPolygon, isEPSG3857, createParamsValidateError, isNumber } from './util';
+import { getTile } from './tileget';
 
 const GeoJSONCache = {};
 
@@ -121,74 +122,88 @@ export function clip(options: clipTileOptions) {
         const { tile, tileBBOX, projection, tileSize, maskId, reverse, bufferSize } = options;
         const feature = GeoJSONCache[maskId];
         // const canvas = getCanvas(tileSize);
-        const returnImage = (image) => {
-            createImageTypeResult(getCanvas(), image, options).then(url => {
-                resolve(url);
-            }).catch(error => {
-                reject(error);
-            })
-        };
-        const bbox = feature.bbox;
-        if (!bbox) {
-            returnImage(tile);
-            return;
-        }
-        const { coordinates, type } = feature.geometry;
-        if (!coordinates.length) {
-            returnImage(tile);
-            return;
-        }
 
-        const judgeReverse = () => {
-            if (!reverse) {
-                returnImage(getBlankTile(tileSize));
-            } else {
+        const handler = (tile: ImageBitmap) => {
+            const returnImage = (image) => {
+                createImageTypeResult(getCanvas(), image, options).then(url => {
+                    resolve(url);
+                }).catch(error => {
+                    reject(error);
+                })
+            };
+            const bbox = feature.bbox;
+            if (!bbox) {
                 returnImage(tile);
+                return;
             }
-        }
-        if (!bboxIntersect(bbox, tileBBOX)) {
-            judgeReverse();
-            return;
-        }
-        let polygons = coordinates;
-        if (type === 'Polygon') {
-            polygons = [polygons];
-        }
+            const { coordinates, type } = feature.geometry;
+            if (!coordinates.length) {
+                returnImage(tile);
+                return;
+            }
 
-        let prjCoordinates, clipBufferOpts: clipBufferOptions;
-
-        const transform = () => {
-            if (isNumber(bufferSize) && bufferSize !== 0) {
-                const prjCoordinates = transformCoordinates(projection, polygons);
-                const bufferPixels = transformPixels(projection, tileBBOX, tileSize, prjCoordinates);
-                clipBufferOpts = {
-                    bufferSize,
-                    polygons: bufferPixels
+            const judgeReverse = () => {
+                if (!reverse) {
+                    returnImage(getBlankTile(tileSize));
+                } else {
+                    returnImage(tile);
                 }
             }
-        }
-        if (bboxInBBOX(bbox, tileBBOX)) {
-            prjCoordinates = transformCoordinates(projection, polygons);
+            if (!bboxIntersect(bbox, tileBBOX)) {
+                judgeReverse();
+                return;
+            }
+            let polygons = coordinates;
+            if (type === 'Polygon') {
+                polygons = [polygons];
+            }
+
+            let prjCoordinates, clipBufferOpts: clipBufferOptions;
+
+            const transform = () => {
+                if (isNumber(bufferSize) && bufferSize !== 0) {
+                    const prjCoordinates = transformCoordinates(projection, polygons);
+                    const bufferPixels = transformPixels(projection, tileBBOX, tileSize, prjCoordinates);
+                    clipBufferOpts = {
+                        bufferSize,
+                        polygons: bufferPixels
+                    }
+                }
+            }
+            if (bboxInBBOX(bbox, tileBBOX)) {
+                prjCoordinates = transformCoordinates(projection, polygons);
+                const pixels = transformPixels(projection, tileBBOX, tileSize, prjCoordinates);
+                transform();
+                const image = imageClip(tileSize, pixels, tile, reverse, clipBufferOpts);
+                returnImage(image);
+                return;
+            }
+
+
+
+            const clipRings = clipPolygons(polygons, tileBBOX);
+            if (clipRings.length === 0) {
+                judgeReverse();
+                return;
+            }
+
+            prjCoordinates = transformCoordinates(projection, clipRings);
             const pixels = transformPixels(projection, tileBBOX, tileSize, prjCoordinates);
             transform();
             const image = imageClip(tileSize, pixels, tile, reverse, clipBufferOpts);
             returnImage(image);
-            return;
+        }
+        if (typeof tile === 'string') {
+            const fetchOptions = Object.assign({}, options, { forceReturnImage: true, url: tile }) as unknown as getTileOptions;
+            getTile(fetchOptions).then(image => {
+                handler(image as ImageBitmap);
+            }).catch(error => {
+                reject(error);
+            })
+        } else {
+            handler(tile);
         }
 
-
-
-        const clipRings = clipPolygons(polygons, tileBBOX);
-        if (clipRings.length === 0) {
-            judgeReverse();
-            return;
-        }
-
-        prjCoordinates = transformCoordinates(projection, clipRings);
-        const pixels = transformPixels(projection, tileBBOX, tileSize, prjCoordinates);
-        transform();
-        const image = imageClip(tileSize, pixels, tile, reverse, clipBufferOpts);
-        returnImage(image);
     });
 
 }

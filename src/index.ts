@@ -315,8 +315,8 @@ class TileActor extends worker.Actor {
 
     clipTile(options: clipTileOptions) {
         options = checkOptions(options, 'clipTile');
-        delete (options as unknown as privateOptions).__taskId;
-        delete (options as unknown as privateOptions).__workerId;
+        // delete (options as unknown as privateOptions).__taskId;
+        // delete (options as unknown as privateOptions).__workerId;
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { tile, tileBBOX, projection, tileSize, maskId } = options;
             if (!tile) {
