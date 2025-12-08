@@ -114,7 +114,7 @@ export type rectifyBaiduTileOptions = getTileWithMaxZoomOptions & {
 }
 
 export type colorTerrainTileOptions = {
-    tile: ImageBitmap;
+    tile: ImageBitmap | string;
     colors: Array<[number, string]>;
 } & postProcessingOptionsType & returnResultType;
 

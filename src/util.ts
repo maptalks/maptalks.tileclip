@@ -64,6 +64,9 @@ export function isNumber(value) {
     return typeof value === 'number';
 }
 
+export function isString(value) {
+    return typeof value === 'string';
+}
 function createError(message: string, code: number): Error {
     return new CustomError(message, code);
 }

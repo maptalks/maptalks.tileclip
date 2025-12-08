@@ -8,7 +8,8 @@ import {
     needFormatImageType,
     needPostProcessingImage,
     removeTimeOut,
-    validateSubdomains
+    validateSubdomains,
+    isString
 } from './util';
 import { getCanvas, getCanvasContext, resizeCanvas } from './canvas';
 import {
@@ -654,9 +655,10 @@ class TileActor extends worker.Actor {
 
     colorTerrainTile(options: colorTerrainTileOptions) {
         options = checkOptions(options, 'colorTerrainTile');
+        const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { tile, colors } = options;
-            if (!tile || !isImageBitmap(tile)) {
+            if (!tile || !(isImageBitmap(tile) || isString(tile))) {
                 reject(createParamsValidateError('colorTerrainTile error:tile is not ImageBitMap'));
                 return;
             }
@@ -673,8 +675,8 @@ class TileActor extends worker.Actor {
                 } else {
                     resolve(image);
                 }
-            });
-        });
+            }, workerId);
+        },);
         wrapPromise(promise, options);
         return promise;
     }

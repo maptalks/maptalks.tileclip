@@ -6,6 +6,7 @@ import { clip, injectMask, removeMask, tileBBOXIntersectMask } from './tileclip'
 import { cancelFetch } from './tilefetch';
 import { encodeTerrainTile, getTile, getTileWithMaxZoom, getVTTile, layout_Tiles } from './tileget';
 import { tileRectify } from './tilerectify';
+import { terrainTileColors } from './tileterrain';
 import { tileTransform } from './tiletransform';
 import { checkBuffers, createInnerError, isImageBitmap, CancelTaskLRUCache } from './util';
 
@@ -138,14 +139,20 @@ export const onmessage = function (message, postResponse) {
         return;
     }
     if (type === 'colorTerrainTile') {
-        const { tile, colors } = data;
-        const image = colorsTerrainTile(colors, tile);
-        const postImage = postProcessingImage(image, data);
-        createImageTypeResult(getCanvas(), postImage, data).then(url => {
-            postResponse(null, url, checkBuffers(url));
+        terrainTileColors(data).then(image => {
+            postResponse(null, image, checkBuffers(image));
         }).catch(error => {
             postResponse(error);
         })
+        return;
+        // const { tile, colors } = data;
+        // const image = colorsTerrainTile(colors, tile);
+        // const postImage = postProcessingImage(image, data);
+        // createImageTypeResult(getCanvas(), postImage, data).then(url => {
+        //     postResponse(null, url, checkBuffers(url));
+        // }).catch(error => {
+        //     postResponse(error);
+        // })
         return;
     }
     if (type === 'imagetTileFetch') {

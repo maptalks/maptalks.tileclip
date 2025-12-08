@@ -3,7 +3,7 @@ import lineclip from 'lineclip';
 import { createImageTypeResult, getBlankTile, getCanvas, imageClip } from './canvas';
 import { bboxInBBOX, bboxIntersect, BBOXtype } from './bbox';
 import { clipBufferOptions, clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon, getTileOptions } from './types';
-import { lnglat2Mercator, isPolygon, isEPSG3857, createParamsValidateError, isNumber } from './util';
+import { lnglat2Mercator, isPolygon, isEPSG3857, createParamsValidateError, isNumber, isString } from './util';
 import { getTile } from './tileget';
 
 const GeoJSONCache = {};
@@ -193,7 +193,7 @@ export function clip(options: clipTileOptions) {
             const image = imageClip(tileSize, pixels, tile, reverse, clipBufferOpts);
             returnImage(image);
         }
-        if (typeof tile === 'string') {
+        if (isString(tile)) {
             const fetchOptions = Object.assign({}, options, { forceReturnImage: true, url: tile }) as unknown as getTileOptions;
             getTile(fetchOptions).then(image => {
                 handler(image as ImageBitmap);
