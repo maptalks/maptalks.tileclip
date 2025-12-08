@@ -34,7 +34,7 @@
             // bufferPixel: 1
         })
 
-        const colors = [[0,"#4B2991"],[176,"#872CA2"],[353,"#C0369D"],[530,"#EA4F88"],[706,"#FA7876"],[883,"#F6A97A"],[1060,"#EDD9A3"],[1236,"#EDD9A3"],[1413,"#ffffff"],[1590,"#ffffff"]]
+        const colors = [[-48,"#226412"],[131,"#4C931B"],[310,"#80BD3F"],[489,"#B9E287"],[667,"#E7F5D1"],[846,"#F7F7F7"],[1025,"#FDE1EF"],[1204,"#F1B7DB"],[1383,"#DF78AF"],[1561,"#C6147E"]]
 
 
         baseLayer.on('renderercreate', function (e) {
@@ -42,20 +42,16 @@
             //   img(Image): an Image object
             //   url(String): the url of the tile
             e.renderer.loadTileBitmap = function (url, tile, callback) {
-                tileActor.getTile({ url: maptalks.Util.getAbsoluteURL(url) }).then(imagebitmap => {
-                    tileActor.colorTerrainTile({
-                        tile: imagebitmap,
-                        colors
-                    }).then(image => {
-                        callback(image);
-                    }).catch(error => {
-                        console.error(error);
-                    })
+
+                tileActor.colorTerrainTile({
+                    tile: maptalks.Util.getAbsoluteURL(url),
+                    colors
+                }).then(image => {
+                    callback(image);
                 }).catch(error => {
-                    //do some things
-                    // console.error(error);
-                    callback(maptalks.get404Tile())
+                    console.error(error);
                 })
+
             };
         });
 
