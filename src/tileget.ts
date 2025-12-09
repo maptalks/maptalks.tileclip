@@ -1,21 +1,18 @@
-import { encodeTerrainTileOptions, getTileOptions, getTileWithMaxZoomOptions, getVTTileOptions, layoutTilesOptions, resolveResultType } from './types';
 import {
-    colorsTerrainTile, createImageTypeResult, getCanvas, getCanvasContext, imageTileScale,
-    layoutTiles, mergeTiles, postProcessingImage, resizeCanvas
+    getTileOptions, getTileWithMaxZoomOptions,
+    layoutTilesOptions, resolveResultType
+} from './types';
+import {
+    createImageTypeResult, getCanvas, imageTileScale,
+    layoutTiles, mergeTiles, postProcessingImage
 } from './canvas';
 import {
-    checkArray, createParamsValidateError, createInnerError, HEADERS, disposeImage,
-    createDataError, validateSubdomains, getTileUrl,
-    copyArrayBuffer,
+    checkArray, HEADERS,
+    getTileUrl,
     toTileItems,
     allSettled
 } from './util';
-import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
-import * as lerc from './lerc';
-import { VectorTile } from '@mapbox/vector-tile';
-import Protobuf from 'pbf';
-import vtpbf from 'vt-pbf';
-import { fetchTile, fetchTileBuffer } from './tilefetch';
+import { fetchTile } from './tilefetch';
 
 export function getTile(options: getTileOptions) {
     return new Promise((resolve, reject) => {
@@ -177,184 +174,4 @@ export function layout_Tiles(options: layoutTilesOptions) {
         })
     });
 
-}
-
-export function encodeTerrainTile(options: encodeTerrainTileOptions) {
-    return new Promise((resolve, reject) => {
-        const { url } = options;
-
-        const urls = checkArray(url);
-        const headers = Object.assign({}, HEADERS, options.headers || {});
-        const { terrainWidth, tileSize, terrainType, minHeight, maxHeight, terrainColors } = options;
-        const returnImage = (terrainImage: ImageBitmap) => {
-            createImageTypeResult(getCanvas(), terrainImage, options).then(url => {
-                resolve(url);
-            }).catch(error => {
-                reject(error);
-            })
-        };
-        const isMapZen = terrainType === 'mapzen', isGQIS = terrainType === 'qgis-gray',
-            isTianditu = terrainType === 'tianditu',
-            isCesium = terrainType === 'cesium', isArcgis = terrainType === 'arcgis';
-        if (isMapZen || isGQIS) {
-            const fetchTiles = urls.map(tileUrl => {
-                return fetchTile(tileUrl, headers, options)
-            });
-            allSettled(fetchTiles, urls).then(imagebits => {
-                const canvas = getCanvas();
-                const image = mergeTiles(imagebits);
-                if (image instanceof Error) {
-                    reject(image);
-                    return;
-                }
-                resizeCanvas(canvas, image.width, image.height);
-                const ctx = getCanvasContext(canvas);
-                ctx.drawImage(image, 0, 0);
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                if (isMapZen) {
-                    transformMapZen(imageData);
-                } else {
-                    transformQGisGray(imageData, minHeight, maxHeight);
-                }
-                ctx.putImageData(imageData, 0, 0);
-                const terrainImage = canvas.transferToImageBitmap();
-                disposeImage(image);
-                returnImage(colorsTerrainTile(terrainColors, terrainImage));
-            }).catch(error => {
-                reject(error);
-            })
-        } else if (isTianditu || isCesium || isArcgis) {
-            const fetchTiles = urls.map(tileUrl => {
-                return fetchTileBuffer(tileUrl, headers, options)
-            });
-            allSettled(fetchTiles, urls).then(buffers => {
-                if (!buffers || buffers.length === 0) {
-                    reject(createDataError('buffers is null'));
-                    return;
-                }
-                const buffer = buffers[0];
-                if (buffer.byteLength === 0) {
-                    reject(createDataError('buffer is empty'));
-                    return;
-                }
-                let result;
-                if (isTianditu) {
-                    result = generateTiandituTerrain(buffer, terrainWidth, tileSize);
-                } else if (isCesium) {
-                    result = cesiumTerrainToHeights(buffer, terrainWidth, tileSize);
-                } else if (isArcgis) {
-                    result = lerc.decode(buffer);
-                    result.image = transformArcgis(result);
-                }
-                if (!result || !result.image) {
-                    reject(createInnerError('generate terrain data error,not find image data'));
-                    return;
-                }
-                returnImage(colorsTerrainTile(terrainColors, result.image));
-            }).catch(error => {
-                reject(error);
-            })
-        } else {
-            reject(createParamsValidateError('not support terrainType:' + terrainType));
-        }
-
-    });
-}
-
-function pointArrayToNumberArray(points) {
-    if (Array.isArray(points)) {
-        const result = [];
-        for (let i = 0, len = points.length; i < len; i++) {
-            result[i] = (pointArrayToNumberArray(points[i]));
-        }
-        return result;
-    } else {
-        return [points.x, points.y];
-    }
-}
-
-function mergeVTTile(buffers: ArrayBuffer[]): ArrayBuffer {
-    if (buffers.length === 1) {
-        return copyArrayBuffer(buffers[0]);
-    }
-    const mergeTile = new VectorTile(new Protobuf(buffers[0]));
-    buffers.slice(1, Infinity).forEach(buffer => {
-        const tile = new VectorTile(new Protobuf(buffer));
-        Object.assign(mergeTile.layers, tile.layers);
-    })
-    const data = vtpbf(mergeTile);
-    return data.buffer;
-}
-
-function toGeoJSONVTStruct(customPropertiesFun: Function, buffer: ArrayBuffer) {
-    const vtTile = new VectorTile(new Protobuf(buffer));
-    const layers = vtTile.layers || {};
-    const layerMap: Record<string, any> = {};
-    for (const layerName in layers) {
-        const layer = layers[layerName];
-        const len = layer.length;
-        const features = [];
-        for (let i = 0; i < len; i++) {
-            const feature = layer.feature(i);
-            customPropertiesFun(layerName, layer, feature, i);
-            const array = pointArrayToNumberArray(feature.loadGeometry());
-            const flatFeature = {
-                geometry: array,
-                tags: feature.properties || {},
-                type: feature.type
-            }
-            features.push(flatFeature);
-        }
-        const tile = { features };
-        layerMap[layerName] = tile;
-    }
-    return layerMap;
-}
-
-function vtCustomProperties(customPropertiesFun: Function, buffers: ArrayBuffer[]): ArrayBuffer {
-    if (!customPropertiesFun) {
-        return mergeVTTile(buffers);
-    }
-    try {
-        const mergeLayerMap = {};
-        buffers.forEach(buffer => {
-            Object.assign(mergeLayerMap, toGeoJSONVTStruct(customPropertiesFun, buffer));
-        });
-        const data = vtpbf.fromGeojsonVt(mergeLayerMap);
-        return data.buffer;
-    } catch (error) {
-        console.error('run customProperties error:', error);
-        // console.error(error);
-        return mergeVTTile(buffers);
-    }
-}
-
-
-export function getVTTile(options: getVTTileOptions) {
-    return new Promise((resolve, reject) => {
-        const { url, customProperties } = options;
-        const urls = checkArray(url);
-        const headers = Object.assign({}, HEADERS, options.headers || {});
-        const fetchTiles = urls.map(tileUrl => {
-            return fetchTileBuffer(tileUrl, headers, options)
-        });
-        let customPropertiesFun;
-        if (customProperties) {
-            customPropertiesFun = new Function('layerName', 'layer', 'feature', 'featureIndex', customProperties as unknown as string);
-        }
-        allSettled(fetchTiles, urls).then(buffers => {
-            buffers = buffers.filter(buffer => {
-                return !!buffer;
-            });
-            if (!buffers || buffers.length === 0) {
-                reject(createDataError('buffers is empty'));
-                return;
-            }
-            const buffer = vtCustomProperties(customPropertiesFun, buffers);
-            resolve(buffer);
-
-        }).catch(error => {
-            reject(error);
-        })
-    });
 }

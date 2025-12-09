@@ -4,10 +4,11 @@ import { imagetTileFetch } from './imagetile';
 import { tileBaduRectify } from './tilebaidurectify';
 import { clip, injectMask, removeMask, tileBBOXIntersectMask } from './tileclip';
 import { cancelFetch } from './tilefetch';
-import { encodeTerrainTile, getTile, getTileWithMaxZoom, getVTTile, layout_Tiles } from './tileget';
+import { getTile, getTileWithMaxZoom, layout_Tiles } from './tileget';
 import { tileRectify } from './tilerectify';
-import { terrainTileColors } from './tileterrain';
+import { encodeTerrainTile, terrainTileColors } from './tileterrain';
 import { tileTransform } from './tiletransform';
+import { getVTTile } from './tilevt';
 import { checkBuffers, createInnerError, isImageBitmap, CancelTaskLRUCache } from './util';
 
 export const initialize = function () {
