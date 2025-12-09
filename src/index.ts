@@ -9,7 +9,9 @@ import {
     needPostProcessingImage,
     removeTimeOut,
     validateSubdomains,
-    isString
+    isString,
+    isFunction,
+    getFunctionBody
 } from './util';
 import { getCanvas, getCanvasContext, resizeCanvas } from './canvas';
 import {
@@ -805,10 +807,14 @@ class TileActor extends worker.Actor {
         options = checkOptions(options, 'getVTTile');
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: (buffer: ArrayBuffer) => void, reject: rejectResultType) => {
-            const { url } = options;
+            const { url, customProperties } = options;
             if (!url) {
                 reject(createParamsValidateError('getVTTile error:url is null'));
                 return;
+            }
+            if (isFunction(customProperties)) {
+                const body = getFunctionBody(customProperties.toString());
+                (options as any).customProperties = body;
             }
             const buffers = checkBuffers(url);
             this.send(options, buffers, (error, buffer) => {

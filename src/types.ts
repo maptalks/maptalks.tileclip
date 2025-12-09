@@ -192,7 +192,8 @@ export type sliceImageResultType = {
 }
 
 export type getVTTileOptions = {
-    url: string | Array<string>
+    url: string | Array<string>;
+    customProperties: (layerName: string, layer: any, feature: any, featureIndex: number) => void;
 } & fetchOptionsType;
 
 
