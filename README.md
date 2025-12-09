@@ -29,7 +29,8 @@
 * [custom tile fetch error](https://maptalks.github.io/maptalks.tileclip/demo/tile-custom-error.html)
 
 * [vt tile](https://maptalks.github.io/maptalks.tileclip/demo/tile-vt.html)  
-* [vt tiles will merge mvt data](https://maptalks.github.io/maptalks.tileclip/demo/tile-vts.html) 
+* [vt tiles will merge mvt data](https://maptalks.github.io/maptalks.tileclip/demo/tile-vts.html)  
+* [vt tiles will merge mvt data and custom properties](https://maptalks.github.io/maptalks.tileclip/demo/tile-vts-customproperties.html) 
 
 ### Clip Tile
 
@@ -48,7 +49,6 @@
 
 * [get tile and clip from single image](https://maptalks.github.io/maptalks.tileclip/demo/imagetile-clip.html)  
 
-
 ### Clip By Custom Prj
 
 * [EPSG:4326](https://maptalks.github.io/maptalks.tileclip/demo/4326.html)
@@ -56,20 +56,16 @@
 * [identify projection](https://maptalks.github.io/maptalks.tileclip/demo/identify.html)
 * [EPSG:9807](https://maptalks.github.io/maptalks.tileclip/demo/epsg9807.html)
 
-
-
 ### Rectify Tile  
 
 * [tilerectify-gcj02-wgs84](https://maptalks.org/maptalks.tileclip/demo/tilerectify-gcj02-wgs84.html)  
 * [tilerectify-wgs84-gcj02](https://maptalks.org/maptalks.tileclip/demo/tilerectify-wgs84-gcj02.html)  
 * [tilerectify-baidu-wgs84](https://maptalks.org/maptalks.tileclip/demo/tilerectify-baidu-wgs84.html)  
 
-
 ### Reproject Tile
 
 * [Reproject EPSG4326 to EPSG3857](https://maptalks.github.io/maptalks.tileclip/demo/4326-transform-3857.html)
 * [Reproject EPSG3857 to EPSG4326](https://maptalks.github.io/maptalks.tileclip/demo/3857-transform-4326.html)
-
 
 ### Terrain Encode
 
@@ -173,7 +169,7 @@ const tileActor = getTileActor();
 | removeImage(imageId)                    | remove image source                     |
 | imageHasInjected(imageId)               | Has the image data been injected                         |
 | getImageTile(options)                   | get tile data from    injectImage                |
-| getVTTile(options)                      | get VT tile, support merge vt data            |
+| getVTTile(options)                      | get VT tile, support merge vt data  and custom prorperties          |
 
 #### Common Types
 
@@ -370,7 +366,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                                                        `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                                                           `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
@@ -563,7 +559,7 @@ const result = tileActor.maskHasInjected(maskId);
 ```
 
 * `clipTile(options)` clip tile by mask . return `Promise`
-  + `options.tile`:tile [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap)  data
+  + `options.tile`:tile [ImageBitmap](https://developer.mozilla.org/zh-CN/docs/Web/API/ImageBitmap)  data or http url
   + `options.tileBBOX`:tile BBOX `[minx,miny,maxx,maxy]`
   + `options.projection`: Projection code, such as : EPSG:3857
   + `options.maskId`:mask key
@@ -741,7 +737,7 @@ tileActor.injectMask(maskId, polygon).then(data => {
 ```
 
 * `colorTerrainTile(options)` Terrain tile color matching, return `Promise`
-  + `options.tile`:tile data, is ImageBitMap
+  + `options.tile`:tile data, is ImageBitMap or http url
   + `options.colors`: Color Mapping Table
   + `...postProcessingOptionsType` postProcessingOptionsType params
   + `...returnResultType` returnResultType params 
@@ -950,7 +946,21 @@ tileActor.injectImage({
 ```
 
 * `getVTTile(options)` get vt tile arraybuffer by fetch in worker, return `Promise`
-  + `options.url`:tile url or tiles urls
+  + `options.url`:tile url or tiles urls  
+  + `options?.customProperties`:custom features properties `function`
+
+```js
+  customProperties: (layerName, layer, feature, featureIndex) => {
+      feature.properties = feature.properties || {};
+      if (layerName === 'suzhou_area') {
+          feature.properties.name1 = 'hello'
+      }
+      if (layerName === 'suzhou_line') {
+          feature.properties.name1 = 'world'
+      }
+  },
+```
+
   + `...fetchOptionsType` fetchOptionsType params
 
 ```js
@@ -976,6 +986,15 @@ layer.on('renderercreate', function(e) {
         tileActor.getVTTile({
             //will merge mvt data
             url: [url, url1],
+            customProperties: (layerName, layer, feature, featureIndex) => {
+                feature.properties = feature.properties || {};
+                if (layerName === 'suzhou_area') {
+                    feature.properties.name1 = 'hello'
+                }
+                if (layerName === 'suzhou_line') {
+                    feature.properties.name1 = 'world'
+                }
+            },
             indexedDBCache: true
         }).then(buffer => {
             callback(null, buffer);
