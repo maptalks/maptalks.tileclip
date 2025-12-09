@@ -50,13 +50,6 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
     const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, globalCompositeOperation, tms } = options;
     return new Promise((resolve: resolveResultType, reject) => {
         const urlTemplates = checkArray(urlTemplate);
-        for (let i = 0, len = urlTemplates.length; i < len; i++) {
-            const urlTemplate = urlTemplates[i];
-            if (!validateSubdomains(urlTemplate, subdomains)) {
-                reject(createParamsValidateError('not find subdomains'));
-                return;
-            }
-        }
         // const isDebug = x === 398789 && y === 143180;
         const isDebug = false;
         let dxScale, dyScale, wScale, hScale;
@@ -156,10 +149,6 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
 export function layout_Tiles(options: layoutTilesOptions) {
     const { urlTemplate, tiles, subdomains, debug } = options;
     return new Promise((resolve, reject) => {
-        if (!validateSubdomains(urlTemplate, subdomains)) {
-            reject(createParamsValidateError('not find subdomains'));
-            return;
-        }
         const tileItemList = toTileItems(tiles);
 
         const urls = tileItemList.map(tile => {
