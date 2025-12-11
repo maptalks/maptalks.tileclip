@@ -6,9 +6,10 @@ import { getVTTileOptions } from "./types";
 
 import {
     copyArrayBuffer,
-    checkArray, HEADERS,
+    checkArray,
     allSettled,
-    createDataError
+    createDataError,
+    createFetchTileList
 } from './util';
 
 
@@ -85,10 +86,7 @@ export function getVTTile(options: getVTTileOptions) {
     return new Promise((resolve, reject) => {
         const { url, customProperties } = options;
         const urls = checkArray(url);
-        const headers = Object.assign({}, HEADERS, options.headers || {});
-        const fetchTiles = urls.map(tileUrl => {
-            return fetchTileBuffer(tileUrl, headers, options)
-        });
+        const fetchTiles = createFetchTileList<ArrayBuffer>(urls, options, fetchTileBuffer);
         let customPropertiesFun;
         if (customProperties) {
             customPropertiesFun = new Function('layerName', 'layer', 'feature', 'featureIndex', customProperties as unknown as string);

@@ -285,3 +285,11 @@ export function needPostProcessingImage(options: postProcessingOptionsType) {
     const { filter, opacity, gaussianBlurRadius, mosaicSize, oldPhoto } = options;
     return (filter || opacity || gaussianBlurRadius || mosaicSize || oldPhoto);
 }
+
+export function createFetchTileList<T>(urls: string[], options: Record<string, any>, fetchFun: Function): Array<Promise<T>> {
+    urls = checkArray(urls);
+    const headers = Object.assign({}, HEADERS, options.headers || {});
+    return urls.map(url => {
+        return fetchFun(url, headers, options);
+    })
+}

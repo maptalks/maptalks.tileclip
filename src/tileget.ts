@@ -7,10 +7,11 @@ import {
     layoutTiles, mergeTiles, postProcessingImage
 } from './canvas';
 import {
-    checkArray, HEADERS,
+    checkArray,
     getTileUrl,
     toTileItems,
-    allSettled
+    allSettled,
+    createFetchTileList
 } from './util';
 import { fetchTile } from './tilefetch';
 
@@ -18,10 +19,7 @@ export function getTile(options: getTileOptions) {
     return new Promise((resolve, reject) => {
         const { url } = options;
         const urls = checkArray(url);
-        const headers = Object.assign({}, HEADERS, options.headers || {});
-        const fetchTiles = urls.map(tileUrl => {
-            return fetchTile(tileUrl, headers, options)
-        });
+        const fetchTiles = createFetchTileList<ImageBitmap>(urls, options, fetchTile);
         const { globalCompositeOperation } = options;
         allSettled(fetchTiles, urls).then(imagebits => {
             const canvas = getCanvas();
@@ -106,12 +104,7 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
         const urls = urlTemplates.map(urlTemplate => {
             return getTileUrl(urlTemplate, tileX, tileY, tileZ, subdomains);
         });
-        const headers = Object.assign({}, HEADERS, options.headers || {});
-
-        const fetchTiles = urls.map(url => {
-            return fetchTile(url, headers, options);
-        })
-
+        const fetchTiles = createFetchTileList<ImageBitmap>(urls, options, fetchTile);
         allSettled(fetchTiles, urls).then(imagebits => {
             // const canvas = getCanvas();
             const image = mergeTiles(imagebits, globalCompositeOperation);
@@ -152,11 +145,7 @@ export function layout_Tiles(options: layoutTilesOptions) {
             const { x, y, z } = tile;
             return getTileUrl(urlTemplate, x, y, z, subdomains);
         });
-        const headers = Object.assign({}, HEADERS, options.headers || {});
-
-        const fetchTiles = urls.map(url => {
-            return fetchTile(url, headers, options);
-        })
+        const fetchTiles = createFetchTileList<ImageBitmap>(urls, options, fetchTile);
 
         allSettled(fetchTiles, urls, true).then(imagebits => {
             imagebits.forEach((image, index) => {

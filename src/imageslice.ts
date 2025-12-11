@@ -1,7 +1,7 @@
 import { createImageTypeResult, getCanvas, getCanvasContext, mergeTiles, postProcessingImage, resizeCanvas } from "./canvas";
 import { fetchTile } from "./tilefetch";
 import { getTileOptions, sliceImageItemType, sliceImageResultType } from "./types";
-import { checkArray, HEADERS, uuid, disposeImage, allSettled } from "./util";
+import { checkArray, uuid, disposeImage, allSettled, createFetchTileList } from "./util";
 
 const SIZE = 512;
 
@@ -10,10 +10,7 @@ export function imageSlicing(options: getTileOptions) {
     return new Promise((resolve, reject) => {
         const url = options.url;
         const urls = checkArray(url);
-        const headers = Object.assign({}, HEADERS, options.headers || {});
-        const fetchTiles = urls.map(tileUrl => {
-            return fetchTile(tileUrl, headers, options)
-        });
+        const fetchTiles = createFetchTileList<ImageBitmap>(urls, options, fetchTile);
         allSettled(fetchTiles, urls).then(imagebits => {
             const canvas = getCanvas(SIZE);
             const image = mergeTiles(imagebits);

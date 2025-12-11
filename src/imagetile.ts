@@ -1,7 +1,8 @@
 import { bboxIntersect, bboxToPoints } from "./bbox";
-import { getBlankTile, getCanvas, getCanvasContext } from "./canvas";
+import { getBlankTile, getCanvas, getCanvasContext, mergeTiles } from "./canvas";
+import { fetchTile } from "./tilefetch";
 import { getImageTileOptions, injectImageOptions } from "./types";
-import { createNetWorkError, isEPSG3857, lnglat2Mercator } from "./util";
+import { allSettled, checkArray, createFetchTileList, isEPSG3857, lnglat2Mercator } from "./util";
 
 export function imageTile(imageInfo, options: getImageTileOptions) {
     const imageBBOX = imageInfo.imageBBOX;
@@ -60,22 +61,18 @@ export function imageTile(imageInfo, options: getImageTileOptions) {
 
 export function imagetTileFetch(options: injectImageOptions) {
     return new Promise((resolve: (image: ImageBitmap) => void, reject) => {
-        const { url, headers } = options;
-        const fetchOptions = options.fetchOptions || {
-            headers,
-            referrer: options.referrer
-        };
-
-        fetch(url, fetchOptions).then(res => {
-            if (!res.ok) {
-                reject(createNetWorkError(url));
+        const { url } = options;
+        const urls = checkArray(url);
+        const fetchTiles = createFetchTileList<ImageBitmap>(urls, options, fetchTile);
+        allSettled(fetchTiles, urls).then(imagebits => {
+            const image = mergeTiles(imagebits);
+            if (image instanceof Error) {
+                reject(image);
                 return;
             }
-            return res.blob();
-        }).then(blob => createImageBitmap(blob)).then(image => {
             resolve(image);
         }).catch(error => {
             reject(error);
-        });
+        })
     })
 }

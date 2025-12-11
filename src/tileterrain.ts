@@ -4,13 +4,14 @@ import { colorTerrainTileOptions, encodeTerrainTileOptions, getTileOptions } fro
 import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, transformArcgis, transformMapZen } from './terrain';
 import * as lerc from './lerc';
 import {
-    checkArray, HEADERS,
+    checkArray,
     createDataError,
     allSettled,
     isString,
     disposeImage,
     createInnerError,
-    createParamsValidateError
+    createParamsValidateError,
+    createFetchTileList
 } from './util';
 import { fetchTile, fetchTileBuffer } from './tilefetch';
 
@@ -20,7 +21,6 @@ export function encodeTerrainTile(options: encodeTerrainTileOptions) {
         const { url } = options;
 
         const urls = checkArray(url);
-        const headers = Object.assign({}, HEADERS, options.headers || {});
         const { terrainWidth, tileSize, terrainType, minHeight, maxHeight, terrainColors } = options;
         const returnImage = (terrainImage: ImageBitmap) => {
             createImageTypeResult(getCanvas(), terrainImage, options).then(url => {
@@ -33,9 +33,7 @@ export function encodeTerrainTile(options: encodeTerrainTileOptions) {
             isTianditu = terrainType === 'tianditu',
             isCesium = terrainType === 'cesium', isArcgis = terrainType === 'arcgis';
         if (isMapZen || isGQIS) {
-            const fetchTiles = urls.map(tileUrl => {
-                return fetchTile(tileUrl, headers, options)
-            });
+            const fetchTiles = createFetchTileList<ImageBitmap>(urls, options, fetchTile);
             allSettled(fetchTiles, urls).then(imagebits => {
                 const canvas = getCanvas();
                 const image = mergeTiles(imagebits);
@@ -60,9 +58,7 @@ export function encodeTerrainTile(options: encodeTerrainTileOptions) {
                 reject(error);
             })
         } else if (isTianditu || isCesium || isArcgis) {
-            const fetchTiles = urls.map(tileUrl => {
-                return fetchTileBuffer(tileUrl, headers, options)
-            });
+            const fetchTiles = createFetchTileList<ArrayBuffer>(urls, options, fetchTileBuffer);
             allSettled(fetchTiles, urls).then(buffers => {
                 if (!buffers || buffers.length === 0) {
                     reject(createDataError('buffers is null'));
