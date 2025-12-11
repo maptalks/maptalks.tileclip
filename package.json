@@ -1,12 +1,13 @@
 {
   "name": "maptalks.tileclip",
-  "version": "0.63.3",
+  "version": "0.63.4",
   "description": "",
   "main": "./dist/maptalks.tileclip.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
     "lint": "eslint src/**/*.js",
+    "test": "eslint src/**/*.js",
     "tsc": "npx tsc  --listFiles",
     "dev": "cross-env NODE_ENV=dev  rollup  -c -w",
     "build": "npm run tsc && cross-env NODE_ENV=prd  rollup  -c"
