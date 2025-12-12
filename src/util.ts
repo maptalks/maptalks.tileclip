@@ -50,7 +50,7 @@ export const CancelTaskLRUCache = new LRUCache<number>(1000, () => {
 
 })
 
-export function removeTimeOut(id: number) {
+export function removeTimeOut(id: any) {
     clearTimeout(id);
 }
 
