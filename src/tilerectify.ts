@@ -9,7 +9,7 @@ const debugCenter = [116.3388992615747, 39.897968400218986];
 
 export function tileRectify(options: rectifyTileOptions) {
     return new Promise((resolve, reject) => {
-        const { transform, tileSize, tileBBOX, x, y, z, projection, debug, errorLog, mapZoom } = options;
+        const { transform, tileSize, tileBBOX, x, y, z, projection, debug, errorLog, mapZoom, tms } = options;
         let center = getBBOXCenter(tileBBOX);
         let targetCenter;
         if (transform === 'GCJ02-WGS84') {
@@ -36,9 +36,15 @@ export function tileRectify(options: rectifyTileOptions) {
             return pointInBBOX(debugCenter as [number, number], tileBBOX) && z === Math.round(mapZoom);
         }
 
+        let tileScale = 1;
+        if (tms) {
+            tileScale = -1;
+        }
+
         let offsetx: number, offsety: number;
         const mx = tx >= 0 ? 1 : -1;
-        const my = ty >= 0 ? -1 : 1;
+        let my = ty >= 0 ? -1 : 1;
+        my *= tileScale;
         //同一个瓦片内
         if (Math.abs(tx) <= 0.5) {
             offsetx = 0;
@@ -57,10 +63,12 @@ export function tileRectify(options: rectifyTileOptions) {
         }
         const targetBBOX = [];
 
+
         targetBBOX[0] = minx + dx * offsetx;
-        targetBBOX[1] = miny + dy * -offsety;
+        targetBBOX[1] = miny + dy * (-offsety * tileScale);
         targetBBOX[2] = maxx + dx * offsetx;
-        targetBBOX[3] = maxy + dy * -offsety;
+        targetBBOX[3] = maxy + dy * (-offsety * tileScale);
+
 
         const px = (targetCenter[0] - targetBBOX[0]) / ax;
         const py = tileSize - (targetCenter[1] - targetBBOX[1]) / ay;
@@ -69,12 +77,13 @@ export function tileRectify(options: rectifyTileOptions) {
         const needTop = py < tileSize / 2;
         const needRight = px > tileSize / 2;
         const needBottom = py > tileSize / 2;
-
         const left = (needLeft ? tileSize : 0) + ((px - tileSize / 2))
         const top = (needTop ? tileSize : 0) + (py - tileSize / 2);
 
         const targetX = x + offsetx;
         const targetY = y + offsety;
+
+
 
         let tiles: Array<[number, number, number]> = [
             [targetX - 1, targetY - 1, z],
@@ -96,7 +105,7 @@ export function tileRectify(options: rectifyTileOptions) {
         if (!needTop) {
             tiles = tiles.filter(tile => {
                 const [x, y] = tile;
-                return y !== targetY - 1;
+                return y !== targetY - 1 * tileScale;
             });
         }
         if (!needRight) {
@@ -108,7 +117,7 @@ export function tileRectify(options: rectifyTileOptions) {
         if (!needBottom) {
             tiles = tiles.filter(tile => {
                 const [x, y] = tile;
-                return y !== targetY + 1;
+                return y !== targetY + 1 * tileScale;
             });
         }
 
@@ -132,7 +141,7 @@ export function tileRectify(options: rectifyTileOptions) {
                 reject(FetchCancelError);
                 return;
             }
-            const image = layoutTiles(tileItemList, debug, false);
+            const image = layoutTiles(tileItemList, debug, tms);
             const canvas = getCanvas(tileSize);
             const ctx = getCanvasContext(canvas);
             ctx.drawImage(image, left, top, tileSize, tileSize, 0, 0, tileSize, tileSize);

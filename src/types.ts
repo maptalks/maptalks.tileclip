@@ -29,6 +29,7 @@ export type fetchOptionsType = {
     fetchOptions?: Record<string, any>;
     timeout?: number;
     indexedDBCache?: boolean;
+    errorLog?: boolean;
 }
 
 export type returnResultType = {
@@ -89,7 +90,6 @@ export type tileIntersectMaskOptions = {
 
 export type transformTileOptions = getTileWithMaxZoomOptions & {
     projection: 'EPSG:4326' | 'EPSG:3857';
-    errorLog?: boolean;
     zoomOffset?: number;
     debug?: boolean;
 }
@@ -99,7 +99,6 @@ export type rectifyTileOptions = getTileWithMaxZoomOptions & {
     tileBBOX: BBOXtype;
     transform: 'WGS84-GCJ02' | 'GCJ02-WGS84',
     tileSize: number;
-    errorLog?: boolean;
     debug?: boolean;
     mapZoom?: number;
 }
@@ -108,7 +107,6 @@ export type rectifyBaiduTileOptions = getTileWithMaxZoomOptions & {
     tileBBOX: BBOXtype;
     transform: 'BAIDU-WGS84' | 'BAIDU-GCJ02',
     tileSize: number;
-    errorLog?: boolean;
     debug?: boolean;
     mapZoom?: number;
 }
