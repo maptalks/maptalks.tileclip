@@ -50,6 +50,12 @@ function toGeoJSONVTStruct(customPropertiesFun: Function, buffer: ArrayBuffer) {
             const feature = layer.feature(i);
             customPropertiesFun(layerName, layer, feature, i);
             const array = pointArrayToNumberArray(feature.loadGeometry());
+            if (feature.type === 1) {
+                for (let j = 0; j < array.length; j++) {
+                    array[i] = array[i][0];
+                }
+
+            }
             const flatFeature = {
                 geometry: array,
                 tags: feature.properties || {},
