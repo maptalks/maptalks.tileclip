@@ -93,6 +93,10 @@ function validateUrlTemplate(type: string, options: any) {
     return null;
 }
 
+function validateTileXYZ(x: number, y: number, z: number) {
+    return isNumber(x) && isNumber(y) && isNumber(z);
+}
+
 
 class TileActor extends worker.Actor {
 
@@ -176,7 +180,7 @@ class TileActor extends worker.Actor {
                 reject(error);
                 return;
             }
-            if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
+            if (!validateTileXYZ(x, y, z)) {
                 reject(createParamsValidateError(`${type} error:x/y/z is error`));
                 return;
             }
@@ -216,7 +220,7 @@ class TileActor extends worker.Actor {
                 reject(error);
                 return;
             }
-            if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
+            if (!validateTileXYZ(x, y, z)) {
                 reject(createParamsValidateError(`${type} error:x/y/z is error`));
                 return;
             }
@@ -253,7 +257,7 @@ class TileActor extends worker.Actor {
                 reject(error);
                 return;
             }
-            if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
+            if (!validateTileXYZ(x, y, z)) {
                 reject(createParamsValidateError(`${type} error:x/y/z is error`));
                 return;
             }
@@ -293,7 +297,7 @@ class TileActor extends worker.Actor {
                 reject(error);
                 return;
             }
-            if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
+            if (!validateTileXYZ(x, y, z)) {
                 reject(createParamsValidateError(`${type} error:x/y/z is error`));
                 return;
             }
