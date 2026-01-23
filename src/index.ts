@@ -1,4 +1,4 @@
-import { registerWorkerAdapter, worker, Util, Tile } from 'maptalks';
+import { registerWorkerAdapter, worker, Util } from 'maptalks';
 //@ts-ignore
 import WORKERCODE from './worker/worker.bundle.js';
 import {
@@ -39,8 +39,8 @@ const WORKERNAME = '__maptalks.tileclip__';
 
 registerWorkerAdapter(WORKERNAME, WORKERCODE as unknown as string);
 
-const maskMap = {};
-const imageMap = {};
+const MASKMAP = {};
+const IMAGEMAP = {};
 const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
 
 const transformTypes = ['WGS84-GCJ02', 'GCJ02-WGS84'];
@@ -113,12 +113,13 @@ class TileActor extends worker.Actor {
     }
 
     getTile(options: getTileOptions) {
-        options = checkOptions(options, 'getTile');
+        const type = 'getTile';
+        options = checkOptions(options, type);
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { url } = options;
             if (!url) {
-                reject(createParamsValidateError('getTile error:url is null'));
+                reject(createParamsValidateError(`${type} error:url is null`));
                 return;
             }
             const buffers = checkBuffers(url);
@@ -136,17 +137,18 @@ class TileActor extends worker.Actor {
     }
 
     layoutTiles(options: layoutTilesOptions) {
-        options = checkOptions(options, 'layoutTiles');
+        const type = 'layoutTiles';
+        options = checkOptions(options, type);
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { tiles } = options;
-            const error = validateUrlTemplate('layoutTiles', options);
+            const error = validateUrlTemplate(type, options);
             if (error) {
                 reject(error);
                 return;
             }
             if (!tiles || tiles.length === 0) {
-                reject(createParamsValidateError('layoutTiles error:tiles is null'));
+                reject(createParamsValidateError(`${type} error:tiles is null`));
                 return;
             }
             const buffers = [];
@@ -164,17 +166,18 @@ class TileActor extends worker.Actor {
     }
 
     getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
-        options = checkOptions(options, 'getTileWithMaxZoom');
+        const type = 'getTileWithMaxZoom';
+        options = checkOptions(options, type);
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { x, y, z } = options;
-            const error = validateUrlTemplate('getTileWithMaxZoom', options);
+            const error = validateUrlTemplate(type, options);
             if (error) {
                 reject(error);
                 return;
             }
             if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
-                reject(createParamsValidateError('getTileWithMaxZoom error:x/y/z is error'));
+                reject(createParamsValidateError(`${type} error:x/y/z is error`));
                 return;
             }
             this.send(options, [], (error, image) => {
@@ -195,25 +198,26 @@ class TileActor extends worker.Actor {
     }
 
     transformTile(options: transformTileOptions) {
-        options = checkOptions(options, 'transformTile');
+        const type = 'transformTile';
+        options = checkOptions(options, type);
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { x, y, z, projection } = options;
             if (!projection) {
-                reject(createParamsValidateError('transformTile error:not find projection'));
+                reject(createParamsValidateError(`${type} error:not find projection`));
                 return;
             }
             if (SUPPORTPROJECTION.indexOf(projection) === -1) {
-                reject(createParamsValidateError('transformTile error:not support projection:' + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
+                reject(createParamsValidateError(`${type} error:not support projection:` + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
                 return;
             }
-            const error = validateUrlTemplate('transformTile', options);
+            const error = validateUrlTemplate(type, options);
             if (error) {
                 reject(error);
                 return;
             }
             if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
-                reject(createParamsValidateError('transformTile error:x/y/z is error'));
+                reject(createParamsValidateError(`${type} error:x/y/z is error`));
                 return;
             }
 
@@ -231,37 +235,38 @@ class TileActor extends worker.Actor {
     }
 
     rectifyTile(options: rectifyTileOptions) {
-        options = checkOptions(options, 'rectifyTile');
+        const type = 'rectifyTile';
+        options = checkOptions(options, type);
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { x, y, z, maxAvailableZoom, projection, tileBBOX, transform } = options;
             if (!projection) {
-                reject(createParamsValidateError('rectifyTile error:not find projection'));
+                reject(createParamsValidateError(`${type} error:not find projection`));
                 return;
             }
             if (SUPPORTPROJECTION.indexOf(projection) === -1) {
-                reject(createParamsValidateError('rectifyTile error:not support projection:' + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
+                reject(createParamsValidateError(`${type} error:not support projection:` + projection + '.the support:' + SUPPORTPROJECTION.join(',').toString()));
                 return;
             }
-            const error = validateUrlTemplate('rectifyTile', options);
+            const error = validateUrlTemplate(type, options);
             if (error) {
                 reject(error);
                 return;
             }
             if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
-                reject(createParamsValidateError('rectifyTile error:x/y/z is error'));
+                reject(createParamsValidateError(`${type} error:x/y/z is error`));
                 return;
             }
             if (!tileBBOX) {
-                reject(createParamsValidateError('rectifyTile error:tileBBOX is null'));
+                reject(createParamsValidateError(`${type} error:tileBBOX is null`));
                 return;
             }
             if (!transform) {
-                reject(createParamsValidateError('rectifyTile error:transform is null'));
+                reject(createParamsValidateError(`${type} error:transform is null`));
                 return;
             }
             if (transformTypes.indexOf(transform) === -1) {
-                reject(createParamsValidateError('rectifyTile error:not support transformTo:' + transform + '.the support:' + transformTypes.join(',').toString()));
+                reject(createParamsValidateError(`${type} error:not support transformTo:` + transform + '.the support:' + transformTypes.join(',').toString()));
                 return;
             }
             this.send(options, [], (error, image) => {
@@ -278,29 +283,30 @@ class TileActor extends worker.Actor {
     }
 
     rectifyBaiduTile(options: rectifyBaiduTileOptions) {
-        options = checkOptions(options, 'rectifyBaiduTile');
+        const type = 'rectifyBaiduTile';
+        options = checkOptions(options, type);
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { x, y, z, tileBBOX, transform } = options;
-            const error = validateUrlTemplate('rectifyBaiduTile', options);
+            const error = validateUrlTemplate(type, options);
             if (error) {
                 reject(error);
                 return;
             }
             if (!isNumber(x) || !isNumber(y) || !isNumber(z)) {
-                reject(createParamsValidateError('rectifyBaiduTile error:x/y/z is error'));
+                reject(createParamsValidateError(`${type} error:x/y/z is error`));
                 return;
             }
             if (!tileBBOX) {
-                reject(createParamsValidateError('rectifyBaiduTile error:tileBBOX is null'));
+                reject(createParamsValidateError(`${type} error:tileBBOX is null`));
                 return;
             }
             if (!transform) {
-                reject(createParamsValidateError('rectifyBaiduTile error:transform is null'));
+                reject(createParamsValidateError(`${type} error:transform is null`));
                 return;
             }
             if (transformBaiduTypes.indexOf(transform) === -1) {
-                reject(createParamsValidateError('rectifyBaiduTile error:not support transformTo:' + transform + '.the support:' + transformBaiduTypes.join(',').toString()));
+                reject(createParamsValidateError(`${type} error:not support transformTo:` + transform + '.the support:' + transformBaiduTypes.join(',').toString()));
                 return;
             }
             this.send(options, [], (error, image) => {
@@ -317,34 +323,33 @@ class TileActor extends worker.Actor {
     }
 
     clipTile(options: clipTileOptions) {
-        options = checkOptions(options, 'clipTile');
+        const type = 'clipTile';
+        options = checkOptions(options, type);
         const { workerId } = getTaskId(options);
-        // delete (options as unknown as privateOptions).__taskId;
-        // delete (options as unknown as privateOptions).__workerId;
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { tile, tileBBOX, projection, tileSize, maskId } = options;
             if (!tile) {
-                reject(createParamsValidateError('clipTile error:tile is null.It should be a ImageBitmap'));
+                reject(createParamsValidateError(`${type} error:tile is null.It should be a ImageBitmap`));
                 return;
             }
             if (!tileBBOX) {
-                reject(createParamsValidateError('clipTile error:tileBBOX is null'));
+                reject(createParamsValidateError(`${type} error:tileBBOX is null`));
                 return;
             }
             if (!projection) {
-                reject(createParamsValidateError('clipTile error:projection is null'));
+                reject(createParamsValidateError(`${type} error:projection is null`));
                 return;
             }
             if (!tileSize) {
-                reject(createParamsValidateError('clipTile error:tileSize is null'));
+                reject(createParamsValidateError(`${type} error:tileSize is null`));
                 return;
             }
             if (!maskId) {
-                reject(createParamsValidateError('clipTile error:maskId is null'));
+                reject(createParamsValidateError(`${type} error:maskId is null`));
                 return;
             }
             if (!this.maskHasInjected(maskId)) {
-                reject(createParamsValidateError('not find mask by maskId:' + maskId));
+                reject(createParamsValidateError(`${type} error:not find mask by maskId:` + maskId));
                 return;
             }
             const buffers: ArrayBuffer[] = [];
@@ -365,21 +370,22 @@ class TileActor extends worker.Actor {
     }
 
     tileIntersectMask(options: tileIntersectMaskOptions) {
-        options = checkOptions(options, 'tileIntersectMask');
+        const type = 'tileIntersectMask';
+        options = checkOptions(options, type);
         delete (options as unknown as privateOptions).__taskId;
         delete (options as unknown as privateOptions).__workerId;
         const promise = new Promise((resolve: (result: { intersect: boolean }) => void, reject: rejectResultType) => {
             const { tileBBOX, maskId } = options;
             if (!tileBBOX) {
-                reject(createParamsValidateError('tileIntersectMask error:tileBBOX is null'));
+                reject(createParamsValidateError(`${type} error:tileBBOX is null`));
                 return;
             }
             if (!maskId) {
-                reject(createParamsValidateError('tileIntersectMask error:maskId is null'));
+                reject(createParamsValidateError(`${type} error:maskId is null`));
                 return;
             }
             if (!this.maskHasInjected(maskId)) {
-                reject(createParamsValidateError('not find mask by maskId:' + maskId));
+                reject(createParamsValidateError(`${type} error:not find mask by maskId:` + maskId));
                 return;
             }
             const buffers: ArrayBuffer[] = [];
@@ -396,30 +402,31 @@ class TileActor extends worker.Actor {
     }
 
     injectMask(maskId: string, geojsonFeature: GeoJSONPolygon | GeoJSONMultiPolygon) {
+        const type = 'injectMask';
         const promise = new Promise((resolve, reject: rejectResultType) => {
             if (!maskId) {
-                reject(createParamsValidateError('injectMask error:maskId is null'));
+                reject(createParamsValidateError(`${type} error:maskId is null`));
                 return;
             }
-            if (maskMap[maskId]) {
-                reject(createParamsValidateError(`injectMask error:${maskId} has injected`));
+            if (MASKMAP[maskId]) {
+                reject(createParamsValidateError(`${type} error:${maskId} has injected`));
                 return;
             }
             if (!isPolygon(geojsonFeature)) {
-                reject(createParamsValidateError('injectMask error:geojsonFeature is not Polygon,It should be GeoJSON Polygon/MultiPolygon'));
+                reject(createParamsValidateError(`${type} error:geojsonFeature is not Polygon,It should be GeoJSON Polygon/MultiPolygon`));
                 return;
             }
             this.broadcast({
                 maskId,
                 geojsonFeature,
-                __type: 'injectMask'
+                __type: type
             }, [], (error, data) => {
                 if (isErrorOrCancel(error, promise)) {
                     reject(error || TaskCancelError);
                     return;
                 }
                 resolve(null);
-                maskMap[maskId] = true;
+                MASKMAP[maskId] = true;
             });
         });
         wrapPromise(promise, {});
@@ -427,21 +434,22 @@ class TileActor extends worker.Actor {
     }
 
     removeMask(maskId: string) {
+        const type = 'removeMask';
         const promise = new Promise((resolve, reject: rejectResultType) => {
             if (!maskId) {
-                reject(createParamsValidateError('removeMask error:maskId is null'));
+                reject(createParamsValidateError(`${type} error:maskId is null`));
                 return;
             }
             this.broadcast({
                 maskId,
-                __type: 'removeMask'
+                __type: type
             }, [], (error, data) => {
                 if (isErrorOrCancel(error, promise)) {
                     reject(error || TaskCancelError);
                     return;
                 }
                 resolve(null);
-                delete maskMap[maskId];
+                delete MASKMAP[maskId];
             });
         });
         wrapPromise(promise, {});
@@ -453,7 +461,7 @@ class TileActor extends worker.Actor {
             console.error('maskHasInjected error:maskId is null');
             return false;
         }
-        return !!maskMap[maskId];
+        return !!MASKMAP[maskId];
     }
 
     imageSlicing(options: getTileOptions) {
@@ -538,26 +546,27 @@ class TileActor extends worker.Actor {
 
 
     encodeTerrainTile(options: encodeTerrainTileOptions) {
-        options = checkOptions(options, 'encodeTerrainTile');
+        const type = 'encodeTerrainTile';
+        options = checkOptions(options, type);
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { url, terrainType, minHeight, maxHeight } = options;
             if (!url) {
-                reject(createParamsValidateError('encodeTerrainTile error:url is null'));
+                reject(createParamsValidateError(`${type} error:url is null`));
                 return;
             }
 
             if (!terrainType) {
-                reject(createParamsValidateError('encodeTerrainTile error:terrainType is null'));
+                reject(createParamsValidateError(`${type} error:terrainType is null`));
                 return;
             }
             if (TerrainTypes.indexOf(terrainType) === -1) {
-                reject(createParamsValidateError('encodeTerrainTile error:terrainType:not support the terrainType:' + terrainType));
+                reject(createParamsValidateError(`${type} error:terrainType:not support the terrainType:` + terrainType));
                 return;
             }
             if (terrainType === 'qgis-gray') {
                 if (!isNumber(minHeight) || !isNumber(maxHeight) || minHeight > maxHeight) {
-                    reject(createParamsValidateError('encodeTerrainTile error:terrainType:qgis-gray,require minHeight/maxHeight should number'));
+                    reject(createParamsValidateError(`${type} error:terrainType:qgis-gray,require minHeight/maxHeight should number`));
                     return;
                 }
             }
@@ -575,12 +584,13 @@ class TileActor extends worker.Actor {
     }
 
     terrainTileFixBoundary(options: terrainTileFixBoundaryOptions) {
-        options = checkOptions(options, 'terrainTileFixBoundary');
+        const type = 'terrainTileFixBoundary';
+        options = checkOptions(options, type);
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { tiles } = options;
             if (!tiles || tiles.length === 0) {
-                reject(createParamsValidateError('terrainTileFixBoundary error:tiles is null'));
+                reject(createParamsValidateError(`${type} error:tiles is null`));
                 return;
             }
             const z = tiles[0].z;
@@ -589,13 +599,13 @@ class TileActor extends worker.Actor {
                 const zoom = tiles[i].z;
                 const image = tiles[i].image;
                 if (!image) {
-                    reject(createParamsValidateError('terrainTileFixBoundary error:not find tile.image'));
+                    reject(createParamsValidateError(`${type} error:not find tile.image`));
                     console.error(tiles);
                     return;
                 }
                 tileSize = image.width;
                 if (zoom !== z) {
-                    reject(createParamsValidateError('terrainTileFixBoundary error:All tiles should be on the same level'));
+                    reject(createParamsValidateError(`${type} error:All tiles should be on the same level`));
                     console.error(tiles);
                     return;
                 }
@@ -656,17 +666,18 @@ class TileActor extends worker.Actor {
     }
 
     colorTerrainTile(options: colorTerrainTileOptions) {
-        options = checkOptions(options, 'colorTerrainTile');
+        const type = 'colorTerrainTile';
+        options = checkOptions(options, type);
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { tile, colors } = options;
             if (!tile || !(isImageBitmap(tile) || isString(tile))) {
-                reject(createParamsValidateError('colorTerrainTile error:tile is not ImageBitMap'));
+                reject(createParamsValidateError(`${type} error:tile is not ImageBitMap`));
                 return;
             }
 
             if (!colors || !Array.isArray(colors) || colors.length === 0) {
-                reject(createParamsValidateError('colorTerrainTile error:colors is null'));
+                reject(createParamsValidateError(`${type} error:colors is null`));
                 return;
             }
             const buffers = checkBuffers(tile);
@@ -684,23 +695,24 @@ class TileActor extends worker.Actor {
     }
 
     injectImage(options: injectImageOptions) {
-        options = checkOptions(options, 'injectImage');
+        const type = 'injectImage';
+        options = checkOptions(options, type);
         const promise = new Promise((resolve: (data: any) => void, reject: rejectResultType) => {
             const { imageId, url, imageBBOX } = options;
             if (!imageId) {
-                reject(createParamsValidateError('injectImage error:imageId is null'));
+                reject(createParamsValidateError(`${type} error:imageId is null`));
                 return;
             }
             if (!url) {
-                reject(createParamsValidateError('injectImage error:url is null'));
+                reject(createParamsValidateError(`${type} error:url is null`));
                 return;
             }
             if (this.imageHasInjected(imageId)) {
-                reject(createParamsValidateError(`injectImage error:${imageId} has injected`));
+                reject(createParamsValidateError(`${type} error:${imageId} has injected`));
                 return;
             }
             if (!imageBBOX) {
-                reject(createParamsValidateError('injectImage error:imageBBOX is null'));
+                reject(createParamsValidateError(`${type} error:imageBBOX is null`));
                 return;
             }
 
@@ -710,7 +722,7 @@ class TileActor extends worker.Actor {
                 if (isErrorOrCancel(error, promise)) {
                     reject(error || FetchCancelError);
                 } else {
-                    imageMap[imageId] = {
+                    IMAGEMAP[imageId] = {
                         imageBBOX,
                         url,
                         image
@@ -734,8 +746,8 @@ class TileActor extends worker.Actor {
                     reject(TaskCancelError);
                     return;
                 }
-                const imageInfo = imageMap[imageId] || {};
-                delete imageMap[imageId];
+                const imageInfo = IMAGEMAP[imageId] || {};
+                delete IMAGEMAP[imageId];
                 const image = imageInfo.image;
                 disposeImage(image);
                 removeTimeOut(tid);
@@ -752,30 +764,31 @@ class TileActor extends worker.Actor {
             console.error('imageHasInjected error:imageId is null');
             return false;
         }
-        return !!imageMap[imageId];
+        return !!IMAGEMAP[imageId];
     }
 
     getImageTile(options: getImageTileOptions) {
-        options = checkOptions(options, 'getImageTile');
+        const type = 'getImageTile';
+        options = checkOptions(options, type);
         const promise = new Promise((resolve: resolveResultType, reject: rejectResultType) => {
             const { tileBBOX, projection, imageId } = options;
             if (!tileBBOX) {
-                reject(createParamsValidateError('getImageTile error:tileBBOX is null'));
+                reject(createParamsValidateError(`${type} error:tileBBOX is null`));
                 return;
             }
             if (!imageId) {
-                reject(createParamsValidateError('getImageTile error:imageId is null'));
+                reject(createParamsValidateError(`${type} error:imageId is null`));
                 return;
             }
             if (!projection) {
-                reject(createParamsValidateError('getImageTile error:projection is null'));
+                reject(createParamsValidateError(`${type} error:projection is null`));
                 return;
             }
             if (!this.imageHasInjected(imageId)) {
                 reject(createParamsValidateError('not find image by imageId:' + imageId));
                 return;
             }
-            const imageInfo = imageMap[imageId];
+            const imageInfo = IMAGEMAP[imageId];
             const image = imageTile(imageInfo, options);
             if (needPostProcessingImage(options) || needFormatImageType(options)) {
                 (options as any).image = image;
@@ -804,12 +817,13 @@ class TileActor extends worker.Actor {
     }
 
     getVTTile(options: getVTTileOptions) {
-        options = checkOptions(options, 'getVTTile');
+        const type = 'getVTTile'
+        options = checkOptions(options, type);
         const { workerId } = getTaskId(options);
         const promise = new Promise((resolve: (buffer: ArrayBuffer) => void, reject: rejectResultType) => {
             const { url, customProperties } = options;
             if (!url) {
-                reject(createParamsValidateError('getVTTile error:url is null'));
+                reject(createParamsValidateError(`${type} error:url is null`));
                 return;
             }
             if (isFunction(customProperties)) {
