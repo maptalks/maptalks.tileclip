@@ -61,6 +61,7 @@
 * [tilerectify-gcj02-wgs84](https://maptalks.org/maptalks.tileclip/demo/tilerectify-gcj02-wgs84.html)  
 * [tilerectify-wgs84-gcj02](https://maptalks.org/maptalks.tileclip/demo/tilerectify-wgs84-gcj02.html)  
 * [tilerectify-baidu-wgs84](https://maptalks.org/maptalks.tileclip/demo/tilerectify-baidu-wgs84.html)  
+* [tilerectify urltempalte is function](https://maptalks.org/maptalks.tileclip/demo/tilerectify-urltempalte-function.html)  
 
 ### Reproject Tile
 

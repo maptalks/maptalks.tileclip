@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>User Interactions - Draw tool to draw geometries</title>
+<style type="text/css">
+    html,
+    body {
+        margin: 0px;
+        height: 100%;
+        width: 100%
+    }
+
+    .container {
+        width: 100%;
+        height: 100%
+    }
+</style>
+<link rel='stylesheet' href='https://unpkg.com/maptalks/dist/maptalks.css' />
+<script type='text/javascript' src='https://unpkg.com/maptalks/dist/maptalks.min.js'></script>
+<script type='text/javascript' src='https://unpkg.com/maptalks.tileclip@latest/dist/maptalks.tileclip.js'></script>
+<script type='text/javascript' src='./util.js'></script>
+
+<body>
+    <div id="map" class="container"></div>
+    <script>
+
+        const tileActor = maptalks.getTileActor();
+        const maskId = '1';
+        const baseLayer = new maptalks.TileLayer('base', {
+            // debug: true,
+            urlTemplate: (x, y, z, domain) => {
+                // console.log(x, y, z, domain);
+                const urlTemplate = "https://ecn.{subdomain}.tiles.virtualearth.net/tiles/a{quadkey}.jpeg?g=14583";
+                function toQuadKey(x, y, z) {
+                    var index = "";
+                    for (var i = z; i > 0; i--) {
+                        var b = 0;
+                        var mask = 1 << (i - 1);
+                        if ((x & mask) !== 0) b++;
+                        if ((y & mask) !== 0) b += 2;
+                        index += b.toString();
+                    }
+                    return index;
+                }
+                // console.log(maskId);
+
+                var quadkey = toQuadKey(x, y, z);
+                const tileUrl = urlTemplate
+                    .replace("{quadkey}", quadkey)
+                    .replace("{subdomain}", domain);
+
+                return tileUrl;
+            },
+            // urlTemplate: "https://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
+            subdomains: ["t0", "t1", "t2", "t3"],
+        })
+
+        baseLayer.on('renderercreate', function (e) {
+            //load tile image
+            //   img(Image): an Image object
+            //   url(String): the url of the tile
+            e.renderer.loadTileBitmap = function (url, tile, callback) {
+                // console.log(tile);
+                const { x, y, z } = tile;
+                const urlTemplate = baseLayer.options.urlTemplate;
+                const maxAvailableZoom = 18;
+                tileActor.rectifyTile({
+                    x,
+                    y,
+                    z,
+                    urlTemplate,
+                    maxAvailableZoom,
+                    tileBBOX: baseLayer._getTileBBox(tile),
+                    projection: baseLayer.getProjection().code,
+                    tileSize: baseLayer.getTileSize().width,
+                    transform: 'WGS84-GCJ02',
+                    mapZoom: map.getZoom(),
+                    subdomains: baseLayer.options.subdomains,
+                }
+                ).then(imagebitmap => {
+                    callback(imagebitmap);
+                }).catch(error => {
+                    //do some things
+                    console.error(error);
+                })
+            };
+        });
+
+        var map = new maptalks.Map('map', {
+            zoomControl: true,
+            "center": [120.34842464, 31.18014762], "zoom": 13.00443245326703, "pitch": 0, "bearing": 0
+        });
+
+        map.on('click', e => {
+            console.log(e.coordinate.toArray());
+        })
+
+        baseLayer.addTo(map);
+
+        const baseLayer1 = new maptalks.TileLayer('base1', {
+            // debug: true,
+            // urlTemplate: "https://webst01.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
+            // tileSystem: [1, -1, -180, 90],
+            urlTemplate: 'https://wprd04.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scl=1&style=8&ltype=11',
+            subdomains: ["a", "b", "c", "d"],
+        }).addTo(map);
+
+
+
+
+
+    </script>
+</body>
+
+</html>
