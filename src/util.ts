@@ -1,5 +1,5 @@
 import LRUCache from './LRUCache';
-import { GeoJSONMultiPolygon, GeoJSONPolygon, postProcessingOptionsType, returnResultType, rejectResultType, TileItem } from './types';
+import { GeoJSONMultiPolygon, GeoJSONPolygon, postProcessingOptionsType, returnResultType, rejectResultType, TileItem, urlTemplateFunction } from './types';
 
 export function allSettled<T>(promiseList: Promise<T>[], urls: string[], isAll?: boolean) {
     return new Promise((resolve: (images: Array<T>) => void, reject: rejectResultType) => {
@@ -83,6 +83,9 @@ export function isFunction(obj) {
 export function getFunctionBody(str: string) {
     if (!str) {
         return;
+    }
+    if (isFunction(str)) {
+        str = str.toString();
     }
     const start = str.indexOf('{'), end = str.lastIndexOf('}');
     if (start === -1 || end === -1) {
@@ -228,20 +231,31 @@ export function toTileItems(tiles: Array<[number, number, number]>): Array<TileI
     })
 }
 
+function getDomain(subdomains: string[]) {
+    if (!subdomains || !subdomains.length) {
+        return;
+    }
+    const len = subdomains.length;
+    let index = Math.floor(Math.random() * len);
+    index = Math.min(index, len - 1);
+    return subdomains[index];
+}
 
 function formatTileUrlBySubdomains(url: string, subdomains: string[]) {
     if (!subdomains || !subdomains.length) {
         return url;
     }
-    const len = subdomains.length;
-    let index = Math.floor(Math.random() * len);
-    index = Math.min(index, len - 1);
-    return replaceAll(url, '{s}', subdomains[index])
+    return replaceAll(url, '{s}', getDomain(subdomains));
 }
 
-export function getTileUrl(urlTemplate: string, x: number, y: number, z: number, subdomains: string[]) {
+export function getTileUrl(urlTemplate: string | urlTemplateFunction, x: number, y: number, z: number, subdomains: string[]) {
+    if (isFunction(urlTemplate)) {
+        const urlFun = urlTemplate as unknown as urlTemplateFunction;
+        const url = urlFun(x, y, z, getDomain(subdomains));
+        return url;
+    }
     let key = '{x}';
-    let url = replaceAll(urlTemplate, key, x as unknown as string);
+    let url = replaceAll(urlTemplate as string, key, x as unknown as string);
     key = '{y}';
     url = replaceAll(url, key, y as unknown as string);
     key = '{z}';
@@ -255,6 +269,9 @@ export function validateSubdomains(urlTemplates: string | string[], subdomains: 
     }
     for (let i = 0, len = urlTemplates.length; i < len; i++) {
         const urlTemplate = urlTemplates[i];
+        if (isFunction(urlTemplate)) {
+            continue;
+        }
         if (urlTemplate && urlTemplate.indexOf('{s}') > -1) {
             if (!subdomains || subdomains.length === 0) {
                 return false;
@@ -292,4 +309,10 @@ export function createFetchTileList<T>(urls: string[], options: Record<string, a
     return urls.map(url => {
         return fetchFun(url, headers, options);
     })
+}
+
+
+export function createUrlTemplateFun(urlTemplateBody: string): urlTemplateFunction {
+    const urlTemplate = new Function('x', 'y', 'z', 'domain', urlTemplateBody) as urlTemplateFunction;
+    return urlTemplate;
 }

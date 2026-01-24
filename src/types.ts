@@ -47,10 +47,11 @@ export type getTileOptions = {
 
 
 export type layoutTilesOptions = {
-    urlTemplate: string;
+    urlTemplate: string | urlTemplateFunction;
     tiles: Array<[number, number, number]>;
     subdomains?: Array<string>;
     debug?: boolean;
+    urlTemplateBody?: string;
 } & postProcessingOptionsType & fetchOptionsType & returnResultType;
 
 export type encodeTerrainTileOptions = {
@@ -63,14 +64,17 @@ export type encodeTerrainTileOptions = {
     terrainColors?: Array<[number, string]>
 } & fetchOptionsType & returnResultType;
 
+export type urlTemplateFunction = (x: number, y: number, z: number, domain?: string) => string;
+
 export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {
-    urlTemplate: string | Array<string>;
+    urlTemplate: string | Array<string> | urlTemplateFunction;
     maxAvailableZoom: number;
     x: number;
     y: number;
     z: number;
     subdomains?: Array<string>;
     tms?: boolean;
+    urlTemplateBody?: string;
 }
 
 export type clipTileOptions = {

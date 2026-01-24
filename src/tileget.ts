@@ -11,10 +11,10 @@ import {
     getTileUrl,
     toTileItems,
     allSettled,
-    createFetchTileList
+    createFetchTileList,
+    createUrlTemplateFun
 } from './util';
 import { fetchTile } from './tilefetch';
-
 export function getTile(options: getTileOptions) {
     return new Promise((resolve, reject) => {
         const { url } = options;
@@ -42,7 +42,8 @@ export function getTile(options: getTileOptions) {
 }
 
 export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
-    const { urlTemplate, x, y, z, maxAvailableZoom, subdomains, globalCompositeOperation, tms } = options;
+    const { urlTemplateBody, x, y, z, maxAvailableZoom, subdomains, globalCompositeOperation, tms } = options;
+    const urlTemplate = urlTemplateBody ? createUrlTemplateFun(urlTemplateBody) : options.urlTemplate;
     return new Promise((resolve: resolveResultType, reject) => {
         const urlTemplates = checkArray(urlTemplate);
         // const isDebug = x === 398789 && y === 143180;
@@ -101,9 +102,18 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
             tileZ = maxAvailableZoom;
             // console.log(dxScale, dyScale);
         }
-        const urls = urlTemplates.map(urlTemplate => {
-            return getTileUrl(urlTemplate, tileX, tileY, tileZ, subdomains);
-        });
+
+        let urls;
+        try {
+            urls = urlTemplates.map(urlTemplate => {
+                return getTileUrl(urlTemplate, tileX, tileY, tileZ, subdomains);
+            });
+        } catch (error) {
+            console.error(error);
+            reject(error);
+            return;
+
+        }
         const fetchTiles = createFetchTileList<ImageBitmap>(urls, options, fetchTile);
         allSettled(fetchTiles, urls).then(imagebits => {
             // const canvas = getCanvas();
@@ -137,14 +147,23 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
 
 }
 export function layout_Tiles(options: layoutTilesOptions) {
-    const { urlTemplate, tiles, subdomains, debug } = options;
+    const { urlTemplateBody, tiles, subdomains, debug } = options;
+    const urlTemplate = urlTemplateBody ? createUrlTemplateFun(urlTemplateBody) : options.urlTemplate;
     return new Promise((resolve, reject) => {
         const tileItemList = toTileItems(tiles);
 
-        const urls = tileItemList.map(tile => {
-            const { x, y, z } = tile;
-            return getTileUrl(urlTemplate, x, y, z, subdomains);
-        });
+        let urls;
+        try {
+            urls = tileItemList.map(tile => {
+                const { x, y, z } = tile;
+                return getTileUrl(urlTemplate, x, y, z, subdomains);
+            });
+        } catch (error) {
+            console.error(error);
+            reject(error);
+            return;
+        }
+
         const fetchTiles = createFetchTileList<ImageBitmap>(urls, options, fetchTile);
 
         allSettled(fetchTiles, urls, true).then(imagebits => {

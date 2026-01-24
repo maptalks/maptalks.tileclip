@@ -90,6 +90,10 @@ function validateUrlTemplate(type: string, options: any) {
     if (!validateSubdomains(urlTemplate, subdomains)) {
         return createParamsValidateError(`${type} error: urlTemplate has {s} but subdomains is null`);
     }
+    if (isFunction(urlTemplate)) {
+        options.urlTemplateBody = getFunctionBody(urlTemplate);
+        delete options.urlTemplate;
+    }
     return null;
 }
 
