@@ -11,7 +11,8 @@ import {
     validateSubdomains,
     isString,
     isFunction,
-    getFunctionBody
+    getFunctionBody,
+    checkArray
 } from './util';
 import { getCanvas, getCanvasContext, resizeCanvas } from './canvas';
 import {
@@ -79,7 +80,8 @@ function isErrorOrCancel(error: Error, promise): boolean {
 }
 
 function validateUrlTemplate(type: string, options: any) {
-    const { urlTemplate, subdomains, maxAvailableZoom } = options;
+    const { subdomains, maxAvailableZoom } = options;
+    let urlTemplate = options.urlTemplate;
     const maxZoomEnable = maxAvailableZoom && isNumber(maxAvailableZoom) && maxAvailableZoom >= 1;
     if (!maxZoomEnable) {
         return createParamsValidateError(`${type} error:maxAvailableZoom is error`)
@@ -90,10 +92,16 @@ function validateUrlTemplate(type: string, options: any) {
     if (!validateSubdomains(urlTemplate, subdomains)) {
         return createParamsValidateError(`${type} error: urlTemplate has {s} but subdomains is null`);
     }
-    if (isFunction(urlTemplate)) {
-        options.urlTemplateBody = getFunctionBody(urlTemplate);
-        delete options.urlTemplate;
-    }
+    urlTemplate = checkArray(urlTemplate);
+    const urlTemplateBody = [];
+    urlTemplate.forEach(url => {
+        if (isFunction(url)) {
+            urlTemplateBody.push('function:' + getFunctionBody(url));
+        } else {
+            urlTemplateBody.push(url);
+        }
+    });
+    options.urlTemplate = urlTemplateBody;
     return null;
 }
 

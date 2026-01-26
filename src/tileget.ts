@@ -42,8 +42,9 @@ export function getTile(options: getTileOptions) {
 }
 
 export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
-    const { urlTemplateBody, x, y, z, maxAvailableZoom, subdomains, globalCompositeOperation, tms } = options;
-    const urlTemplate = urlTemplateBody ? createUrlTemplateFun(urlTemplateBody) : options.urlTemplate;
+    const { x, y, z, maxAvailableZoom, subdomains, globalCompositeOperation, tms } = options;
+    let urlTemplate = options.urlTemplate;
+    urlTemplate = createUrlTemplateFun(urlTemplate as string);
     return new Promise((resolve: resolveResultType, reject) => {
         const urlTemplates = checkArray(urlTemplate);
         // const isDebug = x === 398789 && y === 143180;
@@ -147,8 +148,9 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
 
 }
 export function layout_Tiles(options: layoutTilesOptions) {
-    const { urlTemplateBody, tiles, subdomains, debug } = options;
-    const urlTemplate = urlTemplateBody ? createUrlTemplateFun(urlTemplateBody) : options.urlTemplate;
+    const { tiles, subdomains, debug } = options;
+    let urlTemplate = options.urlTemplate;
+    urlTemplate = createUrlTemplateFun(urlTemplate as string)[0];
     return new Promise((resolve, reject) => {
         const tileItemList = toTileItems(tiles);
 

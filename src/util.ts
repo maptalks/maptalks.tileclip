@@ -312,7 +312,13 @@ export function createFetchTileList<T>(urls: string[], options: Record<string, a
 }
 
 
-export function createUrlTemplateFun(urlTemplateBody: string): urlTemplateFunction {
-    const urlTemplate = new Function('x', 'y', 'z', 'domain', urlTemplateBody) as urlTemplateFunction;
-    return urlTemplate;
+export function createUrlTemplateFun(urlTemplate: string | Array<string>): Array<urlTemplateFunction | string> {
+    urlTemplate = checkArray(urlTemplate);
+    return urlTemplate.map(url => {
+        if (url.indexOf('function:') === -1) {
+            return url;
+        }
+        const funBody = url.split('function:')[1];
+        return new Function('x', 'y', 'z', 'domain', funBody) as urlTemplateFunction;
+    })
 }
