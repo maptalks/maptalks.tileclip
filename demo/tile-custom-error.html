@@ -49,18 +49,19 @@
                 }).catch(error => {
                     //do some things
                     console.error(error);
-                    const v = Math.random();
-                    if (v < 0.3) {
-                        callback(maptalks.get404Tile());
-
-                    } else if (v < 0.6) {
-                        callback(maptalks.getBlankTile());
+                    if (error.code === 408) {
+                        const v = Math.random();
+                        if (v < 0.5) {
+                            callback(maptalks.get404Tile());
+                        } else {
+                            copy404Tile().then(imagebitmap => {
+                                callback(imagebitmap);
+                            }).catch(err => {
+                                console.error('Failed to load 404 tile:', err);
+                            });
+                        }
                     } else {
-                        copy404Tile().then(imagebitmap => {
-                            callback(imagebitmap);
-                        }).catch(err => {
-                            console.error('Failed to load 404 tile:', err);
-                        });
+                        callback(maptalks.getBlankTile());
                     }
                 })
             };
