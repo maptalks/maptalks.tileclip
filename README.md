@@ -19,6 +19,7 @@
 * [maxAvailableZoom](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom.html)
 * [maxAvailableZoom tiles](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-array.html)
 * [maxAvailableZoom terrain](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-terrain.html)  
+* [maxAvailableZoom fetch by different](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-different.html)  
 
 * [layout tiles](https://maptalks.github.io/maptalks.tileclip/demo/layouttiles.html)  
 
