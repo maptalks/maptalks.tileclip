@@ -3,9 +3,9 @@ import LRUCache from './LRUCache';
 import {
     isNumber, FetchCancelError, FetchTimeoutError, createInnerError, disposeImage,
     isImageBitmap,
-    createNetWorkError,
     removeTimeOut,
-    checkArray
+    checkArray,
+    createFetchError
 } from './util';
 import { getStoreTile, saveStoreTile } from './store';
 
@@ -172,7 +172,7 @@ export function fetchTile(url: string, headers = {}, options) {
             fetch(url, fetchOptions).then(res => {
                 if (!res.ok) {
                     finishFetch(control);
-                    reject(createNetWorkError(url));
+                    reject(createFetchError(res));
                     return;
                 }
                 return res.arrayBuffer();
@@ -231,7 +231,7 @@ export function fetchTileBuffer(url: string, headers = {}, options) {
             fetch(url, fetchOptions).then(res => {
                 if (!res.ok) {
                     finishFetch(control);
-                    reject(createNetWorkError(url));
+                    reject(createFetchError(res));
                     return;
                 }
                 return res.arrayBuffer();

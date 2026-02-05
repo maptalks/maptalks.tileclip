@@ -4,17 +4,19 @@ import { GeoJSONMultiPolygon, GeoJSONPolygon, postProcessingOptionsType, returnR
 export function allSettled<T>(promiseList: Promise<T>[], urls: string[], isAll?: boolean) {
     return new Promise((resolve: (images: Array<T>) => void, reject: rejectResultType) => {
         const results = [];
+        const errors = [];
+        const onlyOne = promiseList.length === 1;
         const isEnd = () => {
             if (results.length === promiseList.length) {
                 let filterResults = results.filter(image => {
                     return !!image;
                 });
                 if (isAll && filterResults.length < promiseList.length) {
-                    reject(createNetWorkError(urls));
+                    reject(onlyOne ? errors[0] : createNetWorkError(urls));
                     return;
                 }
                 if (filterResults.length === 0) {
-                    reject(createNetWorkError(urls));
+                    reject(onlyOne ? errors[0] : createNetWorkError(urls));
                     return;
                 }
                 filterResults = filterResults.sort((a, b) => {
@@ -31,17 +33,19 @@ export function allSettled<T>(promiseList: Promise<T>[], urls: string[], isAll?:
                 isEnd();
             }).catch(error => {
                 results.push(null);
+                errors.push(error);
                 isEnd();
             })
         });
     });
 }
 
-class CustomError extends Error {
+class CustomError {
     public code: number;
+    public message: string;
 
     constructor(message: string, code: number) {
-        super(message);
+        this.message = message;
         this.code = code;
     }
 }
@@ -94,8 +98,8 @@ export function getFunctionBody(str: string) {
     return str.substring(start + 1, end);
 }
 
-function createError(message: string, code: number): Error {
-    return new CustomError(message, code);
+export function createError(message: string, code: number): Error {
+    return new CustomError(message, code) as unknown as Error;
 }
 
 export const CANVAS_ERROR_MESSAGE = createError('not find canvas.The current environment does not support OffscreenCanvas', -4);
@@ -103,10 +107,14 @@ export const FetchCancelError = createError('fetch tile data cancel', 499);
 export const FetchTimeoutError = createError('fetch tile data timeout', 408);
 export const TaskCancelError = createError('the task is cancel', -6);
 
-export function isFetchDefaultError(error: Error) {
+export function isFetchDefaultError(error: CustomError | Error) {
     return error === FetchCancelError || error === FetchTimeoutError;
 }
 
+export function createFetchError(res: Response) {
+    const { url, status } = res;
+    return createError(`fetch NetWork error, the url is ${url}`, status);
+}
 export function createNetWorkError(url: string | string[]) {
     if (!Array.isArray(url)) {
         url = [url];

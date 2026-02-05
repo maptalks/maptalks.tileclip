@@ -9,7 +9,19 @@ import { tileRectify } from './tilerectify';
 import { encodeTerrainTile, terrainTileColors } from './tileterrain';
 import { tileTransform } from './tiletransform';
 import { getVTTile } from './tilevt';
-import { checkBuffers, createInnerError, isImageBitmap, CancelTaskLRUCache } from './util';
+import { checkBuffers, createInnerError, isImageBitmap, CancelTaskLRUCache, createError } from './util';
+
+function parseError(error) {
+    if (error instanceof Error) {
+        let code = -1;
+        const message = error.message;
+        if (message && message.indexOf('aborted') > -1) {
+            code = 499;
+        }
+        return createError(message, code);
+    }
+    return error;
+}
 
 export const initialize = function () {
 };
@@ -21,7 +33,7 @@ export const onmessage = function (message, postResponse) {
         getTile(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         });
         return;
     }
@@ -29,7 +41,7 @@ export const onmessage = function (message, postResponse) {
         layout_Tiles(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         });
         return;
     }
@@ -37,7 +49,7 @@ export const onmessage = function (message, postResponse) {
         getTileWithMaxZoom(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         });
         return;
     }
@@ -45,7 +57,7 @@ export const onmessage = function (message, postResponse) {
         clip(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         });
         return;
     }
@@ -54,7 +66,7 @@ export const onmessage = function (message, postResponse) {
         tileBBOXIntersectMask(tileBBOX, maskId).then(result => {
             postResponse(null, result, checkBuffers(result));
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         });
         return;
     }
@@ -62,7 +74,7 @@ export const onmessage = function (message, postResponse) {
         tileTransform(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         });
         return;
     }
@@ -70,7 +82,7 @@ export const onmessage = function (message, postResponse) {
         tileRectify(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         });
         return;
     }
@@ -78,14 +90,14 @@ export const onmessage = function (message, postResponse) {
         tileBaduRectify(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         });
         return;
     }
     if (type === 'injectMask') {
         const geojson = injectMask(data.maskId, data.geojsonFeature);
         if (geojson instanceof Error) {
-            postResponse(geojson);
+            postResponse(parseError(geojson));
             return;
         }
         postResponse();
@@ -118,7 +130,7 @@ export const onmessage = function (message, postResponse) {
             });
             postResponse(null, result, buffers);
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         });
         return;
     }
@@ -126,7 +138,7 @@ export const onmessage = function (message, postResponse) {
         imageToBlobURL(data).then((result: any) => {
             postResponse(null, result, []);
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         });
         return;
     }
@@ -135,7 +147,7 @@ export const onmessage = function (message, postResponse) {
         encodeTerrainTile(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         });
         return;
     }
@@ -143,7 +155,7 @@ export const onmessage = function (message, postResponse) {
         terrainTileColors(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         })
         return;
         // const { tile, colors } = data;
@@ -160,7 +172,7 @@ export const onmessage = function (message, postResponse) {
         imagetTileFetch(data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         })
         return;
     }
@@ -170,7 +182,7 @@ export const onmessage = function (message, postResponse) {
         createImageTypeResult(getCanvas(), postImage, data).then(image => {
             postResponse(null, image, checkBuffers(image));
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         })
         return;
     }
@@ -178,7 +190,7 @@ export const onmessage = function (message, postResponse) {
         getVTTile(data).then(buffer => {
             postResponse(null, buffer, checkBuffers(buffer));
         }).catch(error => {
-            postResponse(error);
+            postResponse(parseError(error));
         });
         return;
     }
