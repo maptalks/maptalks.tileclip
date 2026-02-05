@@ -254,6 +254,7 @@ export function getTileUrl(urlTemplate: string | urlTemplateFunction, x: number,
         const url = urlFun(x, y, z, getDomain(subdomains));
         return url;
     }
+    urlTemplate = decodeURIComponent(urlTemplate as string);
     let key = '{x}';
     let url = replaceAll(urlTemplate as string, key, x as unknown as string);
     key = '{y}';
