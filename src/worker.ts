@@ -1,4 +1,5 @@
 import { createImageTypeResult, postProcessingImage, colorsTerrainTile, getCanvas } from './canvas';
+import { createError, createInnerError } from './Error';
 import { imageSlicing, imageToBlobURL } from './imageslice';
 import { imagetTileFetch } from './imagetile';
 import { tileBaduRectify } from './tilebaidurectify';
@@ -9,8 +10,9 @@ import { tileRectify } from './tilerectify';
 import { encodeTerrainTile, terrainTileColors } from './tileterrain';
 import { tileTransform } from './tiletransform';
 import { getVTTile } from './tilevt';
-import { checkBuffers, createInnerError, isImageBitmap, CancelTaskLRUCache, createError } from './util';
+import { checkBuffers, isImageBitmap, CancelTaskLRUCache } from './util';
 
+//why native Error not clone code properties
 function parseError(error) {
     if (error instanceof Error) {
         let code = -1;

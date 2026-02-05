@@ -1,13 +1,13 @@
 
 import LRUCache from './LRUCache';
 import {
-    isNumber, FetchCancelError, FetchTimeoutError, createInnerError, disposeImage,
+    isNumber, disposeImage,
     isImageBitmap,
     removeTimeOut,
-    checkArray,
-    createFetchError
+    checkArray
 } from './util';
 import { getStoreTile, saveStoreTile } from './store';
+import { createFetchError, createInnerError, FetchCancelError, FetchTimeoutError } from './Error';
 
 const LRUCount = 500;
 

@@ -2,8 +2,9 @@ import { getBBOXCenter, pointInBBOX } from "./bbox";
 import { createImageTypeResult, getBlankTile, getCanvas, getCanvasContext, layoutTiles, postProcessingImage, resizeCanvas } from "./canvas";
 import { rectifyTileOptions } from "./types";
 import gcoord from 'gcoord';
-import { CancelTaskLRUCache, disposeImage, FetchCancelError, isEPSG3857, isFetchDefaultError, lnglat2Mercator, toTileItems } from "./util";
+import { CancelTaskLRUCache, disposeImage, isEPSG3857, lnglat2Mercator, toTileItems } from "./util";
 import { getTileWithMaxZoom } from "./tileget";
+import { FetchCancelError, isFetchDefaultError } from "./Error";
 
 const debugCenter = [116.3388992615747, 39.897968400218986];
 

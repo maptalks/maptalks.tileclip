@@ -5,15 +5,13 @@ import { cesiumTerrainToHeights, generateTiandituTerrain, transformQGisGray, tra
 import * as lerc from './lerc';
 import {
     checkArray,
-    createDataError,
     allSettled,
     isString,
     disposeImage,
-    createInnerError,
-    createParamsValidateError,
     createFetchTileList
 } from './util';
 import { fetchTile, fetchTileBuffer } from './tilefetch';
+import { createDataError, createInnerError, createParamsValidateError } from "./Error";
 
 
 export function encodeTerrainTile(options: encodeTerrainTileOptions) {

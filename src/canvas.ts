@@ -1,7 +1,8 @@
 import { clipBufferOptions, postProcessingOptionsType, returnResultType, TileItem } from "./types";
-import { createDataError, disposeImage, isImageBitmap, isNumber, needFormatImageType, rgb2Height } from "./util";
+import { disposeImage, isImageBitmap, isNumber, needFormatImageType, rgb2Height } from "./util";
 import glur from 'glur';
 import { ColorIn } from 'colorin';
+import { createDataError } from "./Error";
 
 let globalCanvas: OffscreenCanvas;
 

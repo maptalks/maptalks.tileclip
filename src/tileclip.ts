@@ -3,8 +3,9 @@ import lineclip from 'lineclip';
 import { createImageTypeResult, getBlankTile, getCanvas, imageClip } from './canvas';
 import { bboxInBBOX, bboxIntersect, BBOXtype } from './bbox';
 import { clipBufferOptions, clipTileOptions, GeoJSONMultiPolygon, GeoJSONPolygon, getTileOptions } from './types';
-import { lnglat2Mercator, isPolygon, isEPSG3857, createParamsValidateError, isNumber, isString } from './util';
+import { lnglat2Mercator, isPolygon, isEPSG3857, isNumber, isString } from './util';
 import { getTile } from './tileget';
+import { createParamsValidateError } from './Error';
 
 const GeoJSONCache = {};
 

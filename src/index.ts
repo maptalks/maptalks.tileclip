@@ -2,9 +2,9 @@ import { registerWorkerAdapter, worker, Util } from 'maptalks';
 //@ts-ignore
 import WORKERCODE from './worker/worker.bundle.js';
 import {
-    createParamsValidateError, FetchCancelError, isNumber, uuid,
-    CANVAS_ERROR_MESSAGE, isImageBitmap, isPolygon,
-    checkBuffers, TaskCancelError, disposeImage,
+    isNumber, uuid,
+    isImageBitmap, isPolygon,
+    checkBuffers, disposeImage,
     needFormatImageType,
     needPostProcessingImage,
     removeTimeOut,
@@ -33,6 +33,7 @@ import {
     rectifyBaiduTileOptions
 } from './types.js';
 import { imageTile } from './imagetile.js';
+import { CANVAS_ERROR_MESSAGE, createParamsValidateError, FetchCancelError, TaskCancelError } from './Error.js';
 export { getBlankTile, get404Tile } from './canvas';
 export { getBlankVTTile } from './util'
 

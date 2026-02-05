@@ -8,9 +8,9 @@ import {
     copyArrayBuffer,
     checkArray,
     allSettled,
-    createDataError,
     createFetchTileList
 } from './util';
+import { createDataError } from './Error';
 
 
 function pointArrayToNumberArray(points) {
