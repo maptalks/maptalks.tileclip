@@ -16,10 +16,6 @@ export function createError(message: string, code: number): Error {
     return new CustomError(message, code) as unknown as Error;
 }
 
-export function createFetchError(res: Response) {
-    const { url, status } = res;
-    return createError(`fetch NetWork error, the url is ${url}`, status);
-}
 
 export const CANVAS_ERROR_MESSAGE = createError('not find canvas.The current environment does not support OffscreenCanvas', -4);
 export const FetchCancelError = createError('fetch tile data cancel', 499);
@@ -54,7 +50,7 @@ export function createInnerError(message) {
 //why native Error not clone code properties
 export function parseError(error: Error | CustomError) {
     if (error instanceof Error) {
-        let code = -1;
+        let code = (error as any).code || -1;
         const message = error.message;
         if (message && message.indexOf('aborted') > -1) {
             code = 499;

@@ -7,7 +7,7 @@ import {
     checkArray
 } from './util';
 import { getStoreTile, saveStoreTile } from './store';
-import { createFetchError, createInnerError, FetchCancelError, FetchTimeoutError } from './Error';
+import { createInnerError, FetchCancelError, FetchTimeoutError } from './Error';
 
 const LRUCount = 500;
 
@@ -134,8 +134,16 @@ function generateFetchOptions(headers, options, reject: Function) {
     delete fetchOptions.timeout;
     return {
         fetchOptions,
-        control
+        control,
+        signal
     }
+}
+
+function createFetchError(res: Response) {
+    const { url, status } = res;
+    const error = new Error(`fetch NetWork error, the url is ${url}`);
+    (error as any).code = status;
+    return error;
 }
 
 export function fetchTile(url: string, headers = {}, options) {
@@ -161,7 +169,7 @@ export function fetchTile(url: string, headers = {}, options) {
             return;
         }
         const { indexedDBCache } = options;
-        const { fetchOptions, control } = generateFetchOptions(headers, options, reject);
+        const { fetchOptions, control, signal } = generateFetchOptions(headers, options, reject);
         const taskId = options.__taskId;
         if (!taskId) {
             reject(createInnerError('taskId is null'));
@@ -171,9 +179,7 @@ export function fetchTile(url: string, headers = {}, options) {
         const fetchTileData = () => {
             fetch(url, fetchOptions).then(res => {
                 if (!res.ok) {
-                    finishFetch(control);
-                    reject(createFetchError(res));
-                    return;
+                    throw createFetchError(res);
                 }
                 return res.arrayBuffer();
             }).then(buffer => {
@@ -189,7 +195,7 @@ export function fetchTile(url: string, headers = {}, options) {
                 copyImageBitMap(image);
             }).catch(error => {
                 finishFetch(control);
-                reject(error);
+                reject(signal.reason || error);
             });
         }
         if (!indexedDBCache) {
@@ -225,14 +231,12 @@ export function fetchTileBuffer(url: string, headers = {}, options) {
             return;
         }
         const { indexedDBCache } = options;
-        const { fetchOptions, control } = generateFetchOptions(headers, options, reject);
+        const { fetchOptions, control, signal } = generateFetchOptions(headers, options, reject);
         cacheFetch(taskId, control);
         const fetchTileData = () => {
             fetch(url, fetchOptions).then(res => {
                 if (!res.ok) {
-                    finishFetch(control);
-                    reject(createFetchError(res));
-                    return;
+                    throw createFetchError(res);
                 }
                 return res.arrayBuffer();
             }).then(buffer => {
@@ -246,7 +250,7 @@ export function fetchTileBuffer(url: string, headers = {}, options) {
                 copyBuffer(buffer);
             }).catch(error => {
                 finishFetch(control);
-                reject(error);
+                reject(signal.reason || error);
             });
         }
         if (!indexedDBCache) {
