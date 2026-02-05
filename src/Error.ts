@@ -2,16 +2,23 @@
 /////////////////////
 class CustomError {
     public code: number;
+    public status: number;
     public message: string;
 
     constructor(message: string, code: number) {
         this.message = message;
         this.code = code;
+        this.status = code;
     }
 }
 
 export function createError(message: string, code: number): Error {
     return new CustomError(message, code) as unknown as Error;
+}
+
+export function createFetchError(res: Response) {
+    const { url, status } = res;
+    return createError(`fetch NetWork error, the url is ${url}`, status);
 }
 
 export const CANVAS_ERROR_MESSAGE = createError('not find canvas.The current environment does not support OffscreenCanvas', -4);
@@ -23,10 +30,6 @@ export function isFetchDefaultError(error: CustomError | Error) {
     return error === FetchCancelError || error === FetchTimeoutError;
 }
 
-export function createFetchError(res: Response) {
-    const { url, status } = res;
-    return createError(`fetch NetWork error, the url is ${url}`, status);
-}
 export function createNetWorkError(url: string | string[]) {
     if (!Array.isArray(url)) {
         url = [url];
@@ -47,4 +50,17 @@ export function createInnerError(message) {
     return createError(message, -3);
 }
 
+
+//why native Error not clone code properties
+export function parseError(error: Error | CustomError) {
+    if (error instanceof Error) {
+        let code = -1;
+        const message = error.message;
+        if (message && message.indexOf('aborted') > -1) {
+            code = 499;
+        }
+        return createError(message, code);
+    }
+    return error;
+}
 ///////////////////////

@@ -1,5 +1,5 @@
-import { createImageTypeResult, postProcessingImage, colorsTerrainTile, getCanvas } from './canvas';
-import { createError, createInnerError } from './Error';
+import { createImageTypeResult, postProcessingImage, getCanvas } from './canvas';
+import { createInnerError, parseError } from './Error';
 import { imageSlicing, imageToBlobURL } from './imageslice';
 import { imagetTileFetch } from './imagetile';
 import { tileBaduRectify } from './tilebaidurectify';
@@ -12,18 +12,6 @@ import { tileTransform } from './tiletransform';
 import { getVTTile } from './tilevt';
 import { checkBuffers, isImageBitmap, CancelTaskLRUCache } from './util';
 
-//why native Error not clone code properties
-function parseError(error) {
-    if (error instanceof Error) {
-        let code = -1;
-        const message = error.message;
-        if (message && message.indexOf('aborted') > -1) {
-            code = 499;
-        }
-        return createError(message, code);
-    }
-    return error;
-}
 
 export const initialize = function () {
 };
