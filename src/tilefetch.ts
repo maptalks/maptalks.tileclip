@@ -7,7 +7,7 @@ import {
     checkArray
 } from './util';
 import { getStoreTile, saveStoreTile } from './store';
-import { createInnerError, FetchCancelError, FetchTimeoutError } from './Error';
+import { createInnerError, CustomError, FetchCancelError, FetchTimeoutError } from './Error';
 
 const LRUCount = 500;
 
@@ -107,7 +107,7 @@ function finishFetch(control: AbortController) {
     });
 }
 
-function abortFetch(constrol: AbortController, error: Error) {
+function abortFetch(constrol: AbortController, error: CustomError) {
     if (constrol.runing) {
         constrol.abort(error);
     } else if (constrol.reject) {

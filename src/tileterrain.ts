@@ -11,7 +11,7 @@ import {
     createFetchTileList
 } from './util';
 import { fetchTile, fetchTileBuffer } from './tilefetch';
-import { createDataError, createInnerError, createParamsValidateError } from "./Error";
+import { createDataError, createInnerError, createParamsValidateError, CustomError } from "./Error";
 
 
 export function encodeTerrainTile(options: encodeTerrainTileOptions) {
@@ -34,11 +34,12 @@ export function encodeTerrainTile(options: encodeTerrainTileOptions) {
             const fetchTiles = createFetchTileList<ImageBitmap>(urls, options, fetchTile);
             allSettled(fetchTiles, urls).then(imagebits => {
                 const canvas = getCanvas();
-                const image = mergeTiles(imagebits);
-                if (image instanceof Error) {
+                const image = mergeTiles(imagebits) as ImageBitmap;
+                if (image instanceof CustomError) {
                     reject(image);
                     return;
                 }
+
                 resizeCanvas(canvas, image.width, image.height);
                 const ctx = getCanvasContext(canvas);
                 ctx.drawImage(image, 0, 0);

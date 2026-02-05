@@ -1,4 +1,5 @@
 import { BBOXtype } from "./bbox";
+import { CustomError } from "./Error";
 
 declare global {
     interface AbortController {
@@ -168,7 +169,7 @@ export type clipBufferOptions = {
 
 export type imageResultType = ImageBitmap | string | ArrayBuffer;
 export type resolveResultType = (image: imageResultType) => void;
-export type rejectResultType = (error: Error) => void;
+export type rejectResultType = (error: CustomError) => void;
 export type sliceImageItemType = {
     x: number;
     y: number;

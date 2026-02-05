@@ -1,4 +1,5 @@
 import { createImageTypeResult, getCanvas, getCanvasContext, mergeTiles, postProcessingImage, resizeCanvas } from "./canvas";
+import { CustomError } from "./Error";
 import { fetchTile } from "./tilefetch";
 import { getTileOptions, sliceImageItemType, sliceImageResultType } from "./types";
 import { checkArray, uuid, disposeImage, allSettled, createFetchTileList } from "./util";
@@ -13,8 +14,8 @@ export function imageSlicing(options: getTileOptions) {
         const fetchTiles = createFetchTileList<ImageBitmap>(urls, options, fetchTile);
         allSettled(fetchTiles, urls).then(imagebits => {
             const canvas = getCanvas(SIZE);
-            const image = mergeTiles(imagebits);
-            if (image instanceof Error) {
+            const image = mergeTiles(imagebits) as ImageBitmap;
+            if (image instanceof CustomError) {
                 reject(image);
                 return;
             }

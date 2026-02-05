@@ -1,5 +1,6 @@
 import { bboxIntersect, bboxToPoints } from "./bbox";
 import { getBlankTile, getCanvas, getCanvasContext, mergeTiles } from "./canvas";
+import { CustomError } from "./Error";
 import { fetchTile } from "./tilefetch";
 import { getImageTileOptions, injectImageOptions } from "./types";
 import { allSettled, checkArray, createFetchTileList, isEPSG3857, lnglat2Mercator } from "./util";
@@ -65,8 +66,8 @@ export function imagetTileFetch(options: injectImageOptions) {
         const urls = checkArray(url);
         const fetchTiles = createFetchTileList<ImageBitmap>(urls, options, fetchTile);
         allSettled(fetchTiles, urls).then(imagebits => {
-            const image = mergeTiles(imagebits);
-            if (image instanceof Error) {
+            const image = mergeTiles(imagebits) as ImageBitmap;
+            if (image instanceof CustomError) {
                 reject(image);
                 return;
             }

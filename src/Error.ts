@@ -1,6 +1,6 @@
 
 /////////////////////
-class CustomError {
+export class CustomError {
     public code: number;
     public status: number;
     public message: string;
@@ -12,8 +12,8 @@ class CustomError {
     }
 }
 
-export function createError(message: string, code: number): Error {
-    return new CustomError(message, code) as unknown as Error;
+export function createError(message: string, code: number) {
+    return new CustomError(message, code);
 }
 
 
@@ -48,7 +48,7 @@ export function createInnerError(message) {
 
 
 //why native Error not clone code properties
-export function parseError(error: Error | CustomError) {
+export function parseError(error: Error | CustomError): CustomError {
     if (error instanceof Error) {
         let code = (error as any).code || -1;
         const message = error.message;

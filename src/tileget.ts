@@ -15,6 +15,7 @@ import {
     createUrlTemplateFun
 } from './util';
 import { fetchTile } from './tilefetch';
+import { CustomError } from './Error';
 export function getTile(options: getTileOptions) {
     return new Promise((resolve, reject) => {
         const { url } = options;
@@ -23,8 +24,8 @@ export function getTile(options: getTileOptions) {
         const { globalCompositeOperation } = options;
         allSettled(fetchTiles, urls).then(imagebits => {
             const canvas = getCanvas();
-            const image = mergeTiles(imagebits, globalCompositeOperation);
-            if (image instanceof Error) {
+            const image = mergeTiles(imagebits, globalCompositeOperation) as ImageBitmap;
+            if (image instanceof CustomError) {
                 reject(image);
                 return;
             }
@@ -118,8 +119,8 @@ export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
         const fetchTiles = createFetchTileList<ImageBitmap>(urls, options, fetchTile);
         allSettled(fetchTiles, urls).then(imagebits => {
             // const canvas = getCanvas();
-            const image = mergeTiles(imagebits, globalCompositeOperation);
-            if (image instanceof Error) {
+            const image = mergeTiles(imagebits, globalCompositeOperation) as ImageBitmap;
+            if (image instanceof CustomError) {
                 reject(image);
                 return;
             }
