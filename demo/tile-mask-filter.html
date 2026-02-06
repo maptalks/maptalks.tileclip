@@ -47,7 +47,7 @@
                     // callback(result);
                     const { intersect } = result;
                     if (intersect) {
-                        tileActor.getTile({ url: maptalks.Util.getAbsoluteURL(url) }).then(imagebitmap => {
+                        tileActor.getTile({ url: url }).then(imagebitmap => {
                             callback(imagebitmap);
                         }).catch(error => {
                             //do some things

@@ -97,7 +97,7 @@
             e.renderer.loadTileArrayBuffer = function (url, tile, callback, options) {
                 console.log(options.command);
                 tileActor.getVTTile({
-                    url: maptalks.Util.getAbsoluteURL(url),
+                    url: url,
                     // indexedDBCache: true
                 }).then(buffer => {
                     callback(null, buffer);

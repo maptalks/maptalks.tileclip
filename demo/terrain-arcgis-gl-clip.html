@@ -61,7 +61,7 @@
             e.renderer.loadTileBitmap = function (url, tile, callback) {
 
                 tileActor.clipTile({
-                    tile: maptalks.Util.getAbsoluteURL(url),
+                    tile: url,
                     tileBBOX: baseLayer._getTileBBox(tile),
                     projection: baseLayer.getProjection().code,
                     maskId,
@@ -121,7 +121,7 @@
             const terrainLayer = group.getTerrainLayer();
             terrainLayer.getRenderer().loadTileBitmap = function (url, tile, callback, options) {
                 tileActor.encodeTerrainTile({
-                    url: maptalks.Util.getAbsoluteURL(url),
+                    url: url,
                     terrainType: 'arcgis',
                     // timeout: 5000
                 }).then(imagebitmap => {

@@ -90,7 +90,7 @@
             terrainLayer.getRenderer().loadTileBitmap = function (url, tile, callback, options) {
                 console.log(url);
                 tileActor.encodeTerrainTile({
-                    url: maptalks.Util.getAbsoluteURL(url),
+                    url: url,
                     terrainType: 'qgis-gray',
                     minHeight: min,
                     maxHeight: max

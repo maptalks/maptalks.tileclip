@@ -44,7 +44,7 @@
                 const url1 = roadTileUrl.replace("{x}", x).replace('{y}', y).replace('{z}', z);
                 tileActor.getTile({
                     url: [url, url1].map(url => {
-                        return maptalks.Util.getAbsoluteURL(url)
+                        return url
                     })
                 }).then(imagebitmap => {
                     callback(imagebitmap);

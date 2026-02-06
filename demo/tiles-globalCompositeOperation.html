@@ -52,7 +52,7 @@
                 const url2 = roadTileUrl2.replace("{x}", x).replace('{y}', y).replace('{z}', z);
                 tileActor.getTile({
                     url: [url, url2].map(url => {
-                        return maptalks.Util.getAbsoluteURL(url)
+                        return url
                     }),
                     // "color" | "color-burn" | "color-dodge" | "copy" | "darken" | "destination-atop" | "destination-in" | "destination-out" | "destination-over" | "difference" |
                     //  "exclusion" | "hard-light" | "hue" | "lighten" | "lighter" | "luminosity" | "multiply" | "overlay" | "saturation" | 

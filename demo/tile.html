@@ -38,7 +38,7 @@
             //   img(Image): an Image object
             //   url(String): the url of the tile
             e.renderer.loadTileBitmap = function (url, tile, callback) {
-                tileActor.getTile({ url: maptalks.Util.getAbsoluteURL(url) }).then(imagebitmap => {
+                tileActor.getTile({ url: url }).then(imagebitmap => {
                     callback(imagebitmap);
                 }).catch(error => {
                     //do some things

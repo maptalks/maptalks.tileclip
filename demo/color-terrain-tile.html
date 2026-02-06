@@ -44,7 +44,7 @@
             e.renderer.loadTileBitmap = function (url, tile, callback) {
 
                 tileActor.colorTerrainTile({
-                    tile: maptalks.Util.getAbsoluteURL(url),
+                    tile: url,
                     colors
                 }).then(image => {
                     callback(image);

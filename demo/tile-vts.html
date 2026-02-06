@@ -98,7 +98,7 @@
                 const { x, y, z } = tile;
                 const url1 = roadTileUrl.replace("{x}", x).replace('{y}', y).replace('{z}', z);
                 tileActor.getVTTile({
-                    url: [maptalks.Util.getAbsoluteURL(url), maptalks.Util.getAbsoluteURL(url1)]
+                    url: [url, url1]
                     // indexedDBCache: true
                 }).then(buffer => {
                     callback(null, buffer);

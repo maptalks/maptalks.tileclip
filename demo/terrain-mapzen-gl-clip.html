@@ -55,7 +55,7 @@
             e.renderer.loadTileBitmap = function (url, tile, callback) {
 
                 tileActor.clipTile({
-                    tile: maptalks.Util.getAbsoluteURL(url),
+                    tile: url,
                     tileBBOX: baseLayer._getTileBBox(tile),
                     projection: baseLayer.getProjection().code,
                     tileSize: baseLayer.getTileSize().width,
@@ -126,7 +126,7 @@
 
             terrainLayer.getRenderer().loadTileBitmap = function (url, tile, callback, options) {
                 tileActor.encodeTerrainTile({
-                    url: maptalks.Util.getAbsoluteURL(url),
+                    url: url,
                     terrainType: 'mapzen',
                     // timeout: 5000
                 }).then(imagebitmap => {

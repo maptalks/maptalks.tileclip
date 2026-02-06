@@ -93,7 +93,7 @@
 
             terrainLayer.getRenderer().loadTileBitmap = function (url, tile, callback, options) {
                 tileActor.encodeTerrainTile({
-                    url: maptalks.Util.getAbsoluteURL(url),
+                    url: url,
                     terrainType: terrain.type,
                     headers: {
                         Authorization: 'Bearer ' + terrain.accessToken,

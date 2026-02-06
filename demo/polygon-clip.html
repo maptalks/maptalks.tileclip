@@ -40,7 +40,7 @@
             e.renderer.loadTileBitmap = function (url, tile, callback) {
 
                 tileActor.clipTile({
-                    tile: maptalks.Util.getAbsoluteURL(url),
+                    tile: url,
                     tileBBOX: baseLayer._getTileBBox(tile),
                     projection: baseLayer.getProjection().code,
                     tileSize: baseLayer.getTileSize().width,

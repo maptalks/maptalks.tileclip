@@ -61,7 +61,7 @@
             e.renderer.loadTileBitmap = function (url, tile, callback) {
                 const { x, y, z } = tile;
                 tileActor.encodeTerrainTile({
-                    url: getAbsoluteURL(url),
+                    url: url,
                     terrainType: 'arcgis',
                     //custom terrain tile colors
                     terrainColors: terrainColors
@@ -69,7 +69,7 @@
                 }).then(terrainTile => {
                     const url1 = getTileUrl(BaseTileURL, x, y, z);
                     tileActor.getTile({
-                        url: [getAbsoluteURL(url1), terrainTile],
+                        url: [url1, terrainTile],
                         globalCompositeOperation: 'destination-atop',
                         //https://developer.mozilla.org/zh-CN/docs/Web/CSS/filter-function/drop-shadow
                         filter: 'drop-shadow(0 0 6px black)'
@@ -78,7 +78,7 @@
 
                         const url2 = getTileUrl(BaseTileURL, x, y, z);
                         tileActor.getTile({
-                            url: [getAbsoluteURL(url2), imageTile],
+                            url: [url2, imageTile],
                         }).then(imageTile1 => {
                             callback(imageTile1);
                         }).catch(error => {

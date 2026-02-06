@@ -121,7 +121,7 @@
             e.renderer.loadTileBitmap = function (url, tile, callback) {
                 const { x, y, z } = tile;
                 tileActor.encodeTerrainTile({
-                    url: getAbsoluteURL(url),
+                    url: url,
                     terrainType: 'arcgis',
                     //custom terrain tile colors
                     terrainColors: terrainColors
@@ -129,14 +129,14 @@
                 }).then(terrainTile => {
                     const url1 = getTileUrl(ImageTileURL, x, y, z);
                     tileActor.getTile({
-                        url: [getAbsoluteURL(url1), terrainTile],
+                        url: [url1, terrainTile],
                         globalCompositeOperation: 'destination-atop'
                         // timeout: 5000
                     }).then(imageTile => {
 
                         const url2 = getTileUrl(BaseTileURL, x, y, z);
                         tileActor.getTile({
-                            url: [getAbsoluteURL(url2), imageTile]
+                            url: [url2, imageTile]
                             // timeout: 5000
                         }).then(baseTile => {
                             callback(baseTile);
