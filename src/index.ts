@@ -12,7 +12,8 @@ import {
     isString,
     isFunction,
     getFunctionBody,
-    checkArray
+    checkArray,
+    isAbsoluteURL
 } from './util';
 import { getCanvas, getCanvasContext, resizeCanvas } from './canvas';
 import {
@@ -48,9 +49,10 @@ const SUPPORTPROJECTION = ['EPSG:4326', 'EPSG:3857'];
 const transformTypes = ['WGS84-GCJ02', 'GCJ02-WGS84'];
 const transformBaiduTypes = ['BAIDU-WGS84', 'BAIDU-GCJ02'];
 const TerrainTypes = ['mapzen', 'tianditu', 'cesium', 'arcgis', 'qgis-gray'];
+const URLKEYS = ['url', 'urlTemplate', 'tile'];
 
 function checkOptions(options, type: string) {
-    return Object.assign(
+    const opts = Object.assign(
         {
             //default params
             referrer: document.location.href,
@@ -65,6 +67,27 @@ function checkOptions(options, type: string) {
             __taskId: uuid(),
             __workerId: getWorkerId()
         });
+    URLKEYS.forEach(key => {
+        let url = opts[key];
+        if (!url) {
+            return;
+        }
+        const isArray = Array.isArray(url);
+        url = checkArray(url);
+        let urls = url.map(v => {
+            if (isAbsoluteURL(v)) {
+                return v;
+            }
+            return Util.getAbsoluteURL(v);
+        });
+        if (!isArray) {
+            urls = urls[0];
+        }
+        opts[key] = urls;
+    })
+
+    return opts;
+
 }
 
 function getTaskId(options: Record<string, any>) {

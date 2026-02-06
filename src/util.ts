@@ -96,6 +96,24 @@ export function checkArray(url: any | Array<any>): Array<any> {
     return [url];
 }
 
+const BASE64_REG = /data:image\/.*;base64,/;
+
+export function isAbsoluteURL(url: string) {
+    if (typeof url !== 'string') {
+        return true;
+    }
+    if (BASE64_REG.test(url)) {
+        return true;
+    }
+    if (url.indexOf('blob:') === 0) {
+        return true;
+    }
+    if (url.indexOf('http') === 0) {
+        return true;
+    }
+    return false;
+}
+
 
 export function lnglat2Mercator(coordinates: Array<number>) {
     const [lng, lat] = coordinates;
