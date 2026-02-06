@@ -89,8 +89,7 @@
 
         group.on('terrainlayercreated', e => {
             const terrainLayer = group.getTerrainLayer();
-            let urlTemplate = maptalks.Util.getAbsoluteURL('./mapbox-terrain');
-            urlTemplate += `/{z}/{x}/{y}.png`;
+            let urlTemplate = terrainLayer.options.urlTemplate;
             terrainLayer.getRenderer().loadTileBitmap = function (url, tile, callback, options) {
                 const { x, y, z } = tile;
                 const maxAvailableZoom = 9;
@@ -107,7 +106,7 @@
                     callback(null, imagebitmap);
                 }).catch(error => {
                     //do some things
-                    // console.error(error);
+                    console.error(error);
                     callback(null, maptalks.getBlankTile());
                 })
             };
