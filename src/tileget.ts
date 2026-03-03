@@ -43,108 +43,113 @@ export function getTile(options: getTileOptions) {
 }
 
 export function getTileWithMaxZoom(options: getTileWithMaxZoomOptions) {
-    const { x, y, z, maxAvailableZoom, subdomains, globalCompositeOperation, tms } = options;
-    let urlTemplate = options.urlTemplate;
-    urlTemplate = createUrlTemplateFun(urlTemplate as string);
+
     return new Promise((resolve: resolveResultType, reject) => {
-        const urlTemplates = checkArray(urlTemplate);
-        // const isDebug = x === 398789 && y === 143180;
-        const isDebug = false;
-        let dxScale, dyScale, wScale, hScale;
-        let tileX = x, tileY = y, tileZ = z;
-        const zoomOffset = z - maxAvailableZoom;
-        if (zoomOffset > 0) {
-            let px = x, py = y;
-            let zoom = z;
-            // parent tile
-            while (zoom > maxAvailableZoom) {
-                px = Math.floor(px / 2);
-                py = Math.floor(py / 2)
-                zoom--;
-            }
-            if (isDebug) {
-                console.log(px, py);
-            }
-            const scale = Math.pow(2, zoomOffset);
-            // child tiles
-            let startX = Math.floor(px * scale);
-            let endX = startX + scale;
-            let startY = Math.floor(py * scale);
-            let endY = startY + scale;
-            if (startX > x) {
-                startX--;
-                endX--;
-            }
-            if (startY > y) {
-                startY--;
-                endY--;
-            }
-            // console.log(startCol, endCol, startRow, endRow);
-            dxScale = (x - startX) / (endX - startX);
-            dyScale = (y - startY) / (endY - startY);
-            if (tms) {
-                const ady = 1 / (endY - startY);
-                const offsety = endY - y - 1;
-                dyScale = offsety * ady;
-                if (isDebug) {
-                    console.log(offsety);
+
+        const handler = () => {
+            const { x, y, z, maxAvailableZoom, subdomains, globalCompositeOperation, tms, fetchParentTileOn404 } = options;
+            let urlTemplate = options.urlTemplate;
+            urlTemplate = createUrlTemplateFun(urlTemplate as string);
+            const urlTemplates = checkArray(urlTemplate);
+            // const isDebug = x === 398789 && y === 143180;
+            const isDebug = false;
+            let dxScale, dyScale, wScale, hScale;
+            let tileX = x, tileY = y, tileZ = z;
+            const zoomOffset = z - maxAvailableZoom;
+            if (zoomOffset > 0) {
+                let px = x, py = y;
+                let zoom = z;
+                // parent tile
+                while (zoom > maxAvailableZoom) {
+                    px = Math.floor(px / 2);
+                    py = Math.floor(py / 2)
+                    zoom--;
                 }
+                if (isDebug) {
+                    console.log(px, py);
+                }
+                const scale = Math.pow(2, zoomOffset);
+                // child tiles
+                let startX = Math.floor(px * scale);
+                let endX = startX + scale;
+                let startY = Math.floor(py * scale);
+                let endY = startY + scale;
+                if (startX > x) {
+                    startX--;
+                    endX--;
+                }
+                if (startY > y) {
+                    startY--;
+                    endY--;
+                }
+                // console.log(startCol, endCol, startRow, endRow);
+                dxScale = (x - startX) / (endX - startX);
+                dyScale = (y - startY) / (endY - startY);
+                if (tms) {
+                    const ady = 1 / (endY - startY);
+                    const offsety = endY - y - 1;
+                    dyScale = offsety * ady;
+                    if (isDebug) {
+                        console.log(offsety);
+                    }
+                }
+
+                if (isDebug) {
+                    console.log(startY, endY);
+                    // console.log(startX, endX);
+                    console.log(dxScale, dyScale);
+                }
+                wScale = 1 / (endX - startX);
+                hScale = 1 / (endY - startY);
+                // console.log(dxScale, dyScale, wScale, hScale);
+                tileX = px;
+                tileY = py;
+                tileZ = maxAvailableZoom;
+                // console.log(dxScale, dyScale);
             }
 
-            if (isDebug) {
-                console.log(startY, endY);
-                // console.log(startX, endX);
-                console.log(dxScale, dyScale);
-            }
-            wScale = 1 / (endX - startX);
-            hScale = 1 / (endY - startY);
-            // console.log(dxScale, dyScale, wScale, hScale);
-            tileX = px;
-            tileY = py;
-            tileZ = maxAvailableZoom;
-            // console.log(dxScale, dyScale);
-        }
-
-        let urls;
-        try {
-            urls = urlTemplates.map(urlTemplate => {
-                return getTileUrl(urlTemplate, tileX, tileY, tileZ, subdomains);
-            });
-        } catch (error) {
-            console.error(error);
-            reject(error);
-            return;
-
-        }
-        const fetchTiles = createFetchTileList<ImageBitmap>(urls, options, fetchTile);
-        allSettled(fetchTiles, urls).then(imagebits => {
-            // const canvas = getCanvas();
-            const image = mergeTiles(imagebits, globalCompositeOperation) as ImageBitmap;
-            if (image instanceof CustomError) {
-                reject(image);
+            let urls;
+            try {
+                urls = urlTemplates.map(urlTemplate => {
+                    return getTileUrl(urlTemplate, tileX, tileY, tileZ, subdomains);
+                });
+            } catch (error) {
+                console.error(error);
+                reject(error);
                 return;
             }
-            // const filterImage = imageFilter(canvas, image, options.filter);
-            // const blurImage = imageGaussianBlur(canvas, filterImage, options.gaussianBlurRadius);
-
-            const postImage = postProcessingImage(image, options);
-            let sliceImage;
-            if (zoomOffset <= 0) {
-                sliceImage = postImage;
-            } else {
-                const { width, height } = postImage;
-                const dx = width * dxScale, dy = height * dyScale, w = width * wScale, h = height * hScale;
-                sliceImage = imageTileScale(postImage, dx, dy, w, h);
-                // opImage = imageOpacity(imageBitMap, options.opacity);
-            }
-            createImageTypeResult(getCanvas(), sliceImage, options).then(url => {
-                resolve(url);
+            const fetchTiles = createFetchTileList<ImageBitmap>(urls, options, fetchTile);
+            allSettled(fetchTiles, urls).then(imagebits => {
+                const image = mergeTiles(imagebits, globalCompositeOperation) as ImageBitmap;
+                if (image instanceof CustomError) {
+                    reject(image);
+                    return;
+                }
+                const postImage = postProcessingImage(image, options);
+                let sliceImage;
+                if (zoomOffset <= 0) {
+                    sliceImage = postImage;
+                } else {
+                    const { width, height } = postImage;
+                    const dx = width * dxScale, dy = height * dyScale, w = width * wScale, h = height * hScale;
+                    sliceImage = imageTileScale(postImage, dx, dy, w, h);
+                }
+                createImageTypeResult(getCanvas(), sliceImage, options).then(url => {
+                    resolve(url);
+                }).catch(error => {
+                    reject(error);
+                })
             }).catch(error => {
-                reject(error);
+                if (fetchParentTileOn404 && error.code === 404 && maxAvailableZoom > 0) {
+                    options.maxAvailableZoom--;
+                    handler();
+                } else {
+                    reject(error);
+                }
             })
-        }).catch(error => {
-            reject(error);
-        })
+        }
+        handler();
+
     });
 
 }

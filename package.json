@@ -62,6 +62,8 @@
     "rollup-plugin-copy": "^3.5.0",
     "tinybench": "^6.0.0",
     "tslib": "^2.8.1",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "geojson-read-stream": "^0.4.0",
+    "polylabel": "^1.1.0"
   }
 }

@@ -74,6 +74,7 @@ export type getTileWithMaxZoomOptions = Omit<getTileOptions, 'url'> & {
     z: number;
     subdomains?: Array<string>;
     tms?: boolean;
+    fetchParentTileOn404?: boolean;
 }
 
 export type clipTileOptions = {

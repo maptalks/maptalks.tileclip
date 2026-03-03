@@ -50,7 +50,7 @@ export function removeTimeOut(id: any) {
 }
 
 
-export const HEADERS = {
+export const DEFAULTHEADERS = {
     'accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.26'
 };
@@ -102,6 +102,7 @@ export function isAbsoluteURL(url: string) {
     if (typeof url !== 'string') {
         return true;
     }
+    url = url.toLowerCase();
     if (BASE64_REG.test(url)) {
         return true;
     }
@@ -286,7 +287,7 @@ export function needPostProcessingImage(options: postProcessingOptionsType) {
 
 export function createFetchTileList<T>(urls: string[], options: Record<string, any>, fetchFun: Function): Array<Promise<T>> {
     urls = checkArray(urls);
-    const headers = Object.assign({}, HEADERS, options.headers || {});
+    const headers = Object.assign({}, DEFAULTHEADERS, options.headers || {});
     return urls.map(url => {
         return fetchFun(url, headers, options);
     })
