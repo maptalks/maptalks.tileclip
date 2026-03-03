@@ -20,6 +20,7 @@
 * [maxAvailableZoom tiles](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-array.html)
 * [maxAvailableZoom terrain](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-terrain.html)  
 * [maxAvailableZoom fetch by different](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-different.html)  
+* [maxAvailableZoom fetchParentTileOn404](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-fetchParentTileOn404.html)  
 
 * [layout tiles](https://maptalks.github.io/maptalks.tileclip/demo/layouttiles.html)  
 
@@ -258,7 +259,9 @@ promise.then((imagebitmap) => {
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
-  + `...fetchOptionsType` fetchOptionsType params
+  + `options?.tms`  
+  + `options?.fetchParentTileOn404`  404 will continuously request tiles from the parent node 
+  + `...fetchOptionsType` fetchOptionsType params 
   + `...postProcessingOptionsType` postProcessingOptionsType params
   + `...returnResultType` returnResultType params 
 
@@ -368,7 +371,7 @@ promise.then((imagebitmap) => {
   + `options.x`:tile col
   + `options.y`:tile row
   + `options.z`:tile zoom
-  + `options.projection`: Projection code, only support `EPSG:4326`,                                                           `EPSG:3857`. Note that only global standard pyramid slicing is supported
+  + `options.projection`: Projection code, only support `EPSG:4326`,                                                            `EPSG:3857`. Note that only global standard pyramid slicing is supported
   + `options.maxAvailableZoom`:tile The maximum visible level, such as 18
   + `options.urlTemplate`:tile urlTemplate.https://services.arcgisonline.com/ArcGIS/rest/services/Word_Imagery/MapServer/tile/{z}/{y}/{x} or tiles urlTemplates
   + `options?.subdomains`:subdomains, such as [1, 2, 3, 4, 5]
