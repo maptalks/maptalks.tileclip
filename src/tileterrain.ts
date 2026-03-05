@@ -114,7 +114,7 @@ export function terrainTileColors(options: colorTerrainTileOptions) {
                 reject(error);
             })
         } else {
-            handler(tile);
+            handler(tile as ImageBitmap);
         }
     });
 }
