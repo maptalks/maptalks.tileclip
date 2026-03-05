@@ -15,6 +15,7 @@
 * [fetch tile](https://maptalks.github.io/maptalks.tileclip/demo/tile.html)
 * [fetch and merge tiles](https://maptalks.github.io/maptalks.tileclip/demo/tile-array.html)
 * [tiles filter by  mask(only load tiles in mask)](https://maptalks.github.io/maptalks.tileclip/demo/tile-mask-filter.html) 
+* [fetch tile with canvas](https://maptalks.github.io/maptalks.tileclip/demo/tile-with-canvas.html) 
 
 * [maxAvailableZoom](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom.html)
 * [maxAvailableZoom tiles](https://maptalks.github.io/maptalks.tileclip/demo/maxAvailableZoom-array.html)
