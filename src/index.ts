@@ -133,6 +133,54 @@ function validateTileXYZ(x: number, y: number, z: number) {
     return isNumber(x) && isNumber(y) && isNumber(z);
 }
 
+function prepareCanvasBuffers(options: any, key: string, callback: (buffers: any[]) => void) {
+    const value = options[key];
+    const buffers = [];
+    if (!value) {
+        callback(buffers);
+        return;
+    }
+    const items = checkArray(value);
+    let idx = 0;
+    const isEnd = () => {
+        if (idx >= items.length) {
+            if (!Array.isArray(value) && buffers.length === 1) {
+                options[key] = buffers[0];
+            }
+            callback(buffers);
+        }
+    }
+    items.forEach((item, index) => {
+        if (!item) {
+            idx++;
+            isEnd();
+            return;
+        }
+        if (isImageBitmap(item) || (item instanceof ArrayBuffer)) {
+            buffers.push(item);
+            idx++;
+            isEnd();
+        } else if (item instanceof HTMLImageElement || item instanceof HTMLCanvasElement || item instanceof OffscreenCanvas || item instanceof Image) {
+            createImageBitmap(item).then(imageBitmap => {
+                buffers.push(imageBitmap);
+                if (Array.isArray(value)) {
+                    value[index] = imageBitmap;
+                }
+                idx++;
+                isEnd();
+            }).catch(error => {
+                console.error(error)
+                idx++;
+                isEnd();
+            })
+        } else {
+            idx++;
+            isEnd();
+        }
+    });
+
+}
+
 
 class TileActor extends worker.Actor {
 
@@ -162,15 +210,17 @@ class TileActor extends worker.Actor {
                 reject(createParamsValidateError(`${type} error:url is null`));
                 return;
             }
-            const buffers = checkBuffers(url);
-            this.send(options, buffers, (error, image) => {
-                if (isErrorOrCancel(error, promise)) {
-                    disposeImage(image);
-                    reject(error || FetchCancelError);
-                } else {
-                    resolve(image);
-                }
-            }, workerId);
+            prepareCanvasBuffers(options, 'url', (buffers => {
+                this.send(options, buffers, (error, image) => {
+                    if (isErrorOrCancel(error, promise)) {
+                        disposeImage(image);
+                        reject(error || FetchCancelError);
+                    } else {
+                        resolve(image);
+                    }
+                }, workerId);
+            }));
+
         });
         wrapPromise(promise, options);
         return promise;
@@ -513,72 +563,74 @@ class TileActor extends worker.Actor {
                 reject(createParamsValidateError('url is null'));
                 return;
             }
-            const buffers = checkBuffers(url);
-            this.send(options, buffers, (error, result) => {
-                if (isErrorOrCancel(error, promise)) {
-                    reject(error || FetchCancelError);
-                } else {
-                    if (!needFormatImageType(options)) {
-                        resolve(result);
+            prepareCanvasBuffers(options, 'url', (buffers => {
+                this.send(options, buffers, (error, result) => {
+                    if (isErrorOrCancel(error, promise)) {
+                        reject(error || FetchCancelError);
                     } else {
-                        const items = result.items || [];
-                        const workerIds = [];
-                        while (1) {
-                            const workerId = getWorkerId();
-                            if (workerIds.indexOf(workerId) === -1) {
-                                workerIds.push(workerId);
-                            } else {
-                                break;
-                            }
-                        }
-                        const pageSize = Math.ceil(items.length / workerIds.length);
-                        let temp = [];
-                        const isEnd = () => {
-                            return temp.length === items.length;
-                        }
-                        const mergeResult = () => {
-                            temp.forEach(d => {
-                                for (let i = 0, len = items.length; i < len; i++) {
-                                    const item = items[i];
-                                    if (item.id === d.id) {
-                                        item.image = d.url;
-                                        break;
-                                    }
-                                }
-                            });
+                        if (!needFormatImageType(options)) {
                             resolve(result);
-                        }
-                        for (let i = 0, len = workerIds.length; i < len; i++) {
-                            const workerId = workerIds[i];
-                            const start = i * pageSize;
-                            const end = start + pageSize;
-                            const subItems = items.slice(start, end);
-                            if (subItems.length === 0) {
-                                if (isEnd()) {
-                                    mergeResult();
-                                }
-                                continue;
-                            }
-                            const opts = Object.assign({}, options);
-                            (opts as any).__type = 'imageToBlobURL';
-                            (opts as any).items = subItems;
-                            (opts as any)._workerId = workerId;
-                            const buffers = subItems.map(item => item.image as ArrayBuffer);
-                            this.send(opts, buffers, (error, resultItems) => {
-                                if (isErrorOrCancel(error, promise)) {
-                                    reject(error || FetchCancelError);
-                                    return;
+                        } else {
+                            const items = result.items || [];
+                            const workerIds = [];
+                            while (1) {
+                                const workerId = getWorkerId();
+                                if (workerIds.indexOf(workerId) === -1) {
+                                    workerIds.push(workerId);
                                 } else {
-                                    temp = temp.concat(resultItems);
+                                    break;
+                                }
+                            }
+                            const pageSize = Math.ceil(items.length / workerIds.length);
+                            let temp = [];
+                            const isEnd = () => {
+                                return temp.length === items.length;
+                            }
+                            const mergeResult = () => {
+                                temp.forEach(d => {
+                                    for (let i = 0, len = items.length; i < len; i++) {
+                                        const item = items[i];
+                                        if (item.id === d.id) {
+                                            item.image = d.url;
+                                            break;
+                                        }
+                                    }
+                                });
+                                resolve(result);
+                            }
+                            for (let i = 0, len = workerIds.length; i < len; i++) {
+                                const workerId = workerIds[i];
+                                const start = i * pageSize;
+                                const end = start + pageSize;
+                                const subItems = items.slice(start, end);
+                                if (subItems.length === 0) {
                                     if (isEnd()) {
                                         mergeResult();
                                     }
+                                    continue;
                                 }
-                            }, workerId);
+                                const opts = Object.assign({}, options);
+                                (opts as any).__type = 'imageToBlobURL';
+                                (opts as any).items = subItems;
+                                (opts as any)._workerId = workerId;
+                                const buffers = subItems.map(item => item.image as ArrayBuffer);
+                                this.send(opts, buffers, (error, resultItems) => {
+                                    if (isErrorOrCancel(error, promise)) {
+                                        reject(error || FetchCancelError);
+                                        return;
+                                    } else {
+                                        temp = temp.concat(resultItems);
+                                        if (isEnd()) {
+                                            mergeResult();
+                                        }
+                                    }
+                                }, workerId);
+                            }
                         }
                     }
-                }
-            }, workerId);
+                }, workerId);
+            }))
+
         });
         wrapPromise(promise, options);
         return promise;
@@ -720,15 +772,17 @@ class TileActor extends worker.Actor {
                 reject(createParamsValidateError(`${type} error:colors is null`));
                 return;
             }
-            const buffers = checkBuffers(tile);
-            this.send(Object.assign({}, options), buffers, (error, image) => {
-                if (isErrorOrCancel(error, promise)) {
-                    disposeImage(image);
-                    reject(error || TaskCancelError);
-                } else {
-                    resolve(image);
-                }
-            }, workerId);
+            prepareCanvasBuffers(options, 'tile', (buffers => {
+                this.send(Object.assign({}, options), buffers, (error, image) => {
+                    if (isErrorOrCancel(error, promise)) {
+                        disposeImage(image);
+                        reject(error || TaskCancelError);
+                    } else {
+                        resolve(image);
+                    }
+                }, workerId);
+            }))
+
         },);
         wrapPromise(promise, options);
         return promise;

@@ -41,8 +41,10 @@ export type returnResultType = {
     quality?: number;
 }
 
+type tileType = ImageBitmap | string | HTMLCanvasElement | HTMLImageElement | OffscreenCanvas;
+
 export type getTileOptions = {
-    url: string | ImageBitmap | Array<string | ImageBitmap>;
+    url: tileType | Array<tileType>;
     globalCompositeOperation?: GlobalCompositeOperation;
 } & postProcessingOptionsType & fetchOptionsType & returnResultType;
 
@@ -116,7 +118,7 @@ export type rectifyBaiduTileOptions = getTileWithMaxZoomOptions & {
 }
 
 export type colorTerrainTileOptions = {
-    tile: ImageBitmap | string;
+    tile: tileType;
     colors: Array<[number, string]>;
 } & postProcessingOptionsType & returnResultType;
 
